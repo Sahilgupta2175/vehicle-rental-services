@@ -14,7 +14,7 @@ const bodyParser = require('body-parser');
 // const adminRoutes = require('./routes/admin.routes');
 // const paymentRoutes = require('./routes/payment.routes');
 // const reportRoutes = require('./routes/report.routes');
-// const { errorHandler } = require('./middleware/error.middleware');
+const { errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
 
