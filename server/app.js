@@ -8,7 +8,7 @@ const xss = require('xss-clean');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-// const authRoutes = require('./routes/auth.routes');
+const authRoutes = require('./routes/auth.routes');
 // const vehicleRoutes = require('./routes/vehicle.routes');
 // const bookingRoutes = require('./routes/booking.routes');
 // const adminRoutes = require('./routes/admin.routes');
@@ -19,11 +19,11 @@ const { errorHandler } = require('./middleware/error.middleware');
 const app = express();
 
 // Stripe webhook route needs raw body; defined here before express.json()
-// app.post(
-//   '/api/payments/stripe/webhook',
-//   bodyParser.raw({ type: 'application/json' }),
-//   require('./controllers/payment.controller').stripeWebhook
-// );
+app.post(
+  '/api/payments/stripe/webhook',
+  bodyParser.raw({ type: 'application/json' }),
+  require('./controllers/payment.controller').stripeWebhook
+);
 
 // security middlewares
 app.use(helmet());
@@ -47,7 +47,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API routes
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 // app.use('/api/vehicles', vehicleRoutes);
 // app.use('/api/bookings', bookingRoutes);
 // app.use('/api/admin', adminRoutes);
