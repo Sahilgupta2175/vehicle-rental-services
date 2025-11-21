@@ -13,7 +13,7 @@ const vehicleRoutes = require('./routes/vehicle.routes');
 const bookingRoutes = require('./routes/booking.routes');
 const adminRoutes = require('./routes/admin.routes');
 const paymentRoutes = require('./routes/payment.routes');
-// const reportRoutes = require('./routes/report.routes');
+const reportRoutes = require('./routes/report.routes');
 const { errorHandler } = require('./middleware/error.middleware');
 
 const app = express();
@@ -52,7 +52,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
-// app.use('/api/reports', reportRoutes);
+app.use('/api/reports', reportRoutes);
 
 // health check
 app.get('/api/health', (req, res) => {
