@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
 });
 
 // start cron jobs
-// require('./cron/jobs');
+require('./cron/jobs');
 
 server.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`)
