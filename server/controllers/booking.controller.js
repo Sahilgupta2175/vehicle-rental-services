@@ -1,7 +1,7 @@
 const Booking = require('../models/Booking');
 const Vehicle = require('../models/Vehicle');
 const User = require('../models/User');
-const { sendMail } = require('../services/email.service');
+const { sendMail, sendBookingConfirmation } = require('../services/email.service');
 const { sendSMS } = require('../services/sms.service');
 
 exports.createBooking = async (req, res, next) => {
@@ -11,17 +11,56 @@ exports.createBooking = async (req, res, next) => {
         const vehicle = await Vehicle.findById(vehicleId);
 
         if (!vehicle) {
-            return res.status(404).json({ error: 'Vehicle not found' });
+            return res.status(404).json({ success: false, message: 'Vehicle not found' });
+        }
+
+        if (!vehicle.available) {
+            return res.status(400).json({ success: false, message: 'Vehicle is not available' });
         }
 
         const startDate = new Date(start);
         const endDate = new Date(end);
 
         if (endDate <= startDate) {
-            return res.status(400).json({ error: 'Invalid dates' });
+            return res.status(400).json({ success: false, message: 'End date must be after start date' });
         }
 
+        // Check for minimum booking duration (e.g., 1 hour)
         const diffHours = Math.ceil((endDate - startDate) / (1000 * 60 * 60));
+        if (diffHours < 1) {
+            return res.status(400).json({ success: false, message: 'Minimum booking duration is 1 hour' });
+        }
+
+        // Check if start date is in the past
+        if (startDate < new Date()) {
+            return res.status(400).json({ success: false, message: 'Start date cannot be in the past' });
+        }
+
+        // CHECK FOR OVERLAPPING BOOKINGS (NEW)
+        const overlappingBooking = await Booking.findOne({
+            vehicle: vehicleId,
+            status: { $in: ['pending', 'approved'] },
+            $or: [
+                // New booking starts during existing booking
+                { start: { $lte: startDate }, end: { $gte: startDate } },
+                // New booking ends during existing booking
+                { start: { $lte: endDate }, end: { $gte: endDate } },
+                // New booking completely contains existing booking
+                { start: { $gte: startDate }, end: { $lte: endDate } }
+            ]
+        });
+
+        if (overlappingBooking) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Vehicle is already booked for the selected time period',
+                conflictingBooking: {
+                    start: overlappingBooking.start,
+                    end: overlappingBooking.end
+                }
+            });
+        }
+
         const totalAmount = diffHours * vehicle.pricePerHour;
 
         const booking = new Booking({
@@ -35,32 +74,43 @@ exports.createBooking = async (req, res, next) => {
 
         await booking.save();
 
-        // sockets
+        // Populate for notifications
+        await booking.populate(['vehicle', 'user']);
+
+        // Socket notification
         if (global.io) {
             global.io.to(`vendor:${String(vehicle.owner)}`).emit('booking:new', booking);
         }
 
-        // emails & sms
-        sendMail({ to: user.email, subject: 'Booking created', text: `Your booking request created for ${vehicle.name}` }).catch(console.warn);
+        // Send professional email with template
+        sendBookingConfirmation(booking, user, vehicle).catch(err => 
+            console.warn('[Email] Error sending booking confirmation:', err)
+        );
         
+        // Send SMS to user
         if (user.phone) {
             sendSMS({ 
                 to: user.phone, 
-                body: `Booking created for ${vehicle.name}.` 
+                body: `Booking created for ${vehicle.name}. Start: ${startDate.toLocaleDateString()}. Check your email for details.` 
             }).catch(console.warn);
         }
         
+        // Notify vendor
         const vendor = await User.findById(vehicle.owner);
-        
         if (vendor?.phone) {
             sendSMS({ 
                 to: vendor.phone, 
-                body: `New booking request for ${vehicle.name}` 
+                body: `New booking request for ${vehicle.name} from ${user.name}. Check dashboard for details.` 
             }).catch(console.warn);
         }
 
-        res.status(201).json(booking);
+        res.status(201).json({ 
+            success: true, 
+            booking,
+            message: 'Booking created successfully. Please proceed with payment.' 
+        });
     } catch (err) {
+        console.error('[Booking] Create error:', err);
         next(err);
     }
 };
