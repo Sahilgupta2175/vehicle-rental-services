@@ -1,12 +1,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const { sendWelcomeEmail, sendPasswordResetEmail } = require('../services/email.service');
 
 exports.registerValidators = [
-    body('name').isLength({ min: 2 }),
-    body('email').isEmail(),
-    body('password').isLength({ min: 6 })
+    body('name').isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ];
 
 exports.register = async (req, res, next) => {
@@ -14,14 +16,14 @@ exports.register = async (req, res, next) => {
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ success: false, errors: errors.array() });
         }
         
         const { name, email, password, role, phone } = req.body;
         const exists = await User.findOne({ email });
         
         if (exists) {
-            return res.status(400).json({ error: 'Email already registered' });
+            return res.status(400).json({ success: false, message: 'Email already registered' });
         }
         
         const passwordHash = await bcrypt.hash(password, 10);
@@ -29,16 +31,32 @@ exports.register = async (req, res, next) => {
 
         await user.save();
 
+        // Send welcome email
+        sendWelcomeEmail(user).catch(err => 
+            console.warn('[Email] Error sending welcome email:', err)
+        );
+
+        // Generate token for automatic login
+        const token = jwt.sign(
+            { id: user._id, role: user.role }, 
+            process.env.JWT_SECRET || 'secret', 
+            { expiresIn: process.env.JWT_EXPIRES || '7d' }
+        );
+
         res.status(201).json({ 
-            message: 'Registered', 
+            success: true,
+            message: 'Registration successful', 
+            token,
             user: { 
                 id: user._id, 
                 name: user.name, 
                 email: user.email, 
-                role: user.role 
+                role: user.role,
+                phone: user.phone
             } 
         });
     } catch (err) {
+        console.error('[Auth] Register error:', err);
         next(err);
     }
 };
@@ -46,16 +64,21 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email and password are required' });
+        }
+
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
         const valid = await bcrypt.compare(password, user.passwordHash);
 
         if (!valid) {
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
         const token = jwt.sign(
@@ -65,14 +88,159 @@ exports.login = async (req, res, next) => {
         );
         
         res.json({ 
+            success: true,
             token, 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role } 
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role,
+                phone: user.phone
+            } 
         });
     } catch (err) {
+        console.error('[Auth] Login error:', err);
         next(err);
     }
 };
 
 exports.me = async (req, res) => {
-  res.json(req.user);
+    res.json({ success: true, user: req.user });
+};
+
+// ==================== PASSWORD RESET ====================
+
+exports.forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            // Return success even if user not found (security best practice)
+            return res.json({ 
+                success: true, 
+                message: 'If that email exists, a password reset link has been sent' 
+            });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+        // Save token to user (valid for 1 hour)
+        user.resetPasswordToken = resetTokenHash;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        await user.save();
+
+        // Send email with reset link
+        await sendPasswordResetEmail(user, resetToken);
+
+        res.json({ 
+            success: true, 
+            message: 'Password reset email sent' 
+        });
+    } catch (err) {
+        console.error('[Auth] Forgot password error:', err);
+        next(err);
+    }
+};
+
+exports.resetPassword = async (req, res, next) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Token and new password are required' 
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Password must be at least 6 characters' 
+            });
+        }
+
+        // Hash the token from URL to compare with DB
+        const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+        // Find user with valid token
+        const user = await User.findOne({
+            resetPasswordToken: resetTokenHash,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid or expired reset token' 
+            });
+        }
+
+        // Hash new password and update user
+        user.passwordHash = await bcrypt.hash(newPassword, 10);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: 'Password reset successful. You can now login with your new password.' 
+        });
+    } catch (err) {
+        console.error('[Auth] Reset password error:', err);
+        next(err);
+    }
+};
+
+// Change password (for logged-in users)
+exports.changePassword = async (req, res, next) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Current and new password are required' 
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'New password must be at least 6 characters' 
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+
+        // Verify current password
+        const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+
+        if (!valid) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Current password is incorrect' 
+            });
+        }
+
+        // Update password
+        user.passwordHash = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: 'Password changed successfully' 
+        });
+    } catch (err) {
+        console.error('[Auth] Change password error:', err);
+        next(err);
+    }
 };
