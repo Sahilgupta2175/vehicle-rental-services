@@ -9,4 +9,9 @@ router.post('/register', authLimiter, authCtrl.registerValidators, authCtrl.regi
 router.post('/login', authLimiter, authCtrl.login);
 router.get('/me', authenticate, authCtrl.me);
 
+// Password reset routes
+router.post('/forgot-password', authLimiter, authCtrl.forgotPassword);
+router.post('/reset-password', authLimiter, authCtrl.resetPassword);
+router.post('/change-password', authenticate, authCtrl.changePassword);
+
 module.exports = router;
