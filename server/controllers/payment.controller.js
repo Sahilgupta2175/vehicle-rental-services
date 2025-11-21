@@ -1,5 +1,7 @@
-const { createStripePaymentIntent, createRazorpayOrder, verifyRazorpaySignature, stripe } = require('../services/payment.service');
+const { createStripePaymentIntent, createRazorpayOrder, verifyRazorpaySignature, stripe, razorpay } = require('../services/payment.service');
 const Booking = require('../models/Booking');
+const Transaction = require('../models/Transaction');
+const User = require('../models/User');
 
 exports.createStripeIntent = async (req, res, next) => {
     try {
@@ -7,23 +9,52 @@ exports.createStripeIntent = async (req, res, next) => {
         const booking = await Booking.findById(bookingId).populate('vehicle');
 
         if (!booking) {
-            return res.status(404).json({ error: 'Booking not found' });
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+
+        // Check if booking belongs to user
+        if (booking.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+
+        // Check if already paid
+        if (booking.payment?.status === 'paid') {
+            return res.status(400).json({ success: false, message: 'Booking already paid' });
         }
 
         const intent = await createStripePaymentIntent({
             amount: booking.totalAmount,
             currency: 'inr',
-            metadata: { bookingId: booking._id.toString() }
+            metadata: { 
+                bookingId: booking._id.toString(),
+                userId: req.user._id.toString()
+            }
         });
 
         booking.payment = booking.payment || {};
         booking.payment.provider = 'stripe';
         booking.payment.providerPaymentId = intent.id;
-
         await booking.save();
 
-        res.json({ clientSecret: intent.client_secret, intentId: intent.id });
+        // Create pending transaction
+        await Transaction.create({
+            booking: booking._id,
+            user: req.user._id,
+            amount: booking.totalAmount,
+            type: 'charge',
+            provider: 'stripe',
+            providerId: intent.id,
+            status: 'pending',
+            metadata: { intentId: intent.id }
+        });
+
+        res.json({ 
+            success: true,
+            clientSecret: intent.client_secret, 
+            intentId: intent.id 
+        });
     } catch (err) {
+        console.error('[Stripe Intent] Error:', err);
         next(err);
     }
 };
@@ -48,16 +79,57 @@ exports.stripeWebhook = async (req, res) => {
         if (event.type === 'payment_intent.succeeded') {
             const pi = event.data.object;
             const bookingId = pi.metadata?.bookingId;
+            const userId = pi.metadata?.userId;
+            
             if (bookingId) {
                 const booking = await Booking.findById(bookingId);
                 if (booking) {
                     booking.payment = booking.payment || {};
                     booking.payment.status = 'paid';
                     booking.payment.providerPaymentId = pi.id;
-
+                    booking.status = 'approved';
                     await booking.save();
+
+                    // Update transaction to completed
+                    await Transaction.findOneAndUpdate(
+                        { providerId: pi.id, provider: 'stripe' },
+                        { status: 'completed', metadata: { paymentIntent: pi } },
+                        { new: true }
+                    );
+
+                    // Send notifications
+                    const user = await User.findById(userId || booking.user);
+                    if (user) {
+                        const { sendMail } = require('../services/email.service');
+                        const { sendSMS } = require('../services/sms.service');
+                        
+                        sendMail({
+                            to: user.email,
+                            subject: 'Payment Successful',
+                            html: `<h2>Payment Confirmed!</h2><p>Your payment of ₹${booking.totalAmount} has been received. Booking ID: ${booking._id}</p>`
+                        }).catch(console.warn);
+
+                        if (user.phone) {
+                            sendSMS({
+                                to: user.phone,
+                                body: `Payment of ₹${booking.totalAmount} received for booking #${booking._id}. Thank you!`
+                            }).catch(console.warn);
+                        }
+                    }
+
+                    // Notify via Socket.IO
+                    if (global.io) {
+                        global.io.to(`user:${booking.user}`).emit('payment:success', { bookingId, amount: booking.totalAmount });
+                    }
                 }
             }
+        } else if (event.type === 'payment_intent.payment_failed') {
+            const pi = event.data.object;
+            await Transaction.findOneAndUpdate(
+                { providerId: pi.id, provider: 'stripe' },
+                { status: 'failed', error: pi.last_payment_error?.message },
+                { new: true }
+            );
         }
 
         res.json({ received: true });
@@ -113,14 +185,240 @@ exports.razorpayWebhook = async (req, res, next) => {
                 if (booking) {
                     booking.payment.status = 'paid';
                     booking.payment.providerPaymentId = payload.id;
-
+                    booking.status = 'approved';
                     await booking.save();
+
+                    // Update transaction
+                    await Transaction.findOneAndUpdate(
+                        { booking: bookingId, provider: 'razorpay' },
+                        { status: 'completed', providerId: payload.id },
+                        { new: true }
+                    );
                 }
             }
+        } else if (event === 'payment.failed') {
+            const payload = body.payload.payment.entity;
+            await Transaction.findOneAndUpdate(
+                { providerId: payload.order_id, provider: 'razorpay' },
+                { status: 'failed', error: payload.error_description },
+                { new: true }
+            );
         }
 
         res.json({ ok: true });
     } catch (err) {
+        next(err);
+    }
+};
+
+// ==================== REFUND METHODS ====================
+
+exports.createStripeRefund = async (req, res, next) => {
+    try {
+        const { bookingId, amount, reason } = req.body;
+        
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+
+        if (!booking.payment?.providerPaymentId) {
+            return res.status(400).json({ success: false, message: 'No payment found for this booking' });
+        }
+
+        const refund = await stripe.refunds.create({
+            payment_intent: booking.payment.providerPaymentId,
+            amount: amount ? Math.round(amount * 100) : undefined, // Partial or full refund
+            reason: reason || 'requested_by_customer'
+        });
+
+        // Create refund transaction
+        await Transaction.create({
+            booking: booking._id,
+            user: booking.user,
+            amount: refund.amount / 100,
+            type: 'refund',
+            provider: 'stripe',
+            providerId: refund.id,
+            status: 'completed',
+            metadata: { refund, originalPaymentId: booking.payment.providerPaymentId }
+        });
+
+        // Update booking status
+        booking.status = 'cancelled';
+        booking.payment.status = 'refunded';
+        await booking.save();
+
+        res.json({ success: true, refund });
+    } catch (err) {
+        console.error('[Stripe Refund] Error:', err);
+        next(err);
+    }
+};
+
+exports.createRazorpayRefund = async (req, res, next) => {
+    try {
+        const { bookingId, amount } = req.body;
+        
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+
+        if (!booking.payment?.providerPaymentId) {
+            return res.status(400).json({ success: false, message: 'No payment found' });
+        }
+
+        const refund = await razorpay.payments.refund(booking.payment.providerPaymentId, {
+            amount: amount ? Math.round(amount * 100) : undefined, // in paise
+            speed: 'normal'
+        });
+
+        // Create refund transaction
+        await Transaction.create({
+            booking: booking._id,
+            user: booking.user,
+            amount: refund.amount / 100,
+            type: 'refund',
+            provider: 'razorpay',
+            providerId: refund.id,
+            status: 'completed',
+            metadata: { refund, originalPaymentId: booking.payment.providerPaymentId }
+        });
+
+        // Update booking
+        booking.status = 'cancelled';
+        booking.payment.status = 'refunded';
+        await booking.save();
+
+        res.json({ success: true, refund });
+    } catch (err) {
+        console.error('[Razorpay Refund] Error:', err);
+        next(err);
+    }
+};
+
+// ==================== SAVED CARDS METHODS ====================
+
+exports.attachPaymentMethod = async (req, res, next) => {
+    try {
+        const { paymentMethodId } = req.body;
+        
+        // Get or create Stripe customer
+        let user = await User.findById(req.user._id);
+        
+        if (!user.stripeCustomerId) {
+            const customer = await stripe.customers.create({
+                email: user.email,
+                name: user.name,
+                metadata: { userId: user._id.toString() }
+            });
+            user.stripeCustomerId = customer.id;
+            await user.save();
+        }
+
+        // Attach payment method to customer
+        await stripe.paymentMethods.attach(paymentMethodId, {
+            customer: user.stripeCustomerId,
+        });
+
+        // Set as default if it's the first one
+        const paymentMethods = await stripe.paymentMethods.list({
+            customer: user.stripeCustomerId,
+            type: 'card',
+        });
+
+        if (paymentMethods.data.length === 1) {
+            await stripe.customers.update(user.stripeCustomerId, {
+                invoice_settings: {
+                    default_payment_method: paymentMethodId,
+                },
+            });
+        }
+
+        res.json({ success: true, message: 'Payment method saved' });
+    } catch (err) {
+        console.error('[Stripe] Attach payment method error:', err);
+        next(err);
+    }
+};
+
+exports.listPaymentMethods = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+        
+        if (!user.stripeCustomerId) {
+            return res.json({ success: true, paymentMethods: [] });
+        }
+
+        const paymentMethods = await stripe.paymentMethods.list({
+            customer: user.stripeCustomerId,
+            type: 'card',
+        });
+
+        res.json({ success: true, paymentMethods: paymentMethods.data });
+    } catch (err) {
+        console.error('[Stripe] List payment methods error:', err);
+        next(err);
+    }
+};
+
+exports.detachPaymentMethod = async (req, res, next) => {
+    try {
+        const { paymentMethodId } = req.params;
+        
+        await stripe.paymentMethods.detach(paymentMethodId);
+
+        res.json({ success: true, message: 'Payment method removed' });
+    } catch (err) {
+        console.error('[Stripe] Detach payment method error:', err);
+        next(err);
+    }
+};
+
+// ==================== PAYMENT VERIFICATION ====================
+
+exports.verifyRazorpayPayment = async (req, res, next) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingId } = req.body;
+
+        // Verify signature
+        const text = razorpay_order_id + '|' + razorpay_payment_id;
+        const expectedSignature = require('crypto')
+            .createHmac('sha256', process.env.RAZORPAY_SECRET)
+            .update(text)
+            .digest('hex');
+
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ success: false, message: 'Invalid signature' });
+        }
+
+        // Update booking
+        const booking = await Booking.findById(bookingId);
+        if (booking) {
+            booking.payment = booking.payment || {};
+            booking.payment.status = 'paid';
+            booking.payment.providerPaymentId = razorpay_payment_id;
+            booking.status = 'approved';
+            await booking.save();
+
+            // Create/update transaction
+            await Transaction.findOneAndUpdate(
+                { booking: bookingId, provider: 'razorpay' },
+                {
+                    status: 'completed',
+                    providerId: razorpay_payment_id,
+                    metadata: { orderId: razorpay_order_id, signature: razorpay_signature }
+                },
+                { upsert: true, new: true }
+            );
+
+            res.json({ success: true, message: 'Payment verified', booking });
+        } else {
+            res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+    } catch (err) {
+        console.error('[Razorpay] Verification error:', err);
         next(err);
     }
 };
