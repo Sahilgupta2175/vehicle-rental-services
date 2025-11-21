@@ -60,6 +60,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // centralized error handler
-// app.use(errorHandler);
+app.use(errorHandler);
 
 module.exports = app;
