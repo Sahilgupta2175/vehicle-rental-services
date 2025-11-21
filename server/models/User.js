@@ -26,6 +26,15 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false 
     },
+    stripeCustomerId: {
+        type: String
+    },
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpires: {
+        type: Date
+    },
     createdAt: { 
         type: Date,
         default: Date.now 
@@ -36,5 +45,6 @@ const UserSchema = new mongoose.Schema({
 UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ phone: 1 });
 UserSchema.index({ role: 1 });
+UserSchema.index({ resetPasswordToken: 1 });
 
 module.exports = mongoose.model('User', UserSchema);
