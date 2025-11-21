@@ -36,7 +36,7 @@ const BookingSchema = new mongoose.Schema({
     payment: {
         provider: String, // stripe / razorpay
         providerPaymentId: String,
-        status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
+        status: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' }
     },
     createdAt: { 
         type: Date, 

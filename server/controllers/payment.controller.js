@@ -160,7 +160,19 @@ exports.createRazorpayOrder = async (req, res, next) => {
 
         await booking.save();
 
-        res.json({ order });
+        // Create pending transaction
+        await Transaction.create({
+            booking: booking._id,
+            user: req.user._id,
+            amount: booking.totalAmount,
+            type: 'charge',
+            provider: 'razorpay',
+            providerId: order.id,
+            status: 'pending',
+            metadata: { orderId: order.id }
+        });
+
+        res.json({ success: true, order });
     } catch (err) {
         next(err);
     }
@@ -181,7 +193,7 @@ exports.razorpayWebhook = async (req, res, next) => {
             const payload = body.payload.payment.entity;
             const bookingId = payload?.notes?.bookingId;
             if (bookingId) {
-                const booking = await Booking.findById(bookingId);
+                const booking = await Booking.findById(bookingId).populate('user');
                 if (booking) {
                     booking.payment.status = 'paid';
                     booking.payment.providerPaymentId = payload.id;
@@ -191,9 +203,34 @@ exports.razorpayWebhook = async (req, res, next) => {
                     // Update transaction
                     await Transaction.findOneAndUpdate(
                         { booking: bookingId, provider: 'razorpay' },
-                        { status: 'completed', providerId: payload.id },
+                        { status: 'completed', providerId: payload.id, metadata: { payment: payload } },
                         { new: true }
                     );
+
+                    // Send notifications
+                    const user = await User.findById(booking.user);
+                    if (user) {
+                        const { sendMail } = require('../services/email.service');
+                        const { sendSMS } = require('../services/sms.service');
+                        
+                        sendMail({
+                            to: user.email,
+                            subject: 'Payment Successful - Razorpay',
+                            html: `<h2>Payment Confirmed!</h2><p>Your payment of ₹${booking.totalAmount} has been received via Razorpay. Booking ID: ${booking._id}</p>`
+                        }).catch(console.warn);
+
+                        if (user.phone) {
+                            sendSMS({
+                                to: user.phone,
+                                body: `Payment of ₹${booking.totalAmount} received for booking #${booking._id}. Thank you!`
+                            }).catch(console.warn);
+                        }
+                    }
+
+                    // Notify via Socket.IO
+                    if (global.io) {
+                        global.io.to(`user:${booking.user}`).emit('payment:success', { bookingId, amount: booking.totalAmount, provider: 'razorpay' });
+                    }
                 }
             }
         } else if (event === 'payment.failed') {
