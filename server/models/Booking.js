@@ -44,4 +44,11 @@ const BookingSchema = new mongoose.Schema({
     }
 });
 
+// Indexes for faster queries
+BookingSchema.index({ user: 1, status: 1 });
+BookingSchema.index({ vehicle: 1, start: 1, end: 1 });
+BookingSchema.index({ status: 1, createdAt: -1 });
+BookingSchema.index({ vendor: 1, status: 1 });
+BookingSchema.index({ 'payment.status': 1 });
+
 module.exports = mongoose.model('Booking', BookingSchema);

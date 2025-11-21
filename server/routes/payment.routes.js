@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const paymentCtrl = require('../controllers/payment.controller');
+const { authenticate } = require('../middleware/auth.middleware');
+const { paymentLimiter } = require('../middleware/rateLimiter.middleware');
 
 // Note: stripe webhook route is handled separately in app.js (uses raw body)
-router.post('/stripe/create-intent', paymentCtrl.createStripeIntent);
+router.post('/stripe/create-intent', authenticate, paymentLimiter, paymentCtrl.createStripeIntent);
 
-// webhook installed in app.js using raw body
-router.post('/razorpay/create-order', paymentCtrl.createRazorpayOrder);
+// Razorpay routes
+router.post('/razorpay/create-order', authenticate, paymentLimiter, paymentCtrl.createRazorpayOrder);
 router.post('/razorpay/webhook', paymentCtrl.razorpayWebhook);
 
 module.exports = router;

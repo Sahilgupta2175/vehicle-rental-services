@@ -32,4 +32,9 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
+// Indexes for faster queries
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ phone: 1 });
+UserSchema.index({ role: 1 });
+
 module.exports = mongoose.model('User', UserSchema);

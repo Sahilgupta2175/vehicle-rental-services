@@ -51,6 +51,11 @@ const VehicleSchema = new mongoose.Schema({
     }
 });
 
+// Indexes for faster queries
+VehicleSchema.index({ owner: 1 });
+VehicleSchema.index({ type: 1, available: 1 });
+VehicleSchema.index({ 'location.city': 1 });
+VehicleSchema.index({ pricePerHour: 1 });
 VehicleSchema.index({ name: 'text', 'location.city': 'text', type: 'text' });
 
 module.exports = mongoose.model('Vehicle', VehicleSchema);
