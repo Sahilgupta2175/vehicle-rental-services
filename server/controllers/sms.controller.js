@@ -2,13 +2,13 @@ const { sendSMS } = require('../services/sms.service');
 
 exports.sendSMSController = async (req, res, next) => {
     try {
-        const { to, message } = req.body;
+        const { to, body } = req.body;
 
-        if (!to || !message) {
-            return res.status(400).json({ error: 'Both "to" and "message" are required' });
+        if (!to || !body) {
+            return res.status(400).json({ error: 'Both "to" and "body" are required' });
         }
 
-        const result = await sendSMS({ to, body: message });
+        const result = await sendSMS({ to, body });
 
         // If Twilio not configured, sendSMS returns null (per your service)
         if (!result) {
