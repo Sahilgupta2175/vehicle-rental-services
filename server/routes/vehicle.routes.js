@@ -5,7 +5,16 @@ const { authenticate } = require('../middleware/auth.middleware');
 const { allowRoles } = require('../middleware/role.middleware');
 const upload = require('../middleware/upload.middleware');
 
-router.get('/', vehicleCtrl.getVehicles);
+// Optional authentication - allows both authenticated and unauthenticated access
+const optionalAuth = (req, res, next) => {
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer ')) {
+        return authenticate(req, res, next);
+    }
+    next();
+};
+
+router.get('/', optionalAuth, vehicleCtrl.getVehicles);
 router.get('/:id', vehicleCtrl.getVehicle);
 
 router.post('/', authenticate, allowRoles('vendor', 'admin'), upload.array('images', 6), vehicleCtrl.createVehicle);

@@ -73,8 +73,13 @@ exports.deleteVehicle = async (req, res, next) => {
 
 exports.getVehicles = async (req, res, next) => {
     try {
-        const { q, city, type, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
+        const { q, city, type, minPrice, maxPrice, page = 1, limit = 20, mine } = req.query;
         const filter = {};
+
+        // If 'mine' parameter is true and user is authenticated, filter by owner
+        if (mine === 'true' && req.user) {
+            filter.owner = req.user._id;
+        }
 
         if (q) {
             filter.$text = { $search: q };
