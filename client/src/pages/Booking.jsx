@@ -66,9 +66,22 @@ const Booking = () => {
             toast.error("Select start and end date/time");
             return;
         }
+
+        // Check if start date is in the past
+        if (start < new Date()) {
+            toast.error("Start date cannot be in the past. Please select a future date and time.");
+            return;
+        }
         
         if (end <= start) {
             toast.error("End must be after start");
+            return;
+        }
+
+        // Check minimum duration (1 hour)
+        const diffHours = Math.ceil((end - start) / (1000 * 60 * 60));
+        if (diffHours < 1) {
+            toast.error("Minimum booking duration is 1 hour");
             return;
         }
         
@@ -83,7 +96,7 @@ const Booking = () => {
             toast.success("Booking created. Proceed to payment.");
             navigate(`/payment/${data.booking._id}`);
         } catch (err) {
-            const msg = err.response?.data?.error || "Failed to create booking";
+            const msg = err.response?.data?.message || err.response?.data?.error || "Failed to create booking";
             toast.error(msg);
         } finally {
             setLoading(false);
@@ -216,6 +229,17 @@ const Booking = () => {
                                                 timeIntervals={15}
                                                 dateFormat="dd MMM yyyy, HH:mm"
                                                 minDate={new Date()}
+                                                minTime={
+                                                    start && start.toDateString() === new Date().toDateString()
+                                                        ? new Date()
+                                                        : new Date(new Date().setHours(0, 0, 0, 0))
+                                                }
+                                                maxTime={new Date(new Date().setHours(23, 59, 59, 999))}
+                                                filterTime={(time) => {
+                                                    if (!start) return true;
+                                                    if (start.toDateString() !== new Date().toDateString()) return true;
+                                                    return time >= new Date();
+                                                }}
                                                 placeholderText="Select start date and time"
                                                 className="w-full px-5 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-white text-base placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none transition-all hover:bg-slate-800 cursor-pointer"
                                                 calendarClassName="booking-calendar"
@@ -243,6 +267,18 @@ const Booking = () => {
                                                 timeIntervals={15}
                                                 dateFormat="dd MMM yyyy, HH:mm"
                                                 minDate={start || new Date()}
+                                                minTime={
+                                                    end && start && end.toDateString() === start.toDateString()
+                                                        ? new Date(start.getTime() + 60 * 60 * 1000) // 1 hour after start
+                                                        : new Date(new Date().setHours(0, 0, 0, 0))
+                                                }
+                                                maxTime={new Date(new Date().setHours(23, 59, 59, 999))}
+                                                filterTime={(time) => {
+                                                    if (!start || !end) return true;
+                                                    if (end.toDateString() !== start.toDateString()) return true;
+                                                    // Ensure at least 1 hour after start time
+                                                    return time >= new Date(start.getTime() + 60 * 60 * 1000);
+                                                }}
                                                 placeholderText="Select end date and time"
                                                 className="w-full px-5 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-white text-base placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none transition-all hover:bg-slate-800 cursor-pointer"
                                                 calendarClassName="booking-calendar"

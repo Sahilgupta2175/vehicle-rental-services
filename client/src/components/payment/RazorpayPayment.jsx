@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { paymentsApi } from "../../api/payments";
 
-const loadRazorpayScript = () => { 
-    new Promise((resolve) => {
+const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
         if (document.getElementById("razorpay-sdk")) {
             return resolve(true);
         }
@@ -27,7 +27,8 @@ const RazorpayPayment = ({ bookingId, onSuccess }) => {
         const init = async () => {
             try {
                 const { data } = await paymentsApi.createRazorpayOrder(bookingId);
-                setOrder(data);
+                // data contains { success: true, order: {...} }
+                setOrder(data.order);
             } catch (err) {
                 console.error(err);
                 toast.error("Failed to init Razorpay payment");
