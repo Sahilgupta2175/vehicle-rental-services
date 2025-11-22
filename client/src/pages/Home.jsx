@@ -12,12 +12,15 @@ const Home = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const controller = new AbortController();
+        
 		const load = async () => {
 			try {
 				setLoading(true);
-				const { data } = await vehicleApi.list({ limit: 6 });
+				const { data } = await vehicleApi.list({ limit: 6 }, { signal: controller.signal });
 				setFeatured(data.vehicles || data);
 			} catch (err) {
+				if (err.name === 'CanceledError') return; // Ignore cancelled requests
 				console.error("Failed to load vehicles", err);
 			} finally {
 				setLoading(false);
@@ -25,6 +28,8 @@ const Home = () => {
 		};
 
 		load();
+		
+		return () => controller.abort();
     }, []);
 
     const handleSearch = (e) => {

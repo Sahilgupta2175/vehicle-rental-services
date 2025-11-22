@@ -8,7 +8,8 @@ const api = axios.create({
 });
 
 // Request: attach token
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(
+    (config) => {
         const token = localStorage.getItem("vr_token");
 
         if (token) {

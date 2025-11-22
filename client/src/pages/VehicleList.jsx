@@ -52,7 +52,32 @@ const VehicleList = () => {
     };
 
     useEffect(() => {
-        loadVehicles();
+        const controller = new AbortController();
+        
+        const load = async () => {
+            try {
+                setLoading(true);
+                const params = {};
+
+                if (filters.q) params.q = filters.q;
+                if (filters.city) params.city = filters.city;
+                if (filters.type) params.type = filters.type;
+                if (filters.minPrice) params.minPrice = filters.minPrice;
+                if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+
+                const { data } = await vehicleApi.list(params, { signal: controller.signal });
+                setVehicles(data.vehicles || data);
+            } catch (err) {
+                if (err.name === 'CanceledError') return; // Ignore cancelled requests
+                console.error("Failed to load vehicles", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        load();
+        
+        return () => controller.abort();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

@@ -17,17 +17,21 @@ const Booking = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const controller = new AbortController();
+        
         const load = async () => {
             try {
-                const { data } = await vehicleApi.get(vehicleId);
+                const { data } = await vehicleApi.get(vehicleId, { signal: controller.signal });
                 setVehicle(data.vehicle || data);
-            // eslint-disable-next-line no-unused-vars
             } catch (err) {
+                if (err.name === 'CanceledError') return; // Ignore cancelled requests
                 toast.error("Failed to load vehicle");
             }
         };
 
         load();
+        
+        return () => controller.abort();
     }, [vehicleId]);
 
     const calculateEstimate = () => {

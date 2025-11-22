@@ -1,9 +1,9 @@
 import api from "./axios";
 
 export const vehicleApi = {
-    list: (params) => api.get("/vehicles", { params }),
+    list: (params, config) => api.get("/vehicles", { params, ...config }),
 
-    get: (id) => api.get(`/vehicles/${id}`),
+    get: (id, config) => api.get(`/vehicles/${id}`, config),
 
     create: (formData) => api.post("/vehicles", formData, {
             headers: { "Content-Type": "multipart/form-data" },

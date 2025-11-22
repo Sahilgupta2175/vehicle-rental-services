@@ -13,12 +13,15 @@ const VehicleDetail = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const controller = new AbortController();
+        
         const load = async () => {
             try {
                 setLoading(true);
-                const { data } = await vehicleApi.get(id);
+                const { data } = await vehicleApi.get(id, { signal: controller.signal });
                 setVehicle(data.vehicle || data);
             } catch (err) {
+                if (err.name === 'CanceledError') return; // Ignore cancelled requests
                 console.error(err);
                 toast.error("Failed to load vehicle");
             } finally {
@@ -27,6 +30,8 @@ const VehicleDetail = () => {
         };
 
         load();
+        
+        return () => controller.abort();
     }, [id]);
 
     const handleBook = () => {
