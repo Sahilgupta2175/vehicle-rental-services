@@ -94,7 +94,7 @@ const VehicleList = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                         Browse Vehicles
                     </h1>
                     <p className="text-slate-400 mt-2">
@@ -111,7 +111,7 @@ const VehicleList = () => {
                     </svg>
                     Filters
                     {activeFiltersCount > 0 && (
-                        <span className="absolute -top-2 -right-2 w-6 h-6 bg-accent text-white text-xs font-bold rounded-full flex items-center justify-center">
+                        <span className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                             {activeFiltersCount}
                         </span>
                     )}
@@ -238,7 +238,7 @@ const VehicleList = () => {
                         if (!value) return null;
                         const labels = { q: 'Search', city: 'City', type: 'Type', minPrice: 'Min Price', maxPrice: 'Max Price' };
                         return (
-                            <span key={key} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-sm">
+                            <span key={key} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/40 text-sm">
                                 <span className="text-slate-400">{labels[key]}:</span>
                                 <span className="text-white font-medium">{value}</span>
                                 <button

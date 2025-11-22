@@ -8,22 +8,23 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: "#7c3aed",
-                    soft: "#8b5cf6",
-                    dark: "#6d28d9",
-                    light: "#a78bfa",
+                    DEFAULT: "#3b82f6",
+                    soft: "#60a5fa",
+                    dark: "#2563eb",
+                    light: "#93c5fd",
                 },
                 accent: {
-                    DEFAULT: "#ec4899",
-                    dark: "#db2777",
-                    light: "#f472b6",
+                    DEFAULT: "#f59e0b",
+                    dark: "#d97706",
+                    light: "#fbbf24",
                 },
                 success: "#10b981",
-                warning: "#f59e0b",
+                warning: "#ef4444",
+                info: "#06b6d4",
                 background: {
-                    DEFAULT: "#0a0118",
-                    card: "#150828",
-                    light: "#1e0f3a",
+                    DEFAULT: "#0f172a",
+                    card: "#1e293b",
+                    light: "#334155",
                 },
             },
             backgroundImage: {

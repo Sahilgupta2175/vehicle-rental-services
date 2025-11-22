@@ -35,7 +35,7 @@ const Register = () => {
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8 space-y-2">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg shadow-accent/30">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/40">
                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
                         </svg>
@@ -114,8 +114,8 @@ const Register = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <label className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
                                     form.role === 'user' 
-                                        ? 'border-primary bg-primary/10' 
-                                        : 'border-purple-900/30 bg-background-light hover:border-purple-700/50'
+                                        ? 'border-blue-500 bg-blue-500/10' 
+                                        : 'border-slate-700 bg-slate-800 hover:border-slate-600'
                                 }`}>
                                     <input
                                         type="radio"
@@ -133,7 +133,7 @@ const Register = () => {
                                         <div className="text-xs text-slate-500 mt-1">Book vehicles</div>
                                     </div>
                                     {form.role === 'user' && (
-                                        <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                                        <div className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
                                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                             </svg>
@@ -142,8 +142,8 @@ const Register = () => {
                                 </label>
                                 <label className={`relative flex items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
                                     form.role === 'vendor' 
-                                        ? 'border-accent bg-accent/10' 
-                                        : 'border-purple-900/30 bg-background-light hover:border-purple-700/50'
+                                        ? 'border-amber-500 bg-amber-500/10' 
+                                        : 'border-slate-700 bg-slate-800 hover:border-slate-600'
                                 }`}>
                                     <input
                                         type="radio"
@@ -162,7 +162,7 @@ const Register = () => {
                                         <div className="text-xs text-slate-500 mt-1">List vehicles</div>
                                     </div>
                                     {form.role === 'vendor' && (
-                                        <div className="absolute top-2 right-2 w-5 h-5 bg-accent rounded-full flex items-center justify-center">
+                                        <div className="absolute top-2 right-2 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
                                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                             </svg>
@@ -213,9 +213,9 @@ const Register = () => {
                 {/* Additional Info */}
                 <p className="text-center text-xs text-slate-500 mt-6">
                     By creating an account, you agree to our{" "}
-                    <a href="#" className="text-primary hover:text-primary-light">Terms of Service</a>
+                    <a href="#" className="text-blue-400 hover:text-blue-300">Terms of Service</a>
                     {" "}and{" "}
-                    <a href="#" className="text-primary hover:text-primary-light">Privacy Policy</a>
+                    <a href="#" className="text-blue-400 hover:text-blue-300">Privacy Policy</a>
                 </p>
             </div>
         </div>

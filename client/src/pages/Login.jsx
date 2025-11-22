@@ -31,7 +31,7 @@ const Login = () => {
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8 space-y-2">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/40">
                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                         </svg>
@@ -88,7 +88,7 @@ const Login = () => {
                             </label>
                             <Link
                                 to="/forgot-password"
-                                className="text-primary hover:text-primary-light transition-colors"
+                                className="text-blue-400 hover:text-blue-300 transition-colors"
                             >
                                 Forgot password?
                             </Link>
@@ -135,9 +135,9 @@ const Login = () => {
                 {/* Additional Info */}
                 <p className="text-center text-xs text-slate-500 mt-6">
                     By continuing, you agree to our{" "}
-                    <a href="#" className="text-primary hover:text-primary-light">Terms of Service</a>
+                    <a href="#" className="text-blue-400 hover:text-blue-300">Terms of Service</a>
                     {" "}and{" "}
-                    <a href="#" className="text-primary hover:text-primary-light">Privacy Policy</a>
+                    <a href="#" className="text-blue-400 hover:text-blue-300">Privacy Policy</a>
                 </p>
             </div>
         </div>
