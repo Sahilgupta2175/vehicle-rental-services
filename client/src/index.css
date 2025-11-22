@@ -16,38 +16,81 @@
 
 @layer components {
     input, select, textarea {
-        @apply bg-background-card border border-purple-900/30 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 transition-all duration-200;
-        @apply focus:outline-none focus:ring-2 focus:ring-primary-soft focus:border-transparent;
+        background-color: #150828;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        color: rgb(241 245 249);
+        transition: all 0.2s;
+    }
+
+    input::placeholder, select::placeholder, textarea::placeholder {
+        color: rgb(100 116 139);
     }
 
     input:hover, select:hover, textarea:hover {
-        @apply border-purple-700/50;
+        border-color: rgba(139, 92, 246, 0.5);
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+        border-color: transparent;
     }
 
     button {
-        @apply transition-all duration-200 ease-out;
+        transition: all 0.2s ease-out;
     }
 
     .btn-primary {
-        @apply bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary-DEFAULT;
-        @apply text-white font-medium rounded-xl px-6 py-3 shadow-lg shadow-primary/20;
-        @apply hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0;
+        background: linear-gradient(to right, #7c3aed, #6d28d9);
+        color: white;
+        font-weight: 500;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.2);
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
     }
 
     .btn-secondary {
-        @apply bg-background-light border border-purple-800/50 hover:border-primary-soft;
-        @apply text-slate-200 font-medium rounded-xl px-6 py-3;
-        @apply hover:bg-background-card transition-all;
+        background-color: #1e0f3a;
+        border: 1px solid rgba(139, 92, 246, 0.5);
+        color: rgb(226 232 240);
+        font-weight: 500;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+        border-color: #8b5cf6;
+        background-color: #150828;
     }
 
     .card {
-        @apply bg-background-card border border-purple-900/30 rounded-2xl;
-        @apply hover:border-purple-700/50 transition-all duration-300;
-        @apply shadow-xl shadow-black/20;
+        background-color: #150828;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s;
     }
 
-    .card-hover {
-        @apply hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1;
+    .card:hover {
+        border-color: rgba(139, 92, 246, 0.5);
+    }
+
+    .card-hover:hover {
+        box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.1);
+        transform: translateY(-4px);
     }
 }
 
@@ -95,4 +138,13 @@
     bottom: -200px;
     left: -200px;
     animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
