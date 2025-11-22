@@ -14,7 +14,7 @@ import Login from "./pages/Login";
 import Booking from "./pages/Booking";
 import Payment from "./pages/Payment";
 
-// import UserDashboard from "./pages/dashboards/UserDashboard";
+import UserDashboard from "./pages/dashboards/UserDashboard";
 // import VendorDashboard from "./pages/dashboards/VendorDashboard";
 // import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
