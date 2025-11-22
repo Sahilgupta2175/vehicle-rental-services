@@ -20,6 +20,7 @@ const Booking = () => {
             try {
                 const { data } = await vehicleApi.get(vehicleId);
                 setVehicle(data.vehicle || data);
+            // eslint-disable-next-line no-unused-vars
             } catch (err) {
                 toast.error("Failed to load vehicle");
             }

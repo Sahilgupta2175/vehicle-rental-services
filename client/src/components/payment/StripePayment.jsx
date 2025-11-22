@@ -14,6 +14,7 @@ const StripePayment = ({ bookingId, onSuccess }) => {
             try {
                 const { data } = await paymentsApi.createStripeIntent(bookingId);
                 setClientSecret(data.clientSecret);
+            // eslint-disable-next-line no-unused-vars
             } catch (err) {
                 toast.error("Failed to init Stripe payment");
             }
