@@ -20,7 +20,7 @@ import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 function App() {
     return (
-        <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
+        <div className="min-h-screen flex flex-col bg-background text-slate-50">
             <Navbar />
             <PageContainer>
                 <Routes>
