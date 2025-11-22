@@ -5,13 +5,13 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import RoleRoute from "./components/common/RoleRoute";
 
 import Home from "./pages/Home";
-// import Login from "./pages/Login";
+import Login from "./pages/Login";
 // import Register from "./pages/Register";
 // import ForgotPassword from "./pages/ForgotPassword";
 // import ResetPassword from "./pages/ResetPassword";
 // import VehicleList from "./pages/VehicleList";
 // import VehicleDetail from "./pages/VehicleDetail";
-// import Booking from "./pages/Booking";
+import Booking from "./pages/Booking";
 // import Payment from "./pages/Payment";
 
 // import UserDashboard from "./pages/dashboards/UserDashboard";
