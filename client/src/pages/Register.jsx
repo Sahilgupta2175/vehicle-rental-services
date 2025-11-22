@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAuthStore from "../store/authStore";
 
 const Register = () => {
-    const { register, loading } = useAuthStore();
+    const { register, loading, isAuthenticated, initialized } = useAuthStore();
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -12,6 +12,13 @@ const Register = () => {
         role: "user", // user or vendor
     });
     const navigate = useNavigate();
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (initialized && isAuthenticated) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [initialized, isAuthenticated, navigate]);
 
     const handleChange = (e) => {
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));

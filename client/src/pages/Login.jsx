@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAuthStore from "../store/authStore";
 
 const Login = () => {
-    const { login, loading } = useAuthStore();
+    const { login, loading, isAuthenticated, initialized } = useAuthStore();
     const [form, setForm] = useState({ email: "", password: "" });
     const navigate = useNavigate();
     const location = useLocation();
 
     const from = location.state?.from?.pathname || "/dashboard";
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (initialized && isAuthenticated) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [initialized, isAuthenticated, navigate]);
 
     const handleChange = (e) => {
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));

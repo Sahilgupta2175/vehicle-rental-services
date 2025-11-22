@@ -20,12 +20,19 @@ api.interceptors.request.use((config) => {
     (error) => Promise.reject(error)
 );
 
-// Response: handle 401
-api.interceptors.response.use((response) => response,
+// Response: handle 401 and other errors
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
+            // Token expired or invalid
             localStorage.removeItem("vr_token");
-            // you could also redirect to login using window.location
+            
+            // Only redirect if not already on login/register pages
+            const currentPath = window.location.pathname;
+            if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

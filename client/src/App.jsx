@@ -21,13 +21,14 @@ import VendorDashboard from "./pages/dashboards/VendorDashboard";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 function App() {
-    const { init, loading } = useAuthStore();
+    const { init, initialized } = useAuthStore();
 
     useEffect(() => {
         init();
     }, [init]);
 
-    if (loading) {
+    // Show loading screen only during initial auth check
+    if (!initialized) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-900">
                 <div className="text-center space-y-4">
