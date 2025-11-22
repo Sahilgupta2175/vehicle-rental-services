@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-// import Navbar from "./components/common/Navbar";
-// import PageContainer from "./components/common/PageContainer";
-// import ProtectedRoute from "./components/common/ProtectedRoute";
+import Navbar from "./components/common/Navbar";
+import PageContainer from "./components/common/PageContainer";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 // import RoleRoute from "./components/common/RoleRoute";
 
 // import Home from "./pages/Home";
