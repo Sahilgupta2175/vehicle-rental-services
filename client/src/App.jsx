@@ -15,7 +15,7 @@ import Booking from "./pages/Booking";
 import Payment from "./pages/Payment";
 
 import UserDashboard from "./pages/dashboards/UserDashboard";
-// import VendorDashboard from "./pages/dashboards/VendorDashboard";
+import VendorDashboard from "./pages/dashboards/VendorDashboard";
 // import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 function App() {
