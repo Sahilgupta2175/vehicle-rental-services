@@ -38,7 +38,34 @@ exports.updateVehicle = async (req, res, next) => {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        Object.assign(vehicle, req.body);
+        // Update basic fields
+        if (req.body.name) {
+            vehicle.name = req.body.name;
+        }
+
+        if (req.body.type) {
+            vehicle.type = req.body.type;
+        }
+
+        if (req.body.description !== undefined) {
+            vehicle.description = req.body.description;
+        }
+
+        if (req.body.pricePerHour) {
+            vehicle.pricePerHour = req.body.pricePerHour;
+        }
+        
+        if (req.body.available !== undefined) {
+            vehicle.available = req.body.available;
+        }
+
+        // Handle location as nested object
+        if (req.body.location) {
+            vehicle.location = {
+                ...vehicle.location,
+                ...req.body.location
+            };
+        }
 
         if (req.files && req.files.length) {
             const uploads = await Promise.all(req.files.map((f) => uploadBuffer(f.buffer, 'vehicles')));
