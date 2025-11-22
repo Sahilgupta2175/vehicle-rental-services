@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 // import VehicleList from "./pages/VehicleList";
 // import VehicleDetail from "./pages/VehicleDetail";
 import Booking from "./pages/Booking";
-// import Payment from "./pages/Payment";
+import Payment from "./pages/Payment";
 
 // import UserDashboard from "./pages/dashboards/UserDashboard";
 // import VendorDashboard from "./pages/dashboards/VendorDashboard";
