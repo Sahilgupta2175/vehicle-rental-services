@@ -75,16 +75,16 @@ const VehicleDetail = () => {
     };
 
     return (
-        <div className="space-y-8 pb-12">
+        <div className="space-y-6 pb-12">
             {/* Back Button */}
             <Link 
                 to="/vehicles" 
-                className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400 transition-colors group"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500 rounded-xl text-sm text-slate-300 hover:text-white transition-all group shadow-lg"
             >
                 <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to all vehicles
+                <span className="font-medium">Back to all vehicles</span>
             </Link>
 
             <div className="grid lg:grid-cols-[1.5fr,1fr] gap-8">
@@ -92,7 +92,9 @@ const VehicleDetail = () => {
                 <div className="space-y-6">
                     {/* Main Image */}
                     <div className="relative group">
-                        <div className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl shadow-blue-500/10">
+                        <div 
+                            className="w-full h-[320px] md:h-[400px] rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl shadow-blue-500/10"
+                        >
                             {primaryImage ? (
                                 <img
                                     src={primaryImage}
@@ -128,7 +130,7 @@ const VehicleDetail = () => {
                                 <button
                                     key={idx}
                                     onClick={() => setSelectedImage(idx)}
-                                    className={`relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                                    className={`relative shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                                         selectedImage === idx 
                                             ? "border-blue-500 shadow-lg shadow-blue-500/30 scale-105" 
                                             : "border-slate-700 hover:border-slate-600"
