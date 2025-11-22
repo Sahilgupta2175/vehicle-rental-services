@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/common/Navbar";
 import PageContainer from "./components/common/PageContainer";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RoleRoute from "./components/common/RoleRoute";
+import useAuthStore from "./store/authStore";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -19,6 +21,23 @@ import VendorDashboard from "./pages/dashboards/VendorDashboard";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 function App() {
+    const { init, loading } = useAuthStore();
+
+    useEffect(() => {
+        init();
+    }, [init]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-900">
+                <div className="text-center space-y-4">
+                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="text-slate-400">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen flex flex-col bg-slate-900 text-slate-50">
             <Navbar />

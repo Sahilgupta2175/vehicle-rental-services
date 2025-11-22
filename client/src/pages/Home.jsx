@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { vehicleApi } from "../api/vehicles";
 import VehicleCard from "../components/vehicle/VehicleCard";
+import Footer from "../components/common/Footer";
 
 const Home = () => {
     const [featured, setFeatured] = useState([]);
@@ -263,6 +264,9 @@ const Home = () => {
 					</div>
 				</div>
 			</section>
+
+			{/* Footer */}
+			<Footer />
 		</div>
     );
 };

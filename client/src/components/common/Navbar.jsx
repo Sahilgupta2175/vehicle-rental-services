@@ -3,14 +3,9 @@ import useAuthStore from "../../store/authStore";
 import React from 'react';
 
 const Navbar = () => {
-    const { user, isAuthenticated, logout, init } = useAuthStore();
+    const { user, isAuthenticated, logout } = useAuthStore();
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-
-    // Ensure auth state is initialized
-    React.useEffect(() => {
-        init();
-    }, [init]);
 
     const handleLogout = () => {
         logout();
