@@ -67,96 +67,243 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-            <div className="grid sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                    <label>Name</label>
-                    <input
-                        name="name"
-                        required
-                        value={form.name}
-                        onChange={handleChange}
-                    />
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3 pb-4 border-b border-slate-700">
+                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
                 </div>
-                <div className="space-y-1">
-                    <label>Type</label>
-                    <select name="type" value={form.type} onChange={handleChange}>
-                        <option value="car">Car</option>
-                        <option value="bike">Bike</option>
-                        <option value="scooter">Scooter</option>
-                    </select>
+                <div>
+                    <h3 className="text-xl font-bold text-slate-100">
+                        {mode === "edit" ? "Edit Vehicle" : "New Vehicle"}
+                    </h3>
+                    <p className="text-sm text-slate-400">
+                        {mode === "edit" ? "Update your vehicle information" : "Add a new vehicle to your fleet"}
+                    </p>
                 </div>
-                <div className="space-y-1">
-                    <label>Price per hour (₹)</label>
-                    <input
-                        type="number"
-                        name="pricePerHour"
-                        min="0"
-                        required
-                        value={form.pricePerHour}
-                        onChange={handleChange}
-                    />
+            </div>
+
+            {/* Form Grid */}
+            <div className="grid sm:grid-cols-2 gap-6">
+                {/* Vehicle Name */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Vehicle Name
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
+                    <div className="relative">
+                        <input
+                            name="name"
+                            required
+                            value={form.name}
+                            onChange={handleChange}
+                            placeholder="e.g., Honda City 2024"
+                            className="w-full"
+                        />
+                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
                 </div>
-                <div className="space-y-1">
-                    <label>City</label>
-                    <input
-                        name="city"
-                        required
-                        value={form.city}
-                        onChange={handleChange}
-                    />
+
+                {/* Vehicle Type */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Type
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
+                    <div className="relative">
+                        <select 
+                            name="type" 
+                            value={form.type} 
+                            onChange={handleChange}
+                            className="w-full appearance-none"
+                        >
+                            <option value="car">🚗 Car</option>
+                            <option value="bike">🏍️ Bike</option>
+                            <option value="scooter">🛵 Scooter</option>
+                        </select>
+                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
                 </div>
-                <div className="space-y-1">
-                    <label>State</label>
+
+                {/* Price */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Price per Hour
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 font-semibold">₹</span>
+                        <input
+                            type="number"
+                            name="pricePerHour"
+                            min="0"
+                            required
+                            value={form.pricePerHour}
+                            onChange={handleChange}
+                            placeholder="100"
+                            className="w-full pl-8"
+                        />
+                    </div>
+                </div>
+
+                {/* City */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        City
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
+                    <div className="relative">
+                        <input
+                            name="city"
+                            required
+                            value={form.city}
+                            onChange={handleChange}
+                            placeholder="e.g., Mumbai"
+                            className="w-full"
+                        />
+                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+                {/* State */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        State
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
                     <input
                         name="state"
                         required
                         value={form.state}
                         onChange={handleChange}
+                        placeholder="e.g., Maharashtra"
+                        className="w-full"
                     />
                 </div>
-                <div className="space-y-1 sm:col-span-2">
-                    <label>Address</label>
+
+                {/* Address - Full Width */}
+                <div className="space-y-2 sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Address
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
                     <input
                         name="address"
                         required
                         value={form.address}
                         onChange={handleChange}
+                        placeholder="Street address or landmark"
+                        className="w-full"
                     />
                 </div>
             </div>
 
-            <div className="space-y-1">
-                <label>Description</label>
+            {/* Description */}
+            <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-300">
+                    Description
+                </label>
                 <textarea
                     name="description"
-                    rows={3}
+                    rows={4}
                     value={form.description}
                     onChange={handleChange}
+                    placeholder="Tell customers about your vehicle's features, condition, and any special requirements..."
+                    className="w-full resize-none"
                 />
-            </div>
-
-            <div className="space-y-1">
-                <label>Images (max 6, 10MB each)</label>
-                <input type="file" multiple accept="image/*" onChange={handleFileChange} />
-                <p className="text-[11px] text-slate-500">
-                    Existing images will remain if you don&apos;t upload new ones.
+                <p className="text-xs text-slate-500 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    Optional but recommended for better bookings
                 </p>
             </div>
 
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2 rounded-xl bg-primary-soft hover:bg-primary-dark text-sm font-medium disabled:opacity-60"
-            >
-                {loading
-                ? mode === "edit"
-                    ? "Updating..."
-                    : "Creating..."
-                : mode === "edit"
-                ? "Update vehicle"
-                : "Create vehicle"}
-            </button>
+            {/* Images Upload */}
+            <div className="space-y-3">
+                <label className="block text-sm font-medium text-slate-300">
+                    Vehicle Images
+                </label>
+                <div className="relative">
+                    <input 
+                        type="file" 
+                        multiple 
+                        accept="image/*" 
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="vehicle-images"
+                    />
+                    <label 
+                        htmlFor="vehicle-images"
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-slate-800/50 transition-all group"
+                    >
+                        <svg className="w-10 h-10 text-slate-500 group-hover:text-blue-500 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-sm text-slate-400 group-hover:text-blue-400 transition-colors">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1">
+                            Max 6 images, 10MB each (PNG, JPG, JPEG)
+                        </p>
+                    </label>
+                </div>
+                
+                {images.length > 0 && (
+                    <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <svg className="w-5 h-5 text-blue-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm text-blue-300">
+                            {images.length} image{images.length > 1 ? 's' : ''} selected
+                        </span>
+                    </div>
+                )}
+
+                {mode === "edit" && (
+                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                        Existing images will remain if you don't upload new ones
+                    </p>
+                )}
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-base shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
+                >
+                    {loading ? (
+                        <>
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {mode === "edit" ? "Updating..." : "Creating..."}
+                        </>
+                    ) : (
+                        <>
+                            {mode === "edit" ? "Update Vehicle" : "Create Vehicle"}
+                            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </>
+                    )}
+                </button>
+            </div>
         </form>
     );
 };
