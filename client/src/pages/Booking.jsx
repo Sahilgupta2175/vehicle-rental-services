@@ -213,12 +213,15 @@ const Booking = () => {
                                                 onChange={setStart}
                                                 showTimeSelect
                                                 timeFormat="HH:mm"
-                                                timeIntervals={60}
+                                                timeIntervals={15}
                                                 dateFormat="dd MMM yyyy, HH:mm"
                                                 minDate={new Date()}
                                                 placeholderText="Select start date and time"
                                                 className="w-full px-5 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-white text-base placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none transition-all hover:bg-slate-800 cursor-pointer"
                                                 calendarClassName="booking-calendar"
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                dropdownMode="select"
                                             />
                                             <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -237,12 +240,15 @@ const Booking = () => {
                                                 onChange={setEnd}
                                                 showTimeSelect
                                                 timeFormat="HH:mm"
-                                                timeIntervals={60}
+                                                timeIntervals={15}
                                                 dateFormat="dd MMM yyyy, HH:mm"
                                                 minDate={start || new Date()}
                                                 placeholderText="Select end date and time"
                                                 className="w-full px-5 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-white text-base placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30 focus:outline-none transition-all hover:bg-slate-800 cursor-pointer"
                                                 calendarClassName="booking-calendar"
+                                                showMonthDropdown
+                                                showYearDropdown
+                                                dropdownMode="select"
                                             />
                                             <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
