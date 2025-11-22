@@ -27,14 +27,14 @@
   background: transparent;
   float: none;
   flex: 1 1 auto;
-  padding-bottom: 0;
+  padding-bottom: 16px;
 }
 
 /* Month/Year Dropdowns at Top */
 .react-datepicker__header {
   background: rgb(13 22 38);
   border-bottom: 1px solid rgba(94, 234, 212, 0.08);
-  padding: 14px 22px 18px;
+  padding: 22px 22px 18px;
   border-radius: 0;
   position: relative;
   box-shadow: inset 0 -1px 0 rgba(148, 163, 184, 0.08);
@@ -246,16 +246,6 @@
   flex-direction: column;
   border-radius: 0 18px 18px 0;
   margin: 0 !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.react-datepicker__time-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgb(11 18 33);
-  z-index: 0;
 }
 
 .react-datepicker__time {
@@ -264,8 +254,6 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  position: relative;
-  z-index: 1;
 }
 
 .react-datepicker__time-box {
@@ -274,8 +262,6 @@
   overflow-y: auto;
   height: 320px !important;
   background: rgb(11 18 33) !important;
-  position: relative;
-  z-index: 1;
 }
 
 /* Time Header with Dropdown Style */
@@ -283,8 +269,6 @@
   padding: 22px 18px 18px;
   background: rgb(13 22 38) !important;
   border-bottom: 1px solid rgba(94, 234, 212, 0.08);
-  position: relative;
-  z-index: 1;
 }
 
 .react-datepicker__header--time .react-datepicker-time__header {
@@ -319,8 +303,6 @@
   height: 320px !important;
   overflow-y: auto !important;
   background: rgb(11 18 33) !important;
-  position: relative;
-  z-index: 1;
 }
 
 .react-datepicker__time-list::-webkit-scrollbar {
