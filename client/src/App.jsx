@@ -4,7 +4,7 @@ import PageContainer from "./components/common/PageContainer";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RoleRoute from "./components/common/RoleRoute";
 
-// import Home from "./pages/Home";
+import Home from "./pages/Home";
 // import Login from "./pages/Login";
 // import Register from "./pages/Register";
 // import ForgotPassword from "./pages/ForgotPassword";
