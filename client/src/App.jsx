@@ -19,74 +19,74 @@ import { Routes, Route, Navigate } from "react-router-dom";
 // import AdminDashboard from "./pages/dashboards/AdminDashboard";
 
 function App() {
-  return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
-      <Navbar />
-      <PageContainer>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Home />} />
-          <Route path="/vehicles" element={<VehicleList />} />
-          <Route path="/vehicles/:id" element={<VehicleDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+    return (
+        <div className="min-h-screen flex flex-col bg-slate-950 text-slate-50">
+            <Navbar />
+            <PageContainer>
+                <Routes>
+                    {/* Public */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/vehicles" element={<VehicleList />} />
+                    <Route path="/vehicles/:id" element={<VehicleDetail />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          {/* Protected: any logged-in user */}
-          <Route
-            path="/booking/:vehicleId"
-            element={
-              <ProtectedRoute>
-                <Booking />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/payment/:bookingId"
-            element={
-              <ProtectedRoute>
-                <Payment />
-              </ProtectedRoute>
-            }
-          />
+                    {/* Protected: any logged-in user */}
+                    <Route
+                        path="/booking/:vehicleId"
+                        element={
+                        <ProtectedRoute>
+                            <Booking />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/payment/:bookingId"
+                        element={
+                        <ProtectedRoute>
+                            <Payment />
+                        </ProtectedRoute>
+                        }
+                    />
 
-          {/* User Dashboard */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
-          />
+                    {/* User Dashboard */}
+                    <Route
+                        path="/dashboard"
+                        element={
+                        <ProtectedRoute>
+                            <UserDashboard />
+                        </ProtectedRoute>
+                        }
+                    />
 
-          {/* Vendor Dashboard */}
-          <Route
-            path="/vendor"
-            element={
-              <RoleRoute allowedRoles={["vendor", "admin"]}>
-                <VendorDashboard />
-              </RoleRoute>
-            }
-          />
+                    {/* Vendor Dashboard */}
+                    <Route
+                        path="/vendor"
+                        element={
+                        <RoleRoute allowedRoles={["vendor", "admin"]}>
+                            <VendorDashboard />
+                        </RoleRoute>
+                        }
+                    />
 
-          {/* Admin Dashboard */}
-          <Route
-            path="/admin"
-            element={
-              <RoleRoute allowedRoles={["admin"]}>
-                <AdminDashboard />
-              </RoleRoute>
-            }
-          />
+                    {/* Admin Dashboard */}
+                    <Route
+                        path="/admin"
+                        element={
+                        <RoleRoute allowedRoles={["admin"]}>
+                            <AdminDashboard />
+                        </RoleRoute>
+                        }
+                    />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </PageContainer>
-    </div>
-  );
+                    {/* Fallback */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </PageContainer>
+        </div>
+    );
 }
 
 export default App;

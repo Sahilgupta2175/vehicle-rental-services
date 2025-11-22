@@ -7,10 +7,10 @@ import "./index.css";
 import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-      <ToastContainer position="top-right" theme="dark" />
-    </BrowserRouter>
-  </React.StrictMode>
+    <React.StrictMode>
+        <BrowserRouter>
+            <App />
+            <ToastContainer position="top-right" theme="dark" />
+        </BrowserRouter>
+    </React.StrictMode>
 );
