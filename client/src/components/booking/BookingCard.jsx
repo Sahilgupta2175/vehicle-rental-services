@@ -122,12 +122,14 @@ const BookingCard = ({ booking, actions }) => {
                             </svg>
                             <h3 className="text-base font-bold text-white truncate">{booking.vehicle?.name || "Vehicle"}</h3>
                         </div>
-                        <p className="text-xs text-slate-400 flex items-center gap-1.5">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            <span>{booking.user?.name || "N/A"}</span>
-                        </p>
+                        {booking.user?.name && (
+                            <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>{booking.user.name}</span>
+                            </p>
+                        )}
                     </div>
 
                     {/* Status Badge */}
@@ -187,7 +189,7 @@ const BookingCard = ({ booking, actions }) => {
                         </div>
                         <div>
                             <p className="text-xs text-slate-400">Total Amount</p>
-                            <p className="text-lg font-bold text-white">₹{booking.totalAmount?.toLocaleString() || "N/A"}</p>
+                            <p className="text-lg font-bold text-white">₹{booking.totalAmount?.toLocaleString() || 0}</p>
                         </div>
                     </div>
 
