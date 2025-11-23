@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
+    const [roleFilter, setRoleFilter] = useState('all');
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const navigate = useNavigate();
@@ -24,10 +26,24 @@ const AdminDashboard = () => {
             const { data } = await adminApi.users();
             // Filter out admin users from the list
             const nonAdminUsers = (data.users || data).filter(u => u.role !== 'admin');
-            setUsers(nonAdminUsers);
+            setAllUsers(nonAdminUsers);
+            filterUsers(nonAdminUsers, roleFilter);
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const filterUsers = (userList, filter) => {
+        if (filter === 'all') {
+            setUsers(userList);
+        } else {
+            setUsers(userList.filter(u => u.role === filter));
+        }
+    };
+
+    const handleRoleFilterChange = (filter) => {
+        setRoleFilter(filter);
+        filterUsers(allUsers, filter);
     };
 
     useEffect(() => {
@@ -118,15 +134,23 @@ const AdminDashboard = () => {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+                    <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                         {[
                             { 
                                 label: "Total Users", 
                                 value: stats?.usersCount ?? "--", 
-                                icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z",
+                                icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z",
                                 gradient: "from-blue-500/20 to-blue-600/20", 
                                 border: "border-blue-500/30", 
                                 text: "text-blue-400" 
+                            },
+                            { 
+                                label: "Total Vendors", 
+                                value: stats?.vendorsCount ?? "--", 
+                                icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4",
+                                gradient: "from-amber-500/20 to-orange-500/20", 
+                                border: "border-amber-500/30", 
+                                text: "text-amber-400" 
                             },
                             { 
                                 label: "Total Bookings", 
@@ -173,6 +197,38 @@ const AdminDashboard = () => {
                                 <h2 className="text-xl font-bold text-white">Users & Vendors</h2>
                                 <p className="text-sm text-slate-400">Manage vendors and their approval</p>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => handleRoleFilterChange('all')}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                                    roleFilter === 'all'
+                                        ? 'bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                }`}
+                            >
+                                All ({allUsers.length})
+                            </button>
+                            <button
+                                onClick={() => handleRoleFilterChange('user')}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                                    roleFilter === 'user'
+                                        ? 'bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                }`}
+                            >
+                                Users ({allUsers.filter(u => u.role === 'user').length})
+                            </button>
+                            <button
+                                onClick={() => handleRoleFilterChange('vendor')}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                                    roleFilter === 'vendor'
+                                        ? 'bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                }`}
+                            >
+                                Vendors ({allUsers.filter(u => u.role === 'vendor').length})
+                            </button>
                         </div>
                     </div>
 

@@ -4,12 +4,22 @@ const Booking = require('../models/Booking');
 
 exports.getStats = async (req, res, next) => {
     try {
-        const users = await User.countDocuments();
-        const vendors = await User.countDocuments({ role: 'vendor' });
-        const vehicles = await Vehicle.countDocuments();
-        const bookings = await Booking.countDocuments();
+        const usersCount = await User.countDocuments({ role: 'user' });
+        const vendorsCount = await User.countDocuments({ role: 'vendor' });
+        const bookingsCount = await Booking.countDocuments();
+        
+        // Calculate total revenue from all bookings
+        const revenueData = await Booking.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$totalAmount' }
+                }
+            }
+        ]);
+        const totalRevenue = revenueData.length > 0 ? revenueData[0].totalRevenue : 0;
 
-        res.json({ users, vendors, vehicles, bookings });
+        res.json({ usersCount, vendorsCount, bookingsCount, totalRevenue });
     } catch (err) {
         next(err);
     }
