@@ -83,13 +83,16 @@ exports.stripeWebhook = async (req, res) => {
             const userId = pi.metadata?.userId;
             
             if (bookingId) {
-                const booking = await Booking.findById(bookingId);
+                const booking = await Booking.findById(bookingId).populate(['vehicle', 'user', 'vendor']);
                 if (booking) {
                     booking.payment = booking.payment || {};
                     booking.payment.status = 'paid';
                     booking.payment.providerPaymentId = pi.id;
-                    booking.status = 'approved';
+                    booking.status = 'paid';
                     await booking.save();
+
+                    // Mark vehicle as unavailable during booking period
+                    await Vehicle.findByIdAndUpdate(booking.vehicle._id, { available: false });
 
                     // Update transaction to completed
                     await Transaction.findOneAndUpdate(
@@ -98,29 +101,97 @@ exports.stripeWebhook = async (req, res) => {
                         { new: true }
                     );
 
-                    // Send notifications
-                    const user = await User.findById(userId || booking.user);
-                    if (user) {
-                        const { sendMail } = require('../services/email.service');
-                        const { sendSMS } = require('../services/sms.service');
-                        
-                        sendMail({
-                            to: user.email,
-                            subject: 'Payment Successful',
-                            html: `<h2>Payment Confirmed!</h2><p>Your payment of ₹${booking.totalAmount} has been received. Booking ID: ${booking._id}</p>`
-                        }).catch(console.warn);
+                    // Send detailed booking confirmation email to user
+                    const { sendMail } = require('../services/email.service');
+                    const startDate = new Date(booking.start).toLocaleString('en-US', { 
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    });
+                    const endDate = new Date(booking.end).toLocaleString('en-US', { 
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    });
+                    
+                    sendMail({
+                        to: booking.user.email,
+                        subject: 'Booking Confirmed - Payment Successful',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                                    <h2 style="color: #4CAF50;">🎉 Booking Confirmed!</h2>
+                                    <p>Dear ${booking.user.name},</p>
+                                    <p>Your payment has been successfully processed via Stripe. Here are your booking details:</p>
+                                    
+                                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                                        <h3 style="margin-top: 0;">Booking Details</h3>
+                                        <p><strong>Booking ID:</strong> ${booking._id}</p>
+                                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                                        <p><strong>Type:</strong> ${booking.vehicle.type}</p>
+                                        <p><strong>Start:</strong> ${startDate}</p>
+                                        <p><strong>End:</strong> ${endDate}</p>
+                                        <p><strong>Total Amount:</strong> ₹${booking.totalAmount}</p>
+                                        <p><strong>Payment Status:</strong> <span style="color: #4CAF50;">PAID</span></p>
+                                    </div>
 
-                        if (user.phone) {
-                            sendSMS({
-                                to: user.phone,
-                                body: `Payment of ₹${booking.totalAmount} received for booking #${booking._id}. Thank you!`
-                            }).catch(console.warn);
-                        }
-                    }
+                                    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                        <h4 style="margin-top: 0;">Vendor Contact</h4>
+                                        <p><strong>Name:</strong> ${booking.vendor.name}</p>
+                                        <p><strong>Email:</strong> ${booking.vendor.email}</p>
+                                        ${booking.vendor.phone ? `<p><strong>Phone:</strong> ${booking.vendor.phone}</p>` : ''}
+                                    </div>
+
+                                    <p style="color: #666;">Please arrive on time and bring a valid ID. Have a great experience!</p>
+                                    <p style="color: #999; font-size: 12px; margin-top: 30px;">This is an automated email. Please do not reply.</p>
+                                </div>
+                            </div>
+                        `
+                    }).catch(console.warn);
+
+                    // Send notification to vendor
+                    sendMail({
+                        to: booking.vendor.email,
+                        subject: 'New Booking Received - Payment Confirmed',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                                    <h2 style="color: #4CAF50;">💰 Payment Received!</h2>
+                                    <p>Dear ${booking.vendor.name},</p>
+                                    <p>You have received a new booking with confirmed payment via Stripe:</p>
+                                    
+                                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                                        <h3 style="margin-top: 0;">Booking Details</h3>
+                                        <p><strong>Booking ID:</strong> ${booking._id}</p>
+                                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                                        <p><strong>Customer:</strong> ${booking.user.name}</p>
+                                        <p><strong>Customer Email:</strong> ${booking.user.email}</p>
+                                        ${booking.user.phone ? `<p><strong>Customer Phone:</strong> ${booking.user.phone}</p>` : ''}
+                                        <p><strong>Start:</strong> ${startDate}</p>
+                                        <p><strong>End:</strong> ${endDate}</p>
+                                        <p><strong>Amount Received:</strong> ₹${booking.totalAmount}</p>
+                                    </div>
+
+                                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                        <p style="margin: 0;">⚠️ Your vehicle <strong>${booking.vehicle.name}</strong> is now marked as unavailable until the booking ends.</p>
+                                    </div>
+
+                                    <p style="color: #666;">Please ensure the vehicle is ready for pickup at the scheduled time.</p>
+                                </div>
+                            </div>
+                        `
+                    }).catch(console.warn);
 
                     // Notify via Socket.IO
                     if (global.io) {
-                        global.io.to(`user:${booking.user}`).emit('payment:success', { bookingId, amount: booking.totalAmount });
+                        global.io.to(`user:${String(booking.user._id)}`).emit('payment:success', { 
+                            bookingId: booking._id, 
+                            amount: booking.totalAmount,
+                            provider: 'stripe'
+                        });
+                        
+                        global.io.to(`vendor:${String(booking.vendor._id)}`).emit('booking:paid', {
+                            bookingId: booking._id,
+                            vehicleName: booking.vehicle.name,
+                            amount: booking.totalAmount,
+                            customerName: booking.user.name
+                        });
                     }
                 }
             }
@@ -194,12 +265,15 @@ exports.razorpayWebhook = async (req, res, next) => {
             const payload = body.payload.payment.entity;
             const bookingId = payload?.notes?.bookingId;
             if (bookingId) {
-                const booking = await Booking.findById(bookingId).populate('user');
+                const booking = await Booking.findById(bookingId).populate(['vehicle', 'user', 'vendor']);
                 if (booking) {
                     booking.payment.status = 'paid';
                     booking.payment.providerPaymentId = payload.id;
-                    booking.status = 'approved';
+                    booking.status = 'paid';
                     await booking.save();
+
+                    // Mark vehicle as unavailable during booking period
+                    await Vehicle.findByIdAndUpdate(booking.vehicle._id, { available: false });
 
                     // Update transaction
                     await Transaction.findOneAndUpdate(
@@ -208,29 +282,97 @@ exports.razorpayWebhook = async (req, res, next) => {
                         { new: true }
                     );
 
-                    // Send notifications
-                    const user = await User.findById(booking.user);
-                    if (user) {
-                        const { sendMail } = require('../services/email.service');
-                        const { sendSMS } = require('../services/sms.service');
-                        
-                        sendMail({
-                            to: user.email,
-                            subject: 'Payment Successful - Razorpay',
-                            html: `<h2>Payment Confirmed!</h2><p>Your payment of ₹${booking.totalAmount} has been received via Razorpay. Booking ID: ${booking._id}</p>`
-                        }).catch(console.warn);
+                    // Send detailed booking confirmation email to user
+                    const { sendMail } = require('../services/email.service');
+                    const startDate = new Date(booking.start).toLocaleString('en-US', { 
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    });
+                    const endDate = new Date(booking.end).toLocaleString('en-US', { 
+                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    });
+                    
+                    sendMail({
+                        to: booking.user.email,
+                        subject: 'Booking Confirmed - Payment Successful',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                                    <h2 style="color: #4CAF50;">🎉 Booking Confirmed!</h2>
+                                    <p>Dear ${booking.user.name},</p>
+                                    <p>Your payment has been successfully processed. Here are your booking details:</p>
+                                    
+                                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                                        <h3 style="margin-top: 0;">Booking Details</h3>
+                                        <p><strong>Booking ID:</strong> ${booking._id}</p>
+                                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                                        <p><strong>Type:</strong> ${booking.vehicle.type}</p>
+                                        <p><strong>Start:</strong> ${startDate}</p>
+                                        <p><strong>End:</strong> ${endDate}</p>
+                                        <p><strong>Total Amount:</strong> ₹${booking.totalAmount}</p>
+                                        <p><strong>Payment Status:</strong> <span style="color: #4CAF50;">PAID</span></p>
+                                    </div>
 
-                        if (user.phone) {
-                            sendSMS({
-                                to: user.phone,
-                                body: `Payment of ₹${booking.totalAmount} received for booking #${booking._id}. Thank you!`
-                            }).catch(console.warn);
-                        }
-                    }
+                                    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                        <h4 style="margin-top: 0;">Vendor Contact</h4>
+                                        <p><strong>Name:</strong> ${booking.vendor.name}</p>
+                                        <p><strong>Email:</strong> ${booking.vendor.email}</p>
+                                        ${booking.vendor.phone ? `<p><strong>Phone:</strong> ${booking.vendor.phone}</p>` : ''}
+                                    </div>
+
+                                    <p style="color: #666;">Please arrive on time and bring a valid ID. Have a great experience!</p>
+                                    <p style="color: #999; font-size: 12px; margin-top: 30px;">This is an automated email. Please do not reply.</p>
+                                </div>
+                            </div>
+                        `
+                    }).catch(console.warn);
+
+                    // Send notification to vendor
+                    sendMail({
+                        to: booking.vendor.email,
+                        subject: 'New Booking Received - Payment Confirmed',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                                    <h2 style="color: #4CAF50;">💰 Payment Received!</h2>
+                                    <p>Dear ${booking.vendor.name},</p>
+                                    <p>You have received a new booking with confirmed payment:</p>
+                                    
+                                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                                        <h3 style="margin-top: 0;">Booking Details</h3>
+                                        <p><strong>Booking ID:</strong> ${booking._id}</p>
+                                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                                        <p><strong>Customer:</strong> ${booking.user.name}</p>
+                                        <p><strong>Customer Email:</strong> ${booking.user.email}</p>
+                                        ${booking.user.phone ? `<p><strong>Customer Phone:</strong> ${booking.user.phone}</p>` : ''}
+                                        <p><strong>Start:</strong> ${startDate}</p>
+                                        <p><strong>End:</strong> ${endDate}</p>
+                                        <p><strong>Amount Received:</strong> ₹${booking.totalAmount}</p>
+                                    </div>
+
+                                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                        <p style="margin: 0;">⚠️ Your vehicle <strong>${booking.vehicle.name}</strong> is now marked as unavailable until the booking ends.</p>
+                                    </div>
+
+                                    <p style="color: #666;">Please ensure the vehicle is ready for pickup at the scheduled time.</p>
+                                </div>
+                            </div>
+                        `
+                    }).catch(console.warn);
 
                     // Notify via Socket.IO
                     if (global.io) {
-                        global.io.to(`user:${booking.user}`).emit('payment:success', { bookingId, amount: booking.totalAmount, provider: 'razorpay' });
+                        global.io.to(`user:${String(booking.user._id)}`).emit('payment:success', { 
+                            bookingId: booking._id,
+                            amount: booking.totalAmount,
+                            provider: 'razorpay'
+                        });
+                        
+                        global.io.to(`vendor:${String(booking.vendor._id)}`).emit('booking:paid', {
+                            bookingId: booking._id,
+                            vehicleName: booking.vehicle.name,
+                            amount: booking.totalAmount,
+                            customerName: booking.user.name
+                        });
                     }
                 }
             }
