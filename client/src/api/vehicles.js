@@ -14,4 +14,6 @@ export const vehicleApi = {
         }),
 
     remove: (id) => api.delete(`/vehicles/${id}`),
+
+    toggleAvailability: (id, available) => api.put(`/vehicles/${id}`, { available }),
 };

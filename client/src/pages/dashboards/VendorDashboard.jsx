@@ -82,6 +82,17 @@ const VendorDashboard = () => {
         loadVehicles();
     };
 
+    const handleToggleAvailability = async (vehicleId, currentAvailability) => {
+        try {
+            await vehicleApi.toggleAvailability(vehicleId, !currentAvailability);
+            toast.success(`Vehicle marked as ${!currentAvailability ? 'available' : 'unavailable'}`);
+            loadVehicles();
+        // eslint-disable-next-line no-unused-vars
+        } catch (err) {
+            toast.error("Failed to update vehicle availability");
+        }
+    };
+
     const closeModal = () => {
         setShowModal(false);
         setSelectedVehicle(null);
@@ -214,6 +225,17 @@ const VendorDashboard = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleToggleAvailability(v._id, v.available)}
+                                                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                                                    v.available
+                                                        ? 'bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 hover:border-red-600'
+                                                        : 'bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/30 hover:border-emerald-600'
+                                                }`}
+                                                title={v.available ? 'Mark as unavailable' : 'Mark as available'}
+                                            >
+                                                {v.available ? '✗ Unavailable' : '✓ Available'}
+                                            </button>
                                             <button
                                                 onClick={() => handleEdit(v)}
                                                 className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-blue-500/50 font-medium text-sm transition-all"
