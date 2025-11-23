@@ -36,7 +36,7 @@ const useAuthStore = create((set, get) => ({
             const { data } = await authApi.login(credentials);
             localStorage.setItem("vr_token", data.token);
             set({ user: data.user, isAuthenticated: true, loading: false });
-            return { success: true };
+            return { success: true, user: data.user };
         } catch (err) {
             set({ loading: false });
             const msg = err.response?.data?.error || "Login failed";

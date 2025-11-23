@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import useAuthStore from "../store/authStore";
 
 const Register = () => {
-    const { register, loading, isAuthenticated, initialized } = useAuthStore();
+    const { register, loading, isAuthenticated, initialized, user } = useAuthStore();
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -13,12 +13,19 @@ const Register = () => {
     });
     const navigate = useNavigate();
 
+    // Determine redirect path based on user role
+    const getRedirectPath = (userRole) => {
+        if (userRole === "vendor") return "/vendor";
+        if (userRole === "admin") return "/admin";
+        return "/dashboard";
+    };
+
     // Redirect if already authenticated
     useEffect(() => {
-        if (initialized && isAuthenticated) {
-            navigate("/dashboard", { replace: true });
+        if (initialized && isAuthenticated && user) {
+            navigate(getRedirectPath(user.role), { replace: true });
         }
-    }, [initialized, isAuthenticated, navigate]);
+    }, [initialized, isAuthenticated, user, navigate]);
 
     const handleChange = (e) => {
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -33,7 +40,9 @@ const Register = () => {
         } 
         else {
             toast.success("Account created successfully");
-            navigate("/dashboard");
+            // Redirect based on selected role
+            const redirectPath = getRedirectPath(form.role);
+            navigate(redirectPath);
         }
     };
 
@@ -42,7 +51,7 @@ const Register = () => {
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8 space-y-2">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/40">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/40">
                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
                         </svg>

@@ -4,19 +4,26 @@ import { toast } from "react-toastify";
 import useAuthStore from "../store/authStore";
 
 const Login = () => {
-    const { login, loading, isAuthenticated, initialized } = useAuthStore();
+    const { login, loading, isAuthenticated, initialized, user } = useAuthStore();
     const [form, setForm] = useState({ email: "", password: "" });
     const navigate = useNavigate();
     const location = useLocation();
 
-    const from = location.state?.from?.pathname || "/dashboard";
+    // Determine redirect path based on user role
+    const getRedirectPath = (userRole) => {
+        if (userRole === "vendor") return "/vendor";
+        if (userRole === "admin") return "/admin";
+        return "/dashboard";
+    };
+
+    const from = location.state?.from?.pathname || (user ? getRedirectPath(user.role) : "/dashboard");
 
     // Redirect if already authenticated
     useEffect(() => {
-        if (initialized && isAuthenticated) {
-            navigate("/dashboard", { replace: true });
+        if (initialized && isAuthenticated && user) {
+            navigate(getRedirectPath(user.role), { replace: true });
         }
-    }, [initialized, isAuthenticated, navigate]);
+    }, [initialized, isAuthenticated, user, navigate]);
 
     const handleChange = (e) => {
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -26,10 +33,12 @@ const Login = () => {
         e.preventDefault();
         const res = await login(form);
         if (!res.success) {
-        toast.error(res.message);
+            toast.error(res.message);
         } else {
-        toast.success("Logged in successfully");
-        navigate(from, { replace: true });
+            toast.success("Logged in successfully");
+            // Redirect based on user role
+            const redirectPath = res.user ? getRedirectPath(res.user.role) : from;
+            navigate(redirectPath, { replace: true });
         }
     };
 
