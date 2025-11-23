@@ -41,3 +41,27 @@ exports.approveVendor = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.removeVendor = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+
+        if (user.role !== 'vendor') {
+            return res.status(400).json({ error: 'User is not a vendor' });
+        }
+
+        // Delete all vehicles owned by this vendor
+        await Vehicle.deleteMany({ owner: user._id });
+
+        // Delete the vendor account
+        await User.findByIdAndDelete(req.params.id);
+        
+        res.json({ message: 'Vendor and their vehicles removed successfully' });
+    } catch (err) {
+        next(err);
+    }
+};
