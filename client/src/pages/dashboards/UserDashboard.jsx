@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { bookingApi } from "../../api/bookings";
+import BookingCard from "../../components/booking/BookingCard";
 import useSocket from "../../hooks/useSocket";
+import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
     const [bookings, setBookings] = useState([]);
+    const [filter, setFilter] = useState("all");
+    const navigate = useNavigate();
     useSocket(); // enable realtime toasts
 
     useEffect(() => {
@@ -19,38 +23,160 @@ const UserDashboard = () => {
         load();
     }, []);
 
+    const filteredBookings = bookings.filter(b => {
+        if (filter === "all") return true;
+        return b.status === filter;
+    });
+
+    const getStats = () => {
+        return {
+            total: bookings.length,
+            pending: bookings.filter(b => b.status === "pending").length,
+            approved: bookings.filter(b => b.status === "approved").length,
+            paid: bookings.filter(b => b.status === "paid").length,
+            completed: bookings.filter(b => b.status === "completed").length,
+        };
+    };
+
+    const stats = getStats();
+
     return (
-        <div className="space-y-4">
-            <h1 className="text-lg font-semibold">My bookings</h1>
-            <div className="grid gap-3">
-                {bookings.map((b) => (
-                    <div
-                        key={b._id}
-                        className="bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs flex justify-between"
-                    >
-                        <div>
-                            <p className="font-medium">{b.vehicle?.name}</p>
-                            <p className="text-slate-400">
-                                {new Date(b.start).toLocaleString()} -{" "}
-                                {new Date(b.end).toLocaleString()}
-                            </p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[11px] text-slate-400">Status</p>
-                            <p className="text-[11px] uppercase text-primary-soft">
-                                {b.status}
-                            </p>
-                            <p className="text-[11px] mt-1">
-                                ₹{b.totalAmount?.toFixed(0) || "N/A"}
-                            </p>
-                        </div>
+        <div className="min-h-screen bg-slate-950">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+                {/* Header Section */}
+                <div className="relative overflow-hidden bg-linear-to-br from-slate-900 via-slate-900 to-blue-900/30 border border-slate-700/50 rounded-3xl p-8 shadow-2xl">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-5">
+                        <div className="absolute inset-0" style={{
+                            backgroundImage: 'radial-gradient(circle at 2px 2px, rgb(148 163 184) 1px, transparent 0)',
+                            backgroundSize: '48px 48px'
+                        }}></div>
                     </div>
-                ))}
-                {bookings.length === 0 && (
-                    <p className="text-xs text-slate-400">
-                        No bookings yet. Browse vehicles to get started.
-                    </p>
-                )}
+
+                    <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                        <div className="flex items-start gap-5">
+                            <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-blue-500 via-blue-600 to-cyan-500 flex items-center justify-center shadow-2xl shadow-blue-500/40 shrink-0">
+                                <svg className="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-bold bg-linear-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent mb-2">
+                                    My Bookings
+                                </h1>
+                                <p className="text-slate-400 text-base">Track and manage all your vehicle reservations in one place</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => navigate("/vehicles")}
+                            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Book New Vehicle
+                        </button>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="relative grid grid-cols-2 sm:grid-cols-5 gap-4 mt-8">
+                        {[
+                            { label: "Total", value: stats.total, icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", color: "blue", gradient: "from-blue-500/20 to-blue-600/20", border: "border-blue-500/30", text: "text-blue-400" },
+                            { label: "Pending", value: stats.pending, icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "amber", gradient: "from-amber-500/20 to-orange-500/20", border: "border-amber-500/30", text: "text-amber-400" },
+                            { label: "Approved", value: stats.approved, icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", color: "emerald", gradient: "from-emerald-500/20 to-green-500/20", border: "border-emerald-500/30", text: "text-emerald-400" },
+                            { label: "Paid", value: stats.paid, icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z", color: "cyan", gradient: "from-cyan-500/20 to-blue-500/20", border: "border-cyan-500/30", text: "text-cyan-400" },
+                            { label: "Completed", value: stats.completed, icon: "M5 13l4 4L19 7", color: "green", gradient: "from-green-500/20 to-emerald-500/20", border: "border-green-500/30", text: "text-green-400" },
+                        ].map((stat) => (
+                            <div key={stat.label} className={`bg-linear-to-br ${stat.gradient} border ${stat.border} rounded-2xl p-5 hover:scale-105 transition-all duration-300 backdrop-blur-sm`}>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className={`w-10 h-10 rounded-xl bg-slate-800/50 flex items-center justify-center`}>
+                                        <svg className={`w-5 h-5 ${stat.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm text-slate-400 font-medium">{stat.label}</p>
+                                </div>
+                                <p className={`text-3xl font-bold ${stat.text}`}>{stat.value}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-2 border border-slate-800 shadow-xl">
+                    <div className="flex flex-wrap gap-2">
+                        {[
+                            { value: "all", label: "All Bookings", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
+                            { value: "pending", label: "Pending", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+                            { value: "approved", label: "Approved", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
+                            { value: "paid", label: "Paid", icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" },
+                            { value: "completed", label: "Completed", icon: "M5 13l4 4L19 7" },
+                        ].map((tab) => (
+                            <button
+                                key={tab.value}
+                                onClick={() => setFilter(tab.value)}
+                                className={`flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                                    filter === tab.value
+                                        ? "bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                                        : "text-slate-400 hover:text-white hover:bg-slate-800/70"
+                                }`}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
+                                </svg>
+                                {tab.label}
+                                {tab.value !== "all" && stats[tab.value] > 0 && (
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                        filter === tab.value 
+                                            ? "bg-white/20 text-white" 
+                                            : "bg-slate-700 text-slate-300"
+                                    }`}>
+                                        {stats[tab.value]}
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Bookings List */}
+                <div>
+                    {filteredBookings.length > 0 ? (
+                        <div className="grid gap-6">
+                            {filteredBookings.map((b) => (
+                                <BookingCard key={b._id} booking={b} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-24 bg-slate-900/30 backdrop-blur-sm rounded-3xl border border-slate-800 shadow-xl">
+                            <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-linear-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-2xl">
+                                <svg className="w-16 h-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-3xl font-bold text-slate-300 mb-4">
+                                {filter === "all" ? "No bookings yet" : `No ${filter} bookings`}
+                            </h3>
+                            <p className="text-slate-500 text-lg mb-10 max-w-md mx-auto">
+                                {filter === "all" 
+                                    ? "Start your journey by browsing our collection of vehicles and make your first booking."
+                                    : `You don't have any ${filter} bookings at the moment.`
+                                }
+                            </p>
+                            {filter === "all" && (
+                                <button
+                                    onClick={() => navigate("/vehicles")}
+                                    className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-base shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Browse Vehicles
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
