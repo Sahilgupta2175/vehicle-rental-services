@@ -5,7 +5,6 @@ const cors = require('cors');
 const morgan = require('morgan');
 const xss = require('xss-clean');
 const path = require('path');
-const bodyParser = require('body-parser');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -23,13 +22,6 @@ const requestLogger = require('./middleware/logger.middleware');
 const { apiLimiter } = require('./middleware/rateLimiter.middleware');
 
 const app = express();
-
-// Stripe webhook route needs raw body; defined here before express.json()
-app.post(
-  '/api/payments/stripe/webhook',
-  bodyParser.raw({ type: 'application/json' }),
-  require('./controllers/payment.controller').stripeWebhook
-);
 
 // Security middlewares
 app.use(helmet());
