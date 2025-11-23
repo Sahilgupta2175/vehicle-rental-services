@@ -5,8 +5,7 @@ export const adminApi = {
     users: () => api.get("/admin/users"),
     approveVendor: (id) => api.post(`/admin/vendor/${id}/approve`),
     removeVendor: (id) => api.delete(`/admin/vendor/${id}/remove`),
-    downloadMonthlyReport: (year, month) => api.get("/reports/monthly", { 
-            params: { year, month },
+    downloadMonthlyReport: (year, month) => api.get(`/reports/monthly/${year}/${month}/download`, { 
             responseType: "blob",
         }),
 };

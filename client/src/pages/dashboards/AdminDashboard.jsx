@@ -2,14 +2,18 @@ import React, { useEffect, useState } from "react";
 import { adminApi } from "../../api/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "../../components/common/DatePicker";
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [roleFilter, setRoleFilter] = useState('all');
-    const [year, setYear] = useState(new Date().getFullYear());
-    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [selectedDate, setSelectedDate] = useState({
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+        day: new Date().getDate()
+    });
     const navigate = useNavigate();
 
     const loadStats = async () => {
@@ -81,12 +85,12 @@ const AdminDashboard = () => {
 
     const handleDownloadReport = async () => {
         try {
-            const res = await adminApi.downloadMonthlyReport(year, month);
+            const res = await adminApi.downloadMonthlyReport(selectedDate.year, selectedDate.month);
             const blob = new Blob([res.data], { type: "application/pdf" });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `monthly-report-${year}-${month}.pdf`;
+            a.download = `monthly-report-${selectedDate.year}-${selectedDate.month}.pdf`;
             a.click();
             window.URL.revokeObjectURL(url);
         // eslint-disable-next-line no-unused-vars
@@ -353,34 +357,11 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 items-end">
-                        <div className="flex-1 space-y-2">
-                            <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Year
-                            </label>
-                            <input
-                                type="number"
-                                value={year}
-                                onChange={(e) => setYear(Number(e.target.value))}
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white"
-                            />
-                        </div>
-                        <div className="flex-1 space-y-2">
-                            <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Month
-                            </label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="12"
-                                value={month}
-                                onChange={(e) => setMonth(Number(e.target.value))}
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white"
+                        <div className="flex-1">
+                            <DatePicker
+                                value={selectedDate}
+                                onChange={setSelectedDate}
+                                label="Select Month"
                             />
                         </div>
                         <button
