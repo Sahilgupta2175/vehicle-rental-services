@@ -65,25 +65,23 @@ const AdminSignup = () => {
             <div className="w-full max-w-md">
                 {/* Header */}
                 <div className="text-center mb-8 space-y-2">
-                    <div className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/40">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/40">
                         <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
                         </svg>
                     </div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                        Create Admin Account
-                    </h1>
+                    <h1 className="text-3xl font-bold">Create Admin Account</h1>
                     <p className="text-slate-400">
                         Register as a system administrator
                     </p>
                 </div>
 
                 {/* Form Card */}
-                <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8 space-y-6">
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="card p-8 space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 Full Name
@@ -94,13 +92,13 @@ const AdminSignup = () => {
                                 value={form.name}
                                 onChange={handleChange}
                                 placeholder="John Doe"
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-slate-500"
+                                className="w-full"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 Email Address
@@ -112,13 +110,13 @@ const AdminSignup = () => {
                                 value={form.email}
                                 onChange={handleChange}
                                 placeholder="admin@example.com"
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-slate-500"
+                                className="w-full"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
                                 Phone Number
@@ -126,16 +124,17 @@ const AdminSignup = () => {
                             <input
                                 type="tel"
                                 name="phone"
+                                required
                                 value={form.phone}
                                 onChange={handleChange}
                                 placeholder="+91 1234567890"
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-slate-500"
+                                className="w-full"
                             />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                                 Password
@@ -144,17 +143,18 @@ const AdminSignup = () => {
                                 type="password"
                                 name="password"
                                 required
+                                minLength={6}
                                 value={form.password}
                                 onChange={handleChange}
                                 placeholder="Minimum 6 characters"
-                                minLength={6}
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-slate-500"
+                                className="w-full"
                             />
+                            <p className="text-xs text-slate-500">Must be at least 6 characters long</p>
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Confirm Password
@@ -166,7 +166,7 @@ const AdminSignup = () => {
                                 value={form.confirmPassword}
                                 onChange={handleChange}
                                 placeholder="Re-enter your password"
-                                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-slate-500"
+                                className="w-full"
                             />
                         </div>
 
@@ -193,7 +193,7 @@ const AdminSignup = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                            className="w-full py-3.5 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -225,7 +225,7 @@ const AdminSignup = () => {
                             Already have an account?{" "}
                             <Link 
                                 to="/admin/login" 
-                                className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                                className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                             >
                                 Sign In
                             </Link>
@@ -242,21 +242,7 @@ const AdminSignup = () => {
                     </div>
                 </div>
 
-                {/* Information Notice */}
-                <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                    <div className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <p className="text-sm font-medium text-blue-400 mb-1">Administrator Role</p>
-                            <p className="text-xs text-blue-300/80">
-                                Admin accounts have full access to system management, user management, 
-                                and all vendor/customer data. Only authorized personnel should create admin accounts.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     );
