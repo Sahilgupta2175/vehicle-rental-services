@@ -100,7 +100,7 @@ const RazorpayPayment = ({ bookingId, onSuccess }) => {
                 type="button"
                 disabled={!order || loading}
                 onClick={handlePay}
-                className="w-full py-2 rounded-xl bg-accent hover:bg-orange-500 text-sm font-medium disabled:opacity-60"
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
             >
                 {loading ? "Processing..." : "Pay with Razorpay"}
             </button>
