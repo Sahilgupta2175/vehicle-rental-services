@@ -139,7 +139,29 @@ const DatePicker = ({ value, onChange, label }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 mt-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-3 min-w-60 max-w-60">
+                <div className="absolute z-50 bottom-full mb-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-3 min-w-60 max-w-60">
+                    {/* Month and Year Selectors */}
+                    <div className="flex gap-2 mb-3">
+                        <select
+                            value={displayMonth}
+                            onChange={(e) => setDisplayMonth(Number(e.target.value))}
+                            className="flex-1 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            {monthNames.map((name, idx) => (
+                                <option key={idx} value={idx + 1}>{name}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={displayYear}
+                            onChange={(e) => setDisplayYear(Number(e.target.value))}
+                            className="w-20 px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     {/* Calendar Header */}
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-sm font-bold text-white">
