@@ -14,6 +14,14 @@ const BookingDetails = () => {
         const fetchBooking = async () => {
             try {
                 const { data } = await bookingApi.getById(bookingId);
+                
+                // Only allow access if payment is completed
+                if (data.payment?.status !== 'paid') {
+                    toast.error("This page is only accessible after payment completion");
+                    navigate("/dashboard");
+                    return;
+                }
+                
                 setBooking(data);
             } catch (err) {
                 console.error(err);

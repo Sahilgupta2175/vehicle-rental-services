@@ -187,13 +187,17 @@ exports.getBookingById = async (req, res, next) => {
             return res.status(404).json({ error: 'Booking not found' });
         }
 
-        // Check if user has access to this booking (either the customer or the vendor)
+        // Only allow the customer who made the booking to access details
         const userId = String(req.user._id);
         const bookingUserId = String(booking.user._id);
-        const bookingVendorId = String(booking.vendor._id);
         
-        if (userId !== bookingUserId && userId !== bookingVendorId && req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'Forbidden' });
+        if (userId !== bookingUserId) {
+            return res.status(403).json({ error: 'Access denied. This page is only accessible to the customer who made the booking.' });
+        }
+
+        // Only allow access if payment is completed
+        if (booking.payment?.status !== 'paid') {
+            return res.status(403).json({ error: 'This page is only accessible after payment completion' });
         }
 
         res.json(booking);
