@@ -132,6 +132,12 @@ const BookingDetails = () => {
             {/* Print Styles */}
             <style>{`
                 @media print {
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
                     body * {
                         visibility: hidden;
                     }
@@ -147,7 +153,9 @@ const BookingDetails = () => {
                         top: 0;
                         width: 100%;
                         background: white;
-                        padding: 40px;
+                        padding: 30px 40px;
+                        display: block !important;
+                        font-family: Arial, sans-serif;
                     }
                     
                     .no-print {
@@ -155,13 +163,16 @@ const BookingDetails = () => {
                     }
                     
                     .print-header {
-                        border-bottom: 3px solid #2563eb;
+                        border-bottom: 3px solid #3b82f6;
                         padding-bottom: 20px;
-                        margin-bottom: 30px;
+                        margin-bottom: 25px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
                     }
                     
                     .print-company-name {
-                        font-size: 28px;
+                        font-size: 24px;
                         font-weight: bold;
                         color: #1e293b;
                         margin-bottom: 5px;
@@ -169,161 +180,211 @@ const BookingDetails = () => {
                     
                     .print-company-tagline {
                         color: #64748b;
-                        font-size: 14px;
+                        font-size: 12px;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .print-company-details {
+                        font-size: 11px;
+                        color: #64748b;
+                        line-height: 1.6;
+                    }
+                    
+                    .print-header-right {
+                        text-align: right;
+                        font-size: 11px;
+                        color: #64748b;
                     }
                     
                     .print-title {
-                        font-size: 24px;
+                        font-size: 20px;
                         font-weight: bold;
                         color: #1e293b;
                         text-align: center;
                         margin: 20px 0;
                         text-transform: uppercase;
                         letter-spacing: 1px;
+                        padding: 10px;
+                        background: #f1f5f9;
+                        border-radius: 6px;
                     }
                     
                     .print-section {
-                        margin-bottom: 25px;
+                        margin-bottom: 20px;
                         page-break-inside: avoid;
                     }
                     
                     .print-section-title {
-                        font-size: 16px;
-                        font-weight: 600;
+                        font-size: 14px;
+                        font-weight: 700;
                         color: #1e293b;
-                        border-bottom: 2px solid #e2e8f0;
-                        padding-bottom: 8px;
-                        margin-bottom: 15px;
+                        background: #f8fafc;
+                        padding: 8px 12px;
+                        margin-bottom: 12px;
+                        border-left: 4px solid #3b82f6;
                     }
                     
-                    .print-grid {
-                        display: grid;
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 15px;
+                    .print-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
                     }
                     
-                    .print-item {
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 8px 0;
-                        border-bottom: 1px solid #f1f5f9;
+                    .print-table tr {
+                        border-bottom: 1px solid #e2e8f0;
                     }
                     
-                    .print-label {
+                    .print-table tr:last-child {
+                        border-bottom: none;
+                    }
+                    
+                    .print-table td {
+                        padding: 10px 8px;
+                        font-size: 12px;
+                    }
+                    
+                    .print-table td:first-child {
                         color: #64748b;
                         font-weight: 500;
+                        width: 35%;
                     }
                     
-                    .print-value {
+                    .print-table td:last-child {
                         color: #1e293b;
                         font-weight: 600;
                     }
                     
-                    .print-total {
-                        background: #f1f5f9;
+                    .print-barcode {
+                        text-align: center;
+                        margin: 15px 0;
                         padding: 15px;
+                        background: #f8fafc;
+                        border: 2px dashed #cbd5e1;
                         border-radius: 8px;
-                        margin-top: 20px;
+                    }
+                    
+                    .print-booking-id {
+                        font-family: 'Courier New', monospace;
+                        font-size: 13px;
+                        color: #1e293b;
+                        letter-spacing: 1px;
+                        font-weight: bold;
+                        margin: 8px 0;
+                    }
+                    
+                    .print-status-badge {
+                        display: inline-block;
+                        padding: 6px 16px;
+                        border-radius: 20px;
+                        font-size: 11px;
+                        font-weight: 700;
+                        margin-top: 8px;
+                    }
+                    
+                    .print-status-paid {
+                        background: #d1fae5;
+                        color: #065f46;
+                        border: 1px solid #10b981;
+                    }
+                    
+                    .print-total-box {
+                        background: #eff6ff;
+                        border: 2px solid #3b82f6;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        margin-top: 15px;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                     }
                     
                     .print-total-label {
-                        font-size: 18px;
-                        font-weight: 600;
+                        font-size: 16px;
+                        font-weight: 700;
                         color: #1e293b;
                     }
                     
                     .print-total-amount {
-                        font-size: 24px;
+                        font-size: 22px;
                         font-weight: bold;
                         color: #2563eb;
                     }
                     
-                    .print-footer {
-                        margin-top: 40px;
-                        padding-top: 20px;
-                        border-top: 2px solid #e2e8f0;
-                        text-align: center;
+                    .print-instructions {
+                        background: #fef3c7;
+                        padding: 15px;
+                        border-radius: 6px;
+                        border: 1px solid #fbbf24;
+                        margin-top: 10px;
+                    }
+                    
+                    .print-instructions ul {
+                        margin: 0;
+                        padding-left: 20px;
+                        font-size: 11px;
+                        color: #92400e;
+                        line-height: 1.8;
                     }
                     
                     .print-terms {
-                        margin-top: 30px;
-                        padding: 20px;
+                        margin-top: 20px;
+                        padding: 15px;
                         background: #f8fafc;
-                        border-radius: 8px;
-                        font-size: 11px;
+                        border-radius: 6px;
+                        font-size: 10px;
                         color: #475569;
-                        line-height: 1.6;
+                        line-height: 1.7;
                     }
                     
                     .print-terms-title {
-                        font-weight: 600;
+                        font-weight: 700;
                         color: #1e293b;
                         margin-bottom: 10px;
                         font-size: 12px;
                     }
                     
-                    .print-barcode {
+                    .print-terms ol {
+                        margin: 0;
+                        padding-left: 20px;
+                    }
+                    
+                    .print-signature {
+                        margin-top: 35px;
+                        display: flex;
+                        justify-content: space-between;
+                        gap: 60px;
+                    }
+                    
+                    .print-signature-box {
+                        flex: 1;
+                        border-top: 2px solid #cbd5e1;
+                        padding-top: 10px;
                         text-align: center;
-                        margin: 20px 0;
-                        padding: 15px;
-                        background: #f8fafc;
-                        border-radius: 8px;
-                    }
-                    
-                    .print-booking-id {
-                        font-family: monospace;
-                        font-size: 14px;
-                        color: #1e293b;
-                        letter-spacing: 2px;
-                        font-weight: bold;
-                    }
-                    
-                    .print-status-badge {
-                        display: inline-block;
-                        padding: 5px 15px;
-                        border-radius: 20px;
-                        font-size: 12px;
+                        font-size: 11px;
                         font-weight: 600;
+                        color: #475569;
                     }
                     
-                    .print-status-paid {
-                        background: #d1fae5;
-                        color: #065f46;
+                    .print-footer {
+                        margin-top: 30px;
+                        padding-top: 20px;
+                        border-top: 2px solid #e2e8f0;
+                        text-align: center;
+                        font-size: 10px;
+                        color: #64748b;
+                        line-height: 1.6;
                     }
                     
                     .print-vehicle-image {
                         max-width: 100%;
+                        max-height: 180px;
                         height: auto;
-                        border-radius: 8px;
+                        border-radius: 6px;
                         margin-bottom: 15px;
-                    }
-                    
-                    .print-contact-info {
-                        background: #f8fafc;
-                        padding: 15px;
-                        border-radius: 8px;
-                        margin-top: 10px;
-                    }
-                    
-                    .print-signature {
-                        margin-top: 40px;
-                        display: grid;
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 40px;
-                    }
-                    
-                    .print-signature-box {
-                        border-top: 2px solid #cbd5e1;
-                        padding-top: 10px;
-                        text-align: center;
-                    }
-                    
-                    .print-qr-section {
-                        text-align: center;
-                        margin: 20px 0;
+                        display: block;
+                        margin-left: auto;
+                        margin-right: auto;
+                        border: 1px solid #e2e8f0;
                     }
                 }
             `}</style>
@@ -332,43 +393,39 @@ const BookingDetails = () => {
             <div id="printable-receipt" className="hidden">
                 {/* Print Header */}
                 <div className="print-header">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                        <div>
-                            <div className="print-company-name">🚗 Vehicle Rental Services</div>
-                            <div className="print-company-tagline">Your Trusted Mobility Partner</div>
-                            <div style={{ marginTop: '10px', fontSize: '12px', color: '#64748b' }}>
-                                <div>📧 Email: support@vehiclerental.com</div>
-                                <div>📞 Phone: +91-1234567890</div>
-                                <div>🌐 Website: www.vehiclerental.com</div>
-                            </div>
+                    <div>
+                        <div className="print-company-name">🚗 Vehicle Rental Services</div>
+                        <div className="print-company-tagline">Your Trusted Mobility Partner</div>
+                        <div className="print-company-details">
+                            <div>📧 support@vehiclerental.com</div>
+                            <div>📞 +91-1234567890</div>
+                            <div>🌐 www.vehiclerental.com</div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '5px' }}>
-                                Receipt Date: {new Date().toLocaleDateString('en-IN', { 
-                                    day: '2-digit', 
-                                    month: 'short', 
-                                    year: 'numeric' 
-                                })}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>
-                                Print Time: {new Date().toLocaleTimeString('en-IN', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit',
-                                    hour12: true 
-                                })}
-                            </div>
-                        </div>
+                    </div>
+                    <div className="print-header-right">
+                        <div><strong>Receipt Date:</strong></div>
+                        <div>{new Date().toLocaleDateString('en-IN', { 
+                            day: '2-digit', 
+                            month: 'short', 
+                            year: 'numeric' 
+                        })}</div>
+                        <div style={{ marginTop: '8px' }}><strong>Print Time:</strong></div>
+                        <div>{new Date().toLocaleTimeString('en-IN', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true 
+                        })}</div>
                     </div>
                 </div>
 
                 <div className="print-title">📝 Booking Receipt</div>
 
-                {/* Booking ID Barcode Style */}
+                {/* Booking ID */}
                 <div className="print-barcode">
-                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '5px' }}>BOOKING ID</div>
+                    <div style={{ fontSize: '10px', color: '#64748b', marginBottom: '5px', fontWeight: '600' }}>BOOKING ID</div>
                     <div className="print-booking-id">{booking._id}</div>
-                    <div style={{ marginTop: '10px' }}>
-                        <span className={`print-status-badge ${booking.payment?.status === 'paid' ? 'print-status-paid' : ''}`}>
+                    <div>
+                        <span className="print-status-badge print-status-paid">
                             ✓ PAYMENT {booking.payment?.status?.toUpperCase()}
                         </span>
                     </div>
@@ -377,24 +434,26 @@ const BookingDetails = () => {
                 {/* Customer Information */}
                 <div className="print-section">
                     <div className="print-section-title">👤 Customer Information</div>
-                    <div className="print-grid">
-                        <div className="print-item">
-                            <span className="print-label">Name:</span>
-                            <span className="print-value">{booking.user?.name || 'N/A'}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Email:</span>
-                            <span className="print-value">{booking.user?.email || 'N/A'}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Phone:</span>
-                            <span className="print-value">{booking.user?.phone || 'N/A'}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Booking Status:</span>
-                            <span className="print-value" style={{ textTransform: 'capitalize' }}>{booking.status}</span>
-                        </div>
-                    </div>
+                    <table className="print-table">
+                        <tbody>
+                            <tr>
+                                <td>Name:</td>
+                                <td>{booking.user?.name || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>Email:</td>
+                                <td>{booking.user?.email || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>Phone:</td>
+                                <td>{booking.user?.phone || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td>Booking Status:</td>
+                                <td style={{ textTransform: 'capitalize' }}>{booking.status}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 {/* Vehicle Information */}
@@ -405,113 +464,113 @@ const BookingDetails = () => {
                             src={booking.vehicle.images[0].url} 
                             alt={booking.vehicle.name}
                             className="print-vehicle-image"
-                            style={{ maxHeight: '200px', objectFit: 'cover' }}
                         />
                     )}
-                    <div className="print-grid">
-                        <div className="print-item">
-                            <span className="print-label">Vehicle Name:</span>
-                            <span className="print-value">{booking.vehicle?.name}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Vehicle Type:</span>
-                            <span className="print-value" style={{ textTransform: 'capitalize' }}>{booking.vehicle?.type}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Location:</span>
-                            <span className="print-value">
-                                {booking.vehicle?.location?.city}, {booking.vehicle?.location?.state}
-                            </span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Rate:</span>
-                            <span className="print-value">₹{booking.vehicle?.pricePerHour}/hour</span>
-                        </div>
-                    </div>
-                    {booking.vehicle?.description && (
-                        <div style={{ marginTop: '15px', padding: '10px', background: '#f8fafc', borderRadius: '6px' }}>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '5px' }}>Description:</div>
-                            <div style={{ fontSize: '13px', color: '#334155' }}>{booking.vehicle.description}</div>
-                        </div>
-                    )}
+                    <table className="print-table">
+                        <tbody>
+                            <tr>
+                                <td>Vehicle Name:</td>
+                                <td>{booking.vehicle?.name}</td>
+                            </tr>
+                            <tr>
+                                <td>Vehicle Type:</td>
+                                <td style={{ textTransform: 'capitalize' }}>{booking.vehicle?.type}</td>
+                            </tr>
+                            <tr>
+                                <td>Location:</td>
+                                <td>
+                                    {booking.vehicle?.location?.city}, {booking.vehicle?.location?.state}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Hourly Rate:</td>
+                                <td>Rs. {booking.vehicle?.pricePerHour}/hour</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 {/* Rental Period */}
                 <div className="print-section">
-                    <div className="print-section-title">📅 Rental Period & Duration</div>
-                    <div className="print-grid">
-                        <div className="print-item">
-                            <span className="print-label">Start Date & Time:</span>
-                            <span className="print-value">{formatDate(booking.start)}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">End Date & Time:</span>
-                            <span className="print-value">{formatDate(booking.end)}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Total Duration:</span>
-                            <span className="print-value">{calculateDuration()}</span>
-                        </div>
-                        <div className="print-item">
-                            <span className="print-label">Booking Date:</span>
-                            <span className="print-value">
-                                {new Date(booking.createdAt).toLocaleDateString('en-IN', { 
-                                    day: '2-digit', 
-                                    month: 'short', 
-                                    year: 'numeric' 
-                                })}
-                            </span>
-                        </div>
-                    </div>
+                    <div className="print-section-title">📅 Rental Period</div>
+                    <table className="print-table">
+                        <tbody>
+                            <tr>
+                                <td>Start Date & Time:</td>
+                                <td>{formatDate(booking.start)}</td>
+                            </tr>
+                            <tr>
+                                <td>End Date & Time:</td>
+                                <td>{formatDate(booking.end)}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Duration:</td>
+                                <td>{calculateDuration()}</td>
+                            </tr>
+                            <tr>
+                                <td>Booking Date:</td>
+                                <td>
+                                    {new Date(booking.createdAt).toLocaleDateString('en-IN', { 
+                                        day: '2-digit', 
+                                        month: 'short', 
+                                        year: 'numeric' 
+                                    })}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                {/* Payment Breakdown */}
+                {/* Payment Details */}
                 <div className="print-section">
                     <div className="print-section-title">💳 Payment Details</div>
-                    <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px' }}>
-                        <div className="print-item">
-                            <span className="print-label">Payment Method:</span>
-                            <span className="print-value" style={{ textTransform: 'capitalize' }}>
-                                {booking.payment?.provider || 'N/A'}
-                            </span>
-                        </div>
-                        {booking.payment?.providerPaymentId && (
-                            <div className="print-item">
-                                <span className="print-label">Transaction ID:</span>
-                                <span className="print-value" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-                                    {booking.payment.providerPaymentId}
-                                </span>
-                            </div>
-                        )}
-                        <div className="print-item">
-                            <span className="print-label">Payment Status:</span>
-                            <span className="print-value" style={{ 
-                                color: booking.payment?.status === 'paid' ? '#059669' : '#d97706',
-                                textTransform: 'uppercase'
-                            }}>
-                                {booking.payment?.status || 'Pending'}
-                            </span>
-                        </div>
-                        {booking.payment?.paidAt && (
-                            <div className="print-item">
-                                <span className="print-label">Payment Date:</span>
-                                <span className="print-value">
-                                    {new Date(booking.payment.paidAt).toLocaleString('en-IN', {
-                                        day: '2-digit',
-                                        month: 'short',
-                                        year: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: true
-                                    })}
-                                </span>
-                            </div>
-                        )}
-                    </div>
+                    <table className="print-table">
+                        <tbody>
+                            <tr>
+                                <td>Payment Method:</td>
+                                <td style={{ textTransform: 'capitalize' }}>
+                                    {booking.payment?.provider || 'N/A'}
+                                </td>
+                            </tr>
+                            {booking.payment?.providerPaymentId && (
+                                <tr>
+                                    <td>Transaction ID:</td>
+                                    <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>
+                                        {booking.payment.providerPaymentId}
+                                    </td>
+                                </tr>
+                            )}
+                            <tr>
+                                <td>Payment Status:</td>
+                                <td style={{ 
+                                    color: booking.payment?.status === 'paid' ? '#059669' : '#d97706',
+                                    textTransform: 'uppercase',
+                                    fontWeight: '700'
+                                }}>
+                                    {booking.payment?.status || 'Pending'}
+                                </td>
+                            </tr>
+                            {booking.payment?.paidAt && (
+                                <tr>
+                                    <td>Payment Date:</td>
+                                    <td>
+                                        {new Date(booking.payment.paidAt).toLocaleString('en-IN', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })}
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                     
-                    <div className="print-total">
+                    <div className="print-total-box">
                         <span className="print-total-label">Total Amount Paid:</span>
-                        <span className="print-total-amount">₹{booking.totalAmount}</span>
+                        <span className="print-total-amount">Rs. {booking.totalAmount.toLocaleString('en-IN')}</span>
                     </div>
                 </div>
 
@@ -519,40 +578,40 @@ const BookingDetails = () => {
                 {booking.vendor && (
                     <div className="print-section">
                         <div className="print-section-title">🏢 Vendor Information</div>
-                        <div className="print-contact-info">
-                            <div className="print-grid">
-                                <div className="print-item">
-                                    <span className="print-label">Vendor Name:</span>
-                                    <span className="print-value">{booking.vendor.name}</span>
-                                </div>
+                        <table className="print-table">
+                            <tbody>
+                                <tr>
+                                    <td>Vendor Name:</td>
+                                    <td>{booking.vendor.name}</td>
+                                </tr>
                                 {booking.vendor.email && (
-                                    <div className="print-item">
-                                        <span className="print-label">Email:</span>
-                                        <span className="print-value">{booking.vendor.email}</span>
-                                    </div>
+                                    <tr>
+                                        <td>Email:</td>
+                                        <td>{booking.vendor.email}</td>
+                                    </tr>
                                 )}
                                 {booking.vendor.phone && (
-                                    <div className="print-item">
-                                        <span className="print-label">Contact:</span>
-                                        <span className="print-value">{booking.vendor.phone}</span>
-                                    </div>
+                                    <tr>
+                                        <td>Contact:</td>
+                                        <td>{booking.vendor.phone}</td>
+                                    </tr>
                                 )}
-                            </div>
-                        </div>
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
                 {/* Important Instructions */}
                 <div className="print-section">
                     <div className="print-section-title">⚠️ Important Instructions</div>
-                    <div style={{ background: '#fef3c7', padding: '15px', borderRadius: '8px', border: '1px solid #fbbf24' }}>
-                        <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#92400e', lineHeight: '1.8' }}>
-                            <li>Please carry a valid ID proof and driving license at the time of pickup</li>
-                            <li>Vehicle inspection will be done before handover. Any damage must be reported immediately</li>
-                            <li>Fuel level should be same at the time of return as it was during pickup</li>
-                            <li>Late return charges: ₹{Math.round(booking.vehicle?.pricePerHour * 1.5)}/hour after grace period of 1 hour</li>
-                            <li>For any issues or queries, contact the vendor or our support team immediately</li>
-                            <li>Keep this receipt for your records and present it during vehicle pickup</li>
+                    <div className="print-instructions">
+                        <ul>
+                            <li>Carry valid ID proof and driving license at pickup</li>
+                            <li>Vehicle inspection will be done before handover</li>
+                            <li>Return vehicle with same fuel level as pickup</li>
+                            <li>Late charges: Rs. {Math.round(booking.vehicle?.pricePerHour * 1.5)}/hour after 1 hour grace period</li>
+                            <li>Contact vendor/support for issues or queries</li>
+                            <li>Keep this receipt for pickup and records</li>
                         </ul>
                     </div>
                 </div>
@@ -560,42 +619,41 @@ const BookingDetails = () => {
                 {/* Terms & Conditions */}
                 <div className="print-terms">
                     <div className="print-terms-title">📋 Terms & Conditions</div>
-                    <ol style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8' }}>
-                        <li>The renter must be at least 21 years old and possess a valid driving license.</li>
-                        <li>Security deposit (if applicable) will be refunded within 7 working days after vehicle return.</li>
-                        <li>The vehicle must be returned in the same condition as it was at the time of pickup.</li>
-                        <li>Any traffic violations, fines, or penalties during the rental period are the renter's responsibility.</li>
-                        <li>The renter is liable for any damage to the vehicle during the rental period unless covered by insurance.</li>
-                        <li>Cancellation charges apply as per the cancellation policy. Refund will be processed within 7-10 business days.</li>
-                        <li>The company reserves the right to refuse service or terminate the rental in case of misuse.</li>
-                        <li>This receipt is valid only for the booking mentioned above and cannot be transferred.</li>
-                        <li>For complete terms and conditions, please visit our website or contact customer support.</li>
+                    <ol>
+                        <li>Renter must be at least 21 years old with valid driving license.</li>
+                        <li>Security deposit refunded within 7 working days after return.</li>
+                        <li>Vehicle must be returned in same condition as pickup.</li>
+                        <li>Renter responsible for traffic violations and fines.</li>
+                        <li>Renter liable for damage unless covered by insurance.</li>
+                        <li>Cancellation charges apply. Refund processed in 7-10 days.</li>
+                        <li>Company reserves right to refuse service or terminate rental.</li>
+                        <li>Receipt valid only for this booking, non-transferable.</li>
                     </ol>
                 </div>
 
                 {/* Signatures */}
                 <div className="print-signature">
                     <div className="print-signature-box">
-                        <div style={{ fontSize: '12px', fontWeight: '500', color: '#475569' }}>Customer Signature</div>
+                        Customer Signature
                     </div>
                     <div className="print-signature-box">
-                        <div style={{ fontSize: '12px', fontWeight: '500', color: '#475569' }}>Authorized Signature</div>
+                        Authorized Signature
                     </div>
                 </div>
 
                 {/* Footer */}
                 <div className="print-footer">
-                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '5px' }}>
+                    <div style={{ marginBottom: '5px' }}>
                         This is a computer-generated receipt and does not require a physical signature.
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', marginBottom: '5px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b', margin: '8px 0' }}>
                         Thank you for choosing Vehicle Rental Services! 🚗
                     </div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>
-                        For support: support@vehiclerental.com | +91-1234567890 | Available 24/7
+                    <div>
+                        Support: support@vehiclerental.com | +91-1234567890 | Available 24/7
                     </div>
-                    <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px solid #e2e8f0', fontSize: '10px', color: '#94a3b8' }}>
-                        © {new Date().getFullYear()} Vehicle Rental Services. All rights reserved. | GST No: 29XXXXX1234X1ZY
+                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+                        © {new Date().getFullYear()} Vehicle Rental Services. All rights reserved.
                     </div>
                 </div>
             </div>
