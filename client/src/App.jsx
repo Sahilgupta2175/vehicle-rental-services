@@ -20,6 +20,8 @@ import BookingDetails from "./pages/BookingDetails";
 import UserDashboard from "./pages/dashboards/UserDashboard";
 import VendorDashboard from "./pages/dashboards/VendorDashboard";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminSignup from "./pages/admin/AdminSignup";
 
 function App() {
     const { init, initialized } = useAuthStore();
@@ -53,6 +55,10 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
+                    
+                    {/* Admin Auth */}
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/admin/signup" element={<AdminSignup />} />
 
                     {/* Protected: any logged-in user */}
                     <Route
