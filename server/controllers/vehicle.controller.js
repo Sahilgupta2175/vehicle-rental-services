@@ -106,6 +106,9 @@ exports.getVehicles = async (req, res, next) => {
         // If 'mine' parameter is true and user is authenticated, filter by owner
         if (mine === 'true' && req.user) {
             filter.owner = req.user._id;
+        } else {
+            // For public listing, only show available vehicles
+            filter.available = true;
         }
 
         if (q) {

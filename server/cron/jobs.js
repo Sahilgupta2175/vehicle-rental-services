@@ -1,8 +1,49 @@
 const cron = require('node-cron');
 const Booking = require('../models/Booking');
+const Vehicle = require('../models/Vehicle');
 const moment = require('moment');
 const { sendSMS } = require('../services/sms.service');
 const { generateMonthlyReport } = require('../services/report.service');
+
+// Run every hour to complete bookings and make vehicles available
+cron.schedule('0 * * * *', async () => {
+    try {
+        // Find all paid bookings that have ended
+        const now = new Date();
+        const endedBookings = await Booking.find({
+            status: 'paid',
+            end: { $lt: now }
+        }).populate('vehicle');
+
+        for (const booking of endedBookings) {
+            // Mark booking as completed
+            booking.status = 'completed';
+            await booking.save();
+
+            // Check if there are any other active bookings for this vehicle
+            const activeBookings = await Booking.countDocuments({
+                vehicle: booking.vehicle._id,
+                status: { $in: ['paid', 'approved', 'pending'] },
+                start: { $lte: now },
+                end: { $gte: now }
+            });
+
+            // If no active bookings, make vehicle available
+            if (activeBookings === 0) {
+                await Vehicle.findByIdAndUpdate(booking.vehicle._id, { available: true });
+                console.log(`[cron] Vehicle ${booking.vehicle.name} is now available`);
+            }
+
+            console.log(`[cron] Completed booking ${booking._id}`);
+        }
+
+        if (endedBookings.length > 0) {
+            console.log(`[cron] Processed ${endedBookings.length} completed bookings`);
+        }
+    } catch (err) {
+        console.error('[cron] complete bookings error', err);
+    }
+});
 
 cron.schedule('0 2 * * *', async () => {
     // daily at 02:00 - auto cancel pending bookings older than AUTO_CANCEL_HOURS
