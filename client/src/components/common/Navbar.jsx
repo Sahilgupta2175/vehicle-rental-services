@@ -56,12 +56,15 @@ const Navbar = () => {
 
                         {isAuthenticated ? (
                             <>
-                                <Link
-                                    to="/dashboard"
-                                    className="px-5 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all"
-                                >
-                                    Dashboard
-                                </Link>
+                                {/* Only show Dashboard for regular users, not vendors/admins */}
+                                {user?.role === "user" && (
+                                    <Link
+                                        to="/dashboard"
+                                        className="px-5 py-2 rounded-lg text-sm font-medium bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                )}
                                 <button
                                     onClick={handleLogout}
                                     className="px-4 py-2 rounded-lg text-sm font-medium border border-slate-700 hover:border-amber-500 hover:text-amber-400 text-slate-300 transition-all"
@@ -79,7 +82,7 @@ const Navbar = () => {
                                 </Link>
                                 <Link
                                     to="/register"
-                                    className="px-5 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all"
+                                    className="px-5 py-2 rounded-lg text-sm font-medium bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all"
                                 >
                                     Sign up
                                 </Link>
@@ -135,13 +138,16 @@ const Navbar = () => {
 
                         {isAuthenticated ? (
                             <>
-                                <Link
-                                    to="/dashboard"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-primary-dark text-white text-center"
-                                >
-                                    Dashboard
-                                </Link>
+                                {/* Only show Dashboard for regular users, not vendors/admins */}
+                                {user?.role === "user" && (
+                                    <Link
+                                        to="/dashboard"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block px-4 py-3 rounded-lg text-sm font-medium bg-linear-to-r from-primary to-primary-dark text-white text-center"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                )}
                                 <button
                                     onClick={handleLogout}
                                     className="w-full px-4 py-3 rounded-lg text-sm font-medium border border-purple-800/50 text-slate-300 transition-all"
@@ -161,7 +167,7 @@ const Navbar = () => {
                                 <Link
                                     to="/register"
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-primary-dark text-white text-center"
+                                    className="block px-4 py-3 rounded-lg text-sm font-medium bg-linear-to-r from-primary to-primary-dark text-white text-center"
                                 >
                                     Sign up
                                 </Link>
