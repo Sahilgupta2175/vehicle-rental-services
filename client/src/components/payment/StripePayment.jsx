@@ -44,7 +44,9 @@ const StripePayment = ({ bookingId, onSuccess }) => {
         } 
         else if (paymentIntent.status === "succeeded") {
             toast.success("Payment successful");
-            onSuccess && onSuccess(paymentIntent);
+            if (onSuccess) {
+                setTimeout(() => onSuccess(paymentIntent), 1000);
+            }
         }
 
         setLoading(false);

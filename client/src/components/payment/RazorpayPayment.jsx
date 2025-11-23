@@ -69,7 +69,9 @@ const RazorpayPayment = ({ bookingId, onSuccess }) => {
                         razorpay_signature: response.razorpay_signature,
                     });
                     toast.success("Payment successful");
-                    onSuccess && onSuccess(response);
+                    if (onSuccess) {
+                        setTimeout(() => onSuccess(response), 1000);
+                    }
                 } catch (err) {
                     console.error(err);
                     toast.error("Payment verification failed");

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
@@ -9,7 +9,12 @@ const stripePromise = loadStripe( import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ||
 
 const Payment = () => {
     const { bookingId } = useParams();
+    const navigate = useNavigate();
     const [gateway, setGateway] = useState("razorpay"); // default for India
+
+    const handlePaymentSuccess = () => {
+        navigate(`/booking-details/${bookingId}`);
+    };
 
     return (
         <div className="min-h-[70vh] flex items-center justify-center py-8 px-4">
@@ -133,10 +138,10 @@ const Payment = () => {
                     {/* Payment Component */}
                     <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
                         {gateway === "razorpay" ? (
-                            <RazorpayPayment bookingId={bookingId} />
+                            <RazorpayPayment bookingId={bookingId} onSuccess={handlePaymentSuccess} />
                         ) : (
                             <Elements stripe={stripePromise}>
-                                <StripePayment bookingId={bookingId} />
+                                <StripePayment bookingId={bookingId} onSuccess={handlePaymentSuccess} />
                             </Elements>
                         )}
                     </div>

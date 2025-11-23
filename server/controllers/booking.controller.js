@@ -175,3 +175,29 @@ exports.getVendorBookings = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.getBookingById = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id)
+            .populate('vehicle')
+            .populate('user', 'name email phone')
+            .populate('vendor', 'name email phone');
+        
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        // Check if user has access to this booking (either the customer or the vendor)
+        const userId = String(req.user._id);
+        const bookingUserId = String(booking.user._id);
+        const bookingVendorId = String(booking.vendor._id);
+        
+        if (userId !== bookingUserId && userId !== bookingVendorId && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        res.json(booking);
+    } catch (err) {
+        next(err);
+    }
+};

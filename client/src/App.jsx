@@ -15,6 +15,7 @@ import VehicleList from "./pages/VehicleList";
 import VehicleDetail from "./pages/VehicleDetail";
 import Booking from "./pages/Booking";
 import Payment from "./pages/Payment";
+import BookingDetails from "./pages/BookingDetails";
 
 import UserDashboard from "./pages/dashboards/UserDashboard";
 import VendorDashboard from "./pages/dashboards/VendorDashboard";
@@ -67,6 +68,14 @@ function App() {
                         element={
                         <ProtectedRoute>
                             <Payment />
+                        </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/booking-details/:bookingId"
+                        element={
+                        <ProtectedRoute>
+                            <BookingDetails />
                         </ProtectedRoute>
                         }
                     />
