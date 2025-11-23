@@ -25,10 +25,32 @@ exports.dashboardStats = async (req, res, next) => {
 exports.downloadMonthlyReport = async (req, res, next) => {
     try {
         const { year, month } = req.params;
-        const { filePath, fileName } = await generateMonthlyReport({ year: Number(year), month: Number(month) });
         
-        res.download(filePath, fileName);
+        if (!year || !month) {
+            return res.status(400).json({ error: 'Year and month are required' });
+        }
+        
+        const yearNum = Number(year);
+        const monthNum = Number(month);
+        
+        if (isNaN(yearNum) || isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+            return res.status(400).json({ error: 'Invalid year or month' });
+        }
+        
+        console.log(`Generating report for ${yearNum}-${monthNum}`);
+        const { filePath, fileName } = await generateMonthlyReport({ year: yearNum, month: monthNum });
+        
+        console.log(`Report generated: ${filePath}`);
+        res.download(filePath, fileName, (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: 'Failed to send report' });
+                }
+            }
+        });
     } catch (err) {
+        console.error('Download monthly report error:', err);
         next(err);
     }
 };
