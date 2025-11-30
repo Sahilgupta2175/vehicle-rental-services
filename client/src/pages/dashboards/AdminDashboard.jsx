@@ -10,6 +10,9 @@ const AdminDashboard = () => {
     const [allUsers, setAllUsers] = useState([]);
     const [roleFilter, setRoleFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [recentBookings, setRecentBookings] = useState([]);
+    const [recentTransactions, setRecentTransactions] = useState([]);
+    const [activeTab, setActiveTab] = useState('overview');
     const [selectedDate, setSelectedDate] = useState({
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1,
@@ -21,6 +24,24 @@ const AdminDashboard = () => {
         try {
             const { data } = await adminApi.stats();
             setStats(data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const loadRecentBookings = async () => {
+        try {
+            const { data } = await adminApi.recentBookings();
+            setRecentBookings(data.bookings || data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const loadRecentTransactions = async () => {
+        try {
+            const { data } = await adminApi.recentTransactions();
+            setRecentTransactions(data.transactions || data);
         } catch (err) {
             console.error(err);
         }
@@ -80,8 +101,12 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         (async () => {
-            await loadStats();
-            await loadUsers();
+            await Promise.all([
+                loadStats(),
+                loadUsers(),
+                loadRecentBookings(),
+                loadRecentTransactions()
+            ]);
         })();
     }, []);
 
@@ -205,20 +230,133 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Users & Vendors Section */}
-                <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
-                    <div className="flex flex-col gap-4 mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                {/* Tabs Navigation */}
+                <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl p-2">
+                    <div className="flex gap-2 overflow-x-auto">
+                        {[
+                            { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
+                            { id: 'users', label: 'Users & Vendors', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+                            { id: 'bookings', label: 'Recent Bookings', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+                            { id: 'transactions', label: 'Transactions', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
+                            { id: 'reports', label: 'Reports', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
+                                    activeTab === tab.id
+                                        ? 'bg-linear-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                }`}
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
                                 </svg>
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-white">Users & Vendors</h2>
-                                <p className="text-sm text-slate-400">Manage vendors and their approval</p>
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Overview Tab */}
+                {activeTab === 'overview' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Recent Activity */}
+                        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Recent Bookings
+                            </h3>
+                            <div className="space-y-3">
+                                {recentBookings.slice(0, 5).map((booking) => (
+                                    <div key={booking._id} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 hover:border-blue-500/50 transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="text-white font-medium">{booking.vehicle?.name}</p>
+                                                <p className="text-xs text-slate-400">{booking.user?.name}</p>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                                booking.status === 'paid' ? 'bg-blue-500/20 text-blue-400' :
+                                                booking.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                                booking.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                                                'bg-yellow-500/20 text-yellow-400'
+                                            }`}>
+                                                {booking.status.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-slate-500">
+                                            {new Date(booking.createdAt).toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))}
+                                {recentBookings.length === 0 && (
+                                    <p className="text-slate-500 text-center py-8">No recent bookings</p>
+                                )}
                             </div>
                         </div>
+
+                        {/* Recent Transactions */}
+                        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Recent Transactions
+                            </h3>
+                            <div className="space-y-3">
+                                {recentTransactions.slice(0, 5).map((transaction) => (
+                                    <div key={transaction._id} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 hover:border-emerald-500/50 transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p className="text-white font-medium">₹{transaction.amount}</p>
+                                                <p className="text-xs text-slate-400">{transaction.user?.name}</p>
+                                            </div>
+                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                                transaction.type === 'charge' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                'bg-amber-500/20 text-amber-400'
+                                            }`}>
+                                                {transaction.type.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-xs text-slate-500">
+                                                {new Date(transaction.createdAt).toLocaleString()}
+                                            </p>
+                                            <span className={`text-xs font-medium ${
+                                                transaction.status === 'completed' ? 'text-green-400' :
+                                                transaction.status === 'refunded' ? 'text-orange-400' :
+                                                'text-yellow-400'
+                                            }`}>
+                                                {transaction.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {recentTransactions.length === 0 && (
+                                    <p className="text-slate-500 text-center py-8">No recent transactions</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Users & Vendors Tab */}
+                {activeTab === 'users' && (
+                    <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
+                        <div className="flex flex-col gap-4 mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-white">Users & Vendors</h2>
+                                    <p className="text-sm text-slate-400">Manage vendors and their approval</p>
+                                </div>
+                            </div>
 
                         {/* Search Bar */}
                         <div className="relative">
@@ -388,9 +526,120 @@ const AdminDashboard = () => {
                             </tbody>
                         </table>
                     </div>
-                </div>
+                    </div>
+                )}
 
-                {/* Monthly Report Section */}
+                {/* Recent Bookings Tab */}
+                {activeTab === 'bookings' && (
+                    <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
+                        <h2 className="text-2xl font-bold text-white mb-6">All Recent Bookings</h2>
+                        <div className="space-y-4">
+                            {recentBookings.map((booking) => (
+                                <div key={booking._id} className="bg-slate-800/50 rounded-xl p-5 border border-slate-700 hover:border-blue-500/30 transition-all">
+                                    <div className="flex flex-wrap justify-between items-start gap-4">
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-semibold text-white mb-1">{booking.vehicle?.name}</h3>
+                                            <p className="text-sm text-slate-400">{booking.vehicle?.type}</p>
+                                            <div className="mt-2 flex flex-wrap gap-4 text-sm">
+                                                <span className="text-slate-300">
+                                                    <strong>User:</strong> {booking.user?.name}
+                                                </span>
+                                                <span className="text-slate-300">
+                                                    <strong>Vendor:</strong> {booking.vendor?.name}
+                                                </span>
+                                                <span className="text-slate-300">
+                                                    <strong>Amount:</strong> ₹{booking.totalAmount}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end gap-2">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                booking.status === 'paid' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                                                booking.status === 'completed' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                                                booking.status === 'cancelled' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                                                'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                            }`}>
+                                                {booking.status.toUpperCase()}
+                                            </span>
+                                            <p className="text-xs text-slate-500">
+                                                {new Date(booking.createdAt).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {recentBookings.length === 0 && (
+                                <div className="text-center py-16">
+                                    <svg className="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p className="text-slate-400">No bookings found</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Transactions Tab */}
+                {activeTab === 'transactions' && (
+                    <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
+                        <h2 className="text-2xl font-bold text-white mb-6">All Recent Transactions</h2>
+                        <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-800/50">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-slate-700 bg-slate-700/50">
+                                        <th className="text-left py-4 px-4 font-semibold text-slate-300">User</th>
+                                        <th className="text-left py-4 px-4 font-semibold text-slate-300">Amount</th>
+                                        <th className="text-left py-4 px-4 font-semibold text-slate-300">Type</th>
+                                        <th className="text-left py-4 px-4 font-semibold text-slate-300">Provider</th>
+                                        <th className="text-left py-4 px-4 font-semibold text-slate-300">Status</th>
+                                        <th className="text-left py-4 px-4 font-semibold text-slate-300">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {recentTransactions.map((transaction) => (
+                                        <tr key={transaction._id} className="border-b border-slate-800/60 last:border-0 hover:bg-slate-800/30 transition-colors">
+                                            <td className="py-4 px-4 text-white">{transaction.user?.name}</td>
+                                            <td className="py-4 px-4 text-emerald-400 font-semibold">₹{transaction.amount}</td>
+                                            <td className="py-4 px-4">
+                                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
+                                                    transaction.type === 'charge' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                    'bg-amber-500/20 text-amber-400'
+                                                }`}>
+                                                    {transaction.type}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4 text-slate-300 capitalize">{transaction.provider}</td>
+                                            <td className="py-4 px-4">
+                                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
+                                                    transaction.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                                    transaction.status === 'refunded' ? 'bg-orange-500/20 text-orange-400' :
+                                                    transaction.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                    'bg-red-500/20 text-red-400'
+                                                }`}>
+                                                    {transaction.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4 text-slate-400 text-xs">
+                                                {new Date(transaction.createdAt).toLocaleString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {recentTransactions.length === 0 && (
+                                        <tr>
+                                            <td colSpan={6} className="py-12 text-center">
+                                                <p className="text-slate-400">No transactions found</p>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
                 <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -423,6 +672,7 @@ const AdminDashboard = () => {
                         </button>
                     </div>
                 </div>
+                )}
             </div>
         </div>
     );

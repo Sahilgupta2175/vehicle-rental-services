@@ -70,10 +70,19 @@ exports.razorpayWebhook = async (req, res, next) => {
                     // Mark vehicle as unavailable during booking period
                     await Vehicle.findByIdAndUpdate(booking.vehicle._id, { available: false });
 
-                    // Update transaction
+                    // Update transaction from pending to completed
                     await Transaction.findOneAndUpdate(
-                        { booking: bookingId, provider: 'razorpay' },
-                        { status: 'completed', providerId: payload.id, metadata: { payment: payload } },
+                        { 
+                            booking: bookingId, 
+                            provider: 'razorpay',
+                            status: 'pending'
+                        },
+                        { 
+                            status: 'completed', 
+                            providerId: payload.id, 
+                            metadata: { payment: payload },
+                            updatedAt: new Date()
+                        },
                         { new: true }
                     );
 
@@ -174,8 +183,16 @@ exports.razorpayWebhook = async (req, res, next) => {
         } else if (event === 'payment.failed') {
             const payload = body.payload.payment.entity;
             await Transaction.findOneAndUpdate(
-                { providerId: payload.order_id, provider: 'razorpay' },
-                { status: 'failed', error: payload.error_description },
+                { 
+                    providerId: payload.order_id, 
+                    provider: 'razorpay',
+                    status: 'pending'
+                },
+                { 
+                    status: 'failed', 
+                    error: payload.error_description,
+                    updatedAt: new Date()
+                },
                 { new: true }
             );
         }
@@ -261,11 +278,16 @@ exports.verifyRazorpayPayment = async (req, res, next) => {
 
             // Create/update transaction
             await Transaction.findOneAndUpdate(
-                { booking: bookingId, provider: 'razorpay' },
+                { 
+                    booking: bookingId, 
+                    provider: 'razorpay',
+                    status: 'pending'
+                },
                 {
                     status: 'completed',
                     providerId: razorpay_payment_id,
-                    metadata: { orderId: razorpay_order_id, signature: razorpay_signature }
+                    metadata: { orderId: razorpay_order_id, signature: razorpay_signature },
+                    updatedAt: new Date()
                 },
                 { upsert: true, new: true }
             );

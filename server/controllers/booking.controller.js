@@ -153,7 +153,9 @@ exports.cancelBooking = async (req, res, next) => {
 
         // Process refund if booking was paid
         let refundResult = null;
-        if (booking.status === 'paid' && booking.payment) {
+        const wasPaid = booking.status === 'paid';
+        
+        if (wasPaid && booking.payment) {
             // Find the payment transaction
             const paymentTransaction = await Transaction.findOne({
                 booking: booking._id,
@@ -209,15 +211,150 @@ exports.cancelBooking = async (req, res, next) => {
             global.io.to(`vendor:${String(booking.vendor)}`).emit('booking:cancelled', booking);
         }
 
-        // Send notification emails
-        const emailText = refundResult?.success 
-            ? `Your booking for ${booking.vehicle.name} has been cancelled successfully. A refund of ₹${booking.totalPrice} has been initiated and will be credited to your account within 5-7 business days.`
-            : `Your booking for ${booking.vehicle.name} has been cancelled successfully.${booking.status === 'paid' ? ' Please contact support for refund processing.' : ''}`;
+        // Format dates for email
+        const startDate = new Date(booking.start).toLocaleString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+        });
+        const endDate = new Date(booking.end).toLocaleString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+        });
+
+        // Send detailed cancellation email to user
+        const userEmailHtml = refundResult?.success ? `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                    <h2 style="color: #ff6b6b;">❌ Booking Cancelled</h2>
+                    <p>Dear ${booking.user.name},</p>
+                    <p>Your booking has been cancelled successfully. We understand plans change, and we're here to help.</p>
+                    
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0;">Cancelled Booking Details</h3>
+                        <p><strong>Booking ID:</strong> ${booking._id}</p>
+                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                        <p><strong>Type:</strong> ${booking.vehicle.type}</p>
+                        <p><strong>Original Start Time:</strong> ${startDate}</p>
+                        <p><strong>Original End Time:</strong> ${endDate}</p>
+                        <p><strong>Booking Amount:</strong> ₹${booking.totalPrice}</p>
+                        <p><strong>Status:</strong> <span style="color: #ff6b6b;">CANCELLED</span></p>
+                    </div>
+
+                    <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4CAF50;">
+                        <h3 style="margin-top: 0; color: #2e7d32;">💰 Refund Information</h3>
+                        <p style="margin: 0;"><strong>Refund Amount:</strong> ₹${booking.totalPrice}</p>
+                        <p style="margin: 10px 0 0 0;"><strong>Refund Status:</strong> <span style="color: #4CAF50;">Initiated</span></p>
+                        <p style="margin: 15px 0 0 0; padding-top: 15px; border-top: 1px solid #c8e6c9;">
+                            ⏱️ The refund has been successfully processed and will be credited to your original payment method within <strong>3-5 working days</strong>.
+                        </p>
+                        <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+                            Please note: The exact time may vary depending on your bank's processing time. You will receive a confirmation once the amount is credited to your account.
+                        </p>
+                    </div>
+
+                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404;">
+                            <strong>Note:</strong> If you don't receive the refund within 5-7 working days, please contact your bank or reach out to our support team with your booking ID.
+                        </p>
+                    </div>
+
+                    <p style="margin-top: 20px;">We hope to serve you again in the future. If you have any questions or concerns, please don't hesitate to contact us.</p>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                        <p style="color: #666; font-size: 14px; margin: 5px 0;">Need help? Contact our support team</p>
+                        <p style="color: #999; font-size: 12px; margin: 5px 0;">This is an automated email. Please do not reply.</p>
+                    </div>
+                </div>
+            </div>
+        ` : `
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                    <h2 style="color: #ff6b6b;">❌ Booking Cancelled</h2>
+                    <p>Dear ${booking.user.name},</p>
+                    <p>Your booking has been cancelled successfully.</p>
+                    
+                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                        <h3 style="margin-top: 0;">Cancelled Booking Details</h3>
+                        <p><strong>Booking ID:</strong> ${booking._id}</p>
+                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                        <p><strong>Type:</strong> ${booking.vehicle.type}</p>
+                        <p><strong>Original Start Time:</strong> ${startDate}</p>
+                        <p><strong>Original End Time:</strong> ${endDate}</p>
+                        <p><strong>Status:</strong> <span style="color: #ff6b6b;">CANCELLED</span></p>
+                    </div>
+
+                    ${wasPaid ? `
+                        <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4CAF50;">
+                            <h3 style="margin-top: 0; color: #2e7d32;">💰 Refund Information</h3>
+                            <p style="margin: 0;"><strong>Refund Amount:</strong> ₹${booking.totalPrice}</p>
+                            <p style="margin: 10px 0 0 0;"><strong>Refund Status:</strong> <span style="color: #ff9800;">Processing</span></p>
+                            <p style="margin: 15px 0 0 0; padding-top: 15px; border-top: 1px solid #c8e6c9;">
+                                ⏱️ Your refund is being processed and will be credited to your original payment method within <strong>3-5 working days</strong>.
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+                                Please note: The exact time may vary depending on your bank's processing time. You will receive a confirmation once the amount is credited to your account.
+                            </p>
+                        </div>
+
+                        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                            <p style="margin: 0; color: #856404;">
+                                <strong>Note:</strong> If you don't receive the refund within 5-7 working days, please contact your bank or reach out to our support team with your booking ID.
+                            </p>
+                        </div>
+                    ` : ''}
+
+                    <p style="margin-top: 20px;">We hope to serve you again in the future. If you have any questions, please contact our support team.</p>
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                        <p style="color: #999; font-size: 12px; margin: 5px 0;">This is an automated email. Please do not reply.</p>
+                    </div>
+                </div>
+            </div>
+        `;
 
         sendMail({ 
             to: booking.user.email, 
-            subject: 'Booking Cancelled', 
-            text: emailText
+            subject: refundResult?.success ? 'Booking Cancelled - Refund Initiated' : 'Booking Cancelled',
+            html: userEmailHtml
+        }).catch(console.warn);
+
+        // Send notification to vendor
+        sendMail({
+            to: booking.vendor.email,
+            subject: 'Booking Cancellation Notice',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+                        <h2 style="color: #ff6b6b;">🔔 Booking Cancelled</h2>
+                        <p>Dear ${booking.vendor.name},</p>
+                        <p>A customer has cancelled their booking for your vehicle.</p>
+                        
+                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin-top: 0;">Cancellation Details</h3>
+                            <p><strong>Booking ID:</strong> ${booking._id}</p>
+                            <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
+                            <p><strong>Customer:</strong> ${booking.user.name}</p>
+                            <p><strong>Original Start Time:</strong> ${startDate}</p>
+                            <p><strong>Original End Time:</strong> ${endDate}</p>
+                            <p><strong>Amount:</strong> ₹${booking.totalPrice}</p>
+                        </div>
+
+                        <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2196F3;">
+                            <p style="margin: 0;">
+                                ✅ Your vehicle <strong>${booking.vehicle.name}</strong> is now marked as <strong style="color: #4CAF50;">available</strong> and can be booked by other customers.
+                            </p>
+                        </div>
+
+                        ${refundResult?.success ? `
+                            <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                <p style="margin: 0; color: #856404;">
+                                    <strong>Note:</strong> A refund of ₹${booking.totalPrice} has been initiated to the customer and will be processed within 3-5 working days.
+                                </p>
+                            </div>
+                        ` : ''}
+
+                        <p style="color: #999; font-size: 12px; margin-top: 30px;">This is an automated email. Please do not reply.</p>
+                    </div>
+                </div>
+            `
         }).catch(console.warn);
 
         res.json({ 
