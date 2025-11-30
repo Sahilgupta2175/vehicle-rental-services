@@ -112,29 +112,18 @@ const AdminDashboard = () => {
                         }}></div>
                     </div>
 
-                    <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                        <div className="flex items-start gap-5">
-                            <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-blue-500 via-purple-600 to-cyan-500 flex items-center justify-center shadow-2xl shadow-blue-500/40 shrink-0">
-                                <svg className="w-11 h-11 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 className="text-4xl font-bold bg-linear-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent mb-2">
-                                    Admin Dashboard
-                                </h1>
-                                <p className="text-slate-400 text-base">Manage users, vendors, and system analytics</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => navigate("/vehicles")}
-                            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <div className="relative flex items-start gap-5">
+                        <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-blue-500 via-purple-600 to-cyan-500 flex items-center justify-center shadow-2xl shadow-blue-500/40 shrink-0">
+                            <svg className="w-11 h-11 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
                             </svg>
-                            Browse Vehicles
-                        </button>
+                        </div>
+                        <div>
+                            <h1 className="text-4xl font-bold bg-linear-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent mb-2">
+                                Admin Dashboard
+                            </h1>
+                            <p className="text-slate-400 text-base">Manage users, vendors, and system analytics</p>
+                        </div>
                     </div>
 
                     {/* Stats Grid */}

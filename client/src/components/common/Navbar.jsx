@@ -67,8 +67,11 @@ const Navbar = () => {
                     <div className="hidden md:flex items-center gap-2 lg:gap-3">
                         <Link 
                             to="/vehicles" 
-                            className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-sm font-semibold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105"
                         >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                             Browse Vehicles
                         </Link>
 
@@ -208,8 +211,11 @@ const Navbar = () => {
                         <Link 
                             to="/vehicles" 
                             onClick={() => setMobileMenuOpen(false)}
-                            className="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-background-light transition-all"
+                            className="flex items-center gap-2 px-4 py-3 rounded-lg bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all"
                         >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
                             Browse Vehicles
                         </Link>
 
