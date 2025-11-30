@@ -52,15 +52,27 @@ const statusConfig = (status) => {
             };
         case "cancelled":
             return {
-                bg: "bg-gradient-to-r from-gray-500/20 to-slate-500/20",
-                text: "text-gray-400",
-                border: "border-gray-500/30",
+                bg: "bg-gradient-to-r from-red-500/20 to-rose-500/20",
+                text: "text-red-400",
+                border: "border-red-500/30",
                 icon: (
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 ),
                 label: "CANCELLED"
+            };
+        case "completed":
+            return {
+                bg: "bg-gradient-to-r from-green-500/20 to-emerald-500/20",
+                text: "text-green-400",
+                border: "border-green-500/30",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                ),
+                label: "COMPLETED"
             };
         default:
             return {

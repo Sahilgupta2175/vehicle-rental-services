@@ -19,6 +19,7 @@ const VendorDashboard = () => {
     const [bookings, setBookings] = useState([]);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [bookingFilter, setBookingFilter] = useState("all");
 
     useSocket();
 
@@ -112,6 +113,11 @@ const VendorDashboard = () => {
         setShowModal(false);
         setSelectedVehicle(null);
     };
+
+    // Filter bookings based on selected filter
+    const filteredBookings = bookingFilter === "all" 
+        ? bookings 
+        : bookings.filter(b => b.status === bookingFilter);
 
     return (
         <div className="space-y-6">
@@ -274,7 +280,97 @@ const VendorDashboard = () => {
 
             {/* Bookings Tab */}
             {tab === "bookings" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
+                    {/* Booking Statistics */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Total Bookings */}
+                        <button
+                            onClick={() => setBookingFilter("all")}
+                            className={`bg-slate-800/50 border rounded-xl p-5 transition-all text-left ${
+                                bookingFilter === "all" 
+                                    ? "border-blue-500 ring-2 ring-blue-500/50" 
+                                    : "border-slate-700 hover:border-blue-500/50"
+                            }`}
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-2xl font-bold text-white">{bookings.length}</p>
+                            <p className="text-sm text-slate-400 mt-1">Total Bookings</p>
+                        </button>
+
+                        {/* Paid Bookings */}
+                        <button
+                            onClick={() => setBookingFilter("paid")}
+                            className={`bg-slate-800/50 border rounded-xl p-5 transition-all text-left ${
+                                bookingFilter === "paid" 
+                                    ? "border-emerald-500 ring-2 ring-emerald-500/50" 
+                                    : "border-slate-700 hover:border-emerald-500/50"
+                            }`}
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-2xl font-bold text-white">
+                                {bookings.filter(b => b.status === 'paid').length}
+                            </p>
+                            <p className="text-sm text-slate-400 mt-1">Paid Bookings</p>
+                        </button>
+
+                        {/* Completed Bookings */}
+                        <button
+                            onClick={() => setBookingFilter("completed")}
+                            className={`bg-slate-800/50 border rounded-xl p-5 transition-all text-left ${
+                                bookingFilter === "completed" 
+                                    ? "border-cyan-500 ring-2 ring-cyan-500/50" 
+                                    : "border-slate-700 hover:border-cyan-500/50"
+                            }`}
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-2xl font-bold text-white">
+                                {bookings.filter(b => b.status === 'completed').length}
+                            </p>
+                            <p className="text-sm text-slate-400 mt-1">Completed</p>
+                        </button>
+
+                        {/* Cancelled Bookings */}
+                        <button
+                            onClick={() => setBookingFilter("cancelled")}
+                            className={`bg-slate-800/50 border rounded-xl p-5 transition-all text-left ${
+                                bookingFilter === "cancelled" 
+                                    ? "border-red-500 ring-2 ring-red-500/50" 
+                                    : "border-slate-700 hover:border-red-500/50"
+                            }`}
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-2xl font-bold text-white">
+                                {bookings.filter(b => b.status === 'cancelled').length}
+                            </p>
+                            <p className="text-sm text-slate-400 mt-1">Cancelled</p>
+                        </button>
+                    </div>
+
+                    {/* Bookings List */}
                     {bookings.length === 0 ? (
                         <div className="text-center py-16 bg-slate-900/50 rounded-2xl border border-slate-800">
                             <svg className="w-20 h-20 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,7 +381,7 @@ const VendorDashboard = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {bookings.map((b) => (
+                            {filteredBookings.map((b) => (
                                 <BookingCard
                                     key={b._id}
                                     booking={b}
