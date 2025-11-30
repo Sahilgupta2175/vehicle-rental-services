@@ -875,23 +875,6 @@ const BookingDetails = () => {
                             >
                                 Back to Dashboard
                             </button>
-                            {(booking.status === 'approved' || booking.status === 'paid') && (
-                                <button
-                                    onClick={() => canCancelBooking(booking) && handleCancelBooking()}
-                                    disabled={!canCancelBooking(booking)}
-                                    title={!canCancelBooking(booking) ? "Cannot cancel within 30 minutes of rental start time" : "Cancel this booking"}
-                                    className={`px-6 py-3 rounded-xl text-white font-medium transition-all flex items-center gap-2 ${
-                                        canCancelBooking(booking)
-                                            ? 'bg-linear-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 cursor-pointer'
-                                            : 'bg-gray-500 cursor-not-allowed opacity-50'
-                                    }`}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    Cancel Booking
-                                </button>
-                            )}
                             <button
                                 onClick={() => window.print()}
                                 className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all flex items-center gap-2"

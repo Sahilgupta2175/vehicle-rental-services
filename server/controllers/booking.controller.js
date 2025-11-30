@@ -201,6 +201,9 @@ exports.cancelBooking = async (req, res, next) => {
         booking.status = 'cancelled';
         await booking.save();
 
+        // Mark vehicle as available again after cancellation
+        await Vehicle.findByIdAndUpdate(booking.vehicle._id, { available: true });
+
         // Notify vendor via socket
         if (global.io) {
             global.io.to(`vendor:${String(booking.vendor)}`).emit('booking:cancelled', booking);

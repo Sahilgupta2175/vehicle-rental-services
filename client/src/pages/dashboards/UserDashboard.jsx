@@ -14,7 +14,7 @@ const UserDashboard = () => {
     // Check if booking can be cancelled (30 minutes before rental start)
     const canCancelBooking = (booking) => {
         const now = new Date();
-        const rentalStart = new Date(booking.startDate);
+        const rentalStart = new Date(booking.start);
         const thirtyMinutesBefore = new Date(rentalStart.getTime() - 30 * 60 * 1000);
         return now < thirtyMinutesBefore;
     };

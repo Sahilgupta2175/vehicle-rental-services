@@ -6,9 +6,14 @@ import VehicleForm from "../../components/vehicle/VehicleForm";
 import BookingCard from "../../components/booking/BookingCard";
 import { toast } from "react-toastify";
 import useSocket from "../../hooks/useSocket";
+import { io } from "socket.io-client";
+import useAuthStore from "../../store/authStore";
+
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 const VendorDashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
     const [tab, setTab] = useState("vehicles");
     const [vehicles, setVehicles] = useState([]);
     const [bookings, setBookings] = useState([]);
@@ -40,7 +45,24 @@ const VendorDashboard = () => {
             await Promise.all([loadVehicles(), loadBookings()]);
         };
         fetchData();
-    }, []);
+
+        // Setup socket listener for booking cancellations
+        if (user) {
+            const token = localStorage.getItem("vr_token");
+            const socket = io(SOCKET_URL, { auth: { token } });
+
+            socket.on("booking:cancelled", (booking) => {
+                toast.info(`Booking cancelled for ${booking.vehicle?.name || 'vehicle'}`);
+                // Refresh vehicles to show updated availability
+                loadVehicles();
+                loadBookings();
+            });
+
+            return () => {
+                socket.disconnect();
+            };
+        }
+    }, [user]);
 
     const handleCreate = () => {
         setSelectedVehicle(null);
