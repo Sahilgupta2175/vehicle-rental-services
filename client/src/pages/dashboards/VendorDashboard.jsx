@@ -67,16 +67,7 @@ const VendorDashboard = () => {
         }
     };
 
-    const handleBookingRespond = async (id, status) => {
-        try {
-            await bookingApi.respond(id, { status });
-            toast.success(`Booking ${status}`);
-            loadBookings();
-        // eslint-disable-next-line no-unused-vars
-        } catch (err) {
-            toast.error("Failed to update booking");
-        }
-    };
+    // Booking respond function removed - bookings are auto-approved
 
     const handleFormSaved = () => {
         setShowModal(false);
@@ -276,24 +267,6 @@ const VendorDashboard = () => {
                                 <BookingCard
                                     key={b._id}
                                     booking={b}
-                                    actions={
-                                        b.status === "pending" && (
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleBookingRespond(b._id, "approved")}
-                                                    className="flex-1 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm transition-all"
-                                                >
-                                                    Approve
-                                                </button>
-                                                <button
-                                                    onClick={() => handleBookingRespond(b._id, "rejected")}
-                                                    className="flex-1 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-medium text-sm transition-all"
-                                                >
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        )
-                                    }
                                 />
                             ))}
                         </div>

@@ -31,10 +31,9 @@ const UserDashboard = () => {
     const getStats = () => {
         return {
             total: bookings.length,
-            pending: bookings.filter(b => b.status === "pending").length,
-            approved: bookings.filter(b => b.status === "approved").length,
             paid: bookings.filter(b => b.status === "paid").length,
             completed: bookings.filter(b => b.status === "completed").length,
+            cancelled: bookings.filter(b => b.status === "cancelled").length,
         };
     };
 
@@ -79,13 +78,12 @@ const UserDashboard = () => {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="relative grid grid-cols-2 sm:grid-cols-5 gap-4 mt-8">
+                    <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
                         {[
                             { label: "Total", value: stats.total, icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", color: "blue", gradient: "from-blue-500/20 to-blue-600/20", border: "border-blue-500/30", text: "text-blue-400" },
-                            { label: "Pending", value: stats.pending, icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "amber", gradient: "from-amber-500/20 to-orange-500/20", border: "border-amber-500/30", text: "text-amber-400" },
-                            { label: "Approved", value: stats.approved, icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", color: "emerald", gradient: "from-emerald-500/20 to-green-500/20", border: "border-emerald-500/30", text: "text-emerald-400" },
                             { label: "Paid", value: stats.paid, icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z", color: "cyan", gradient: "from-cyan-500/20 to-blue-500/20", border: "border-cyan-500/30", text: "text-cyan-400" },
                             { label: "Completed", value: stats.completed, icon: "M5 13l4 4L19 7", color: "green", gradient: "from-green-500/20 to-emerald-500/20", border: "border-green-500/30", text: "text-green-400" },
+                            { label: "Cancelled", value: stats.cancelled, icon: "M6 18L18 6M6 6l12 12", color: "red", gradient: "from-red-500/20 to-rose-500/20", border: "border-red-500/30", text: "text-red-400" },
                         ].map((stat) => (
                             <div key={stat.label} className={`bg-linear-to-br ${stat.gradient} border ${stat.border} rounded-2xl p-5 hover:scale-105 transition-all duration-300 backdrop-blur-sm`}>
                                 <div className="flex items-center gap-3 mb-3">
@@ -107,10 +105,9 @@ const UserDashboard = () => {
                     <div className="flex flex-wrap gap-2">
                         {[
                             { value: "all", label: "All Bookings", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
-                            { value: "pending", label: "Pending", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
-                            { value: "approved", label: "Approved", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
                             { value: "paid", label: "Paid", icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" },
                             { value: "completed", label: "Completed", icon: "M5 13l4 4L19 7" },
+                            { value: "cancelled", label: "Cancelled", icon: "M6 18L18 6M6 6l12 12" },
                         ].map((tab) => (
                             <button
                                 key={tab.value}

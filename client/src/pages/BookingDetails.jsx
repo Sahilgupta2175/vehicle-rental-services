@@ -75,19 +75,12 @@ const BookingDetails = () => {
 
     const getStatusConfig = (status) => {
         const configs = {
-            pending: {
-                bg: "bg-yellow-500/20",
-                text: "text-yellow-400",
-                border: "border-yellow-500/30",
-                icon: "⏳",
-                label: "Pending Approval"
-            },
             approved: {
                 bg: "bg-blue-500/20",
                 text: "text-blue-400",
                 border: "border-blue-500/30",
                 icon: "✓",
-                label: "Approved"
+                label: "Approved - Awaiting Payment"
             },
             paid: {
                 bg: "bg-emerald-500/20",
@@ -103,13 +96,6 @@ const BookingDetails = () => {
                 icon: "✓",
                 label: "Completed"
             },
-            rejected: {
-                bg: "bg-red-500/20",
-                text: "text-red-400",
-                border: "border-red-500/30",
-                icon: "✗",
-                label: "Rejected"
-            },
             cancelled: {
                 bg: "bg-slate-500/20",
                 text: "text-slate-400",
@@ -118,7 +104,7 @@ const BookingDetails = () => {
                 label: "Cancelled"
             }
         };
-        return configs[status] || configs.pending;
+        return configs[status] || configs.approved;
     };
 
     const statusConfig = getStatusConfig(booking.status);

@@ -8,6 +8,6 @@ router.post('/', authenticate, allowRoles('user'), bookingCtrl.createBooking);
 router.get('/me', authenticate, bookingCtrl.getUserBookings);
 router.get('/vendor', authenticate, allowRoles('vendor'), bookingCtrl.getVendorBookings);
 router.get('/:id', authenticate, bookingCtrl.getBookingById);
-router.post('/:id/action', authenticate, allowRoles('vendor'), bookingCtrl.vendorAction);
+// Vendor action route removed - bookings are auto-approved
 
 module.exports = router;

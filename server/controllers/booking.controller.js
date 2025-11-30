@@ -39,7 +39,7 @@ exports.createBooking = async (req, res, next) => {
         // CHECK FOR OVERLAPPING BOOKINGS (NEW)
         const overlappingBooking = await Booking.findOne({
             vehicle: vehicleId,
-            status: { $in: ['pending', 'approved', 'paid'] },
+            status: { $in: ['approved', 'paid'] },
             $or: [
                 // New booking starts during existing booking
                 { start: { $lte: startDate }, end: { $gte: startDate } },
@@ -69,7 +69,8 @@ exports.createBooking = async (req, res, next) => {
             vendor: vehicle.owner,
             start: startDate,
             end: endDate,
-            totalAmount
+            totalAmount,
+            status: 'approved' // Auto-approve bookings
         });
 
         await booking.save();
@@ -115,48 +116,7 @@ exports.createBooking = async (req, res, next) => {
     }
 };
 
-exports.vendorAction = async (req, res, next) => {
-    try {
-        const booking = await Booking.findById(req.params.id).populate('vehicle user');
-        
-        if (!booking) {
-            return res.status(404).json({ error: 'Not found' });
-        }
-        
-        if (String(booking.vendor) !== String(req.user._id)) {
-            return res.status(403).json({ error: 'Forbidden' });
-        }
-
-        const { action } = req.body; // 'approve' or 'reject'
-        
-        if (action === 'approve') {
-            booking.status = 'approved';
-        } 
-        else if (action === 'reject') {
-            booking.status = 'rejected';
-        } 
-        else {
-            return res.status(400).json({ error: 'Invalid action' });
-        }
-
-        await booking.save();
-
-        if (global.io) {
-            global.io.to(`user:${String(booking.user)}`).emit('booking:update', booking);
-            global.io.to(`vendor:${String(booking.vendor)}`).emit('booking:update', booking);
-        }
-
-        sendMail({ 
-            to: booking.user.email, 
-            subject: `Booking ${booking.status}`, 
-            text: `Your booking is ${booking.status}` 
-        }).catch(console.warn);
-
-        res.json(booking);
-    } catch (err) {
-        next(err);
-    }
-};
+// Vendor action removed - bookings are auto-approved
 
 exports.getUserBookings = async (req, res, next) => {
     try {
