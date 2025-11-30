@@ -13,4 +13,13 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    host: true,
+    port: process.env.PORT || 5173,
+    allowedHosts: [
+      'vehicle-rental-services.onrender.com',
+      '.onrender.com',
+      'localhost'
+    ]
+  }
 })
