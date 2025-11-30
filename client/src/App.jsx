@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/common/Navbar";
-import PageContainer from "./components/common/PageContainer";
+import PageContainer from "./components/common/PageContainer.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RoleRoute from "./components/common/RoleRoute";
 import useAuthStore from "./store/authStore";
