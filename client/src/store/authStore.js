@@ -7,6 +7,10 @@ const useAuthStore = create((set, get) => ({
     isAuthenticated: false,
     initialized: false,
 
+    setUser: (user) => {
+        set({ user });
+    },
+
     init: async () => {
         const token = localStorage.getItem("vr_token");
 

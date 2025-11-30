@@ -52,7 +52,8 @@ exports.register = async (req, res, next) => {
                 name: user.name, 
                 email: user.email, 
                 role: user.role,
-                phone: user.phone
+                phone: user.phone,
+                profilePicture: user.profilePicture
             } 
         });
     } catch (err) {
@@ -95,7 +96,8 @@ exports.login = async (req, res, next) => {
                 name: user.name, 
                 email: user.email, 
                 role: user.role,
-                phone: user.phone
+                phone: user.phone,
+                profilePicture: user.profilePicture
             } 
         });
     } catch (err) {
@@ -241,6 +243,67 @@ exports.changePassword = async (req, res, next) => {
         });
     } catch (err) {
         console.error('[Auth] Change password error:', err);
+        next(err);
+    }
+};
+
+// Update user profile
+exports.updateProfile = async (req, res, next) => {
+    try {
+        const { name, phone } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (name) user.name = name;
+        if (phone) user.phone = phone;
+
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: 'Profile updated successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone,
+                profilePicture: user.profilePicture
+            }
+        });
+    } catch (err) {
+        console.error('[Auth] Update profile error:', err);
+        next(err);
+    }
+};
+
+// Upload profile picture
+exports.uploadProfilePicture = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Store the file path
+        user.profilePicture = `/uploads/${req.file.filename}`;
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: 'Profile picture uploaded successfully',
+            profilePicture: user.profilePicture
+        });
+    } catch (err) {
+        console.error('[Auth] Upload profile picture error:', err);
         next(err);
     }
 };

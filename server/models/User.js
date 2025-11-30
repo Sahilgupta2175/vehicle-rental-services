@@ -22,6 +22,10 @@ const UserSchema = new mongoose.Schema({
     phone: { 
         type: String 
     },
+    profilePicture: {
+        type: String,
+        default: ''
+    },
     isVendorApproved: { 
         type: Boolean,
         default: false 

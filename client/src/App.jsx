@@ -16,6 +16,7 @@ import VehicleDetail from "./pages/VehicleDetail";
 import Booking from "./pages/Booking";
 import Payment from "./pages/Payment";
 import BookingDetails from "./pages/BookingDetails";
+import Profile from "./pages/Profile";
 
 import UserDashboard from "./pages/dashboards/UserDashboard";
 import VendorDashboard from "./pages/dashboards/VendorDashboard";
@@ -61,6 +62,14 @@ function App() {
                     <Route path="/admin/signup" element={<AdminSignup />} />
 
                     {/* Protected: any logged-in user */}
+                    <Route
+                        path="/profile"
+                        element={
+                        <ProtectedRoute>
+                            <Profile />
+                        </ProtectedRoute>
+                        }
+                    />
                     <Route
                         path="/booking/:vehicleId"
                         element={
