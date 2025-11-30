@@ -6,4 +6,5 @@ export const bookingApi = {
     vendorBookings: () => api.get("/bookings/vendor"),
     respond: (id, data) => api.post(`/bookings/${id}/respond`, data),
     getById: (id) => api.get(`/bookings/${id}`),
+    cancel: (id) => api.post(`/bookings/${id}/cancel`),
 };

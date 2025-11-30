@@ -118,6 +118,46 @@ exports.createBooking = async (req, res, next) => {
 
 // Vendor action removed - bookings are auto-approved
 
+exports.cancelBooking = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id).populate('vehicle user');
+        
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+        
+        // Check if user owns this booking
+        if (String(booking.user._id) !== String(req.user._id)) {
+            return res.status(403).json({ success: false, message: 'Not authorized to cancel this booking' });
+        }
+
+        // Only allow cancellation of approved or paid bookings
+        if (!['approved', 'paid'].includes(booking.status)) {
+            return res.status(400).json({ success: false, message: `Cannot cancel booking with status: ${booking.status}` });
+        }
+
+        booking.status = 'cancelled';
+        await booking.save();
+
+        // Notify vendor via socket
+        if (global.io) {
+            global.io.to(`vendor:${String(booking.vendor)}`).emit('booking:cancelled', booking);
+        }
+
+        // Send notification emails
+        sendMail({ 
+            to: booking.user.email, 
+            subject: 'Booking Cancelled', 
+            text: `Your booking for ${booking.vehicle.name} has been cancelled successfully.` 
+        }).catch(console.warn);
+
+        res.json({ success: true, booking, message: 'Booking cancelled successfully' });
+    } catch (err) {
+        console.error('[Booking] Cancel error:', err);
+        next(err);
+    }
+};
+
 exports.getUserBookings = async (req, res, next) => {
     try {
         const bookings = await Booking.find({ user: req.user._id }).populate('vehicle');
