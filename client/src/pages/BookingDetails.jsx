@@ -177,37 +177,50 @@ const BookingDetails = () => {
                     }
                     
                     .print-header {
-                        border-bottom: 3px solid #3b82f6;
-                        padding-bottom: 20px;
-                        margin-bottom: 25px;
+                        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+                        padding: 18px 22px;
+                        margin: -20px -30px 18px -30px;
                         display: flex;
                         justify-content: space-between;
-                        align-items: flex-start;
+                        align-items: center;
+                        border-radius: 0;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                     }
                     
                     .print-company-name {
-                        font-size: 24px;
+                        font-size: 26px;
                         font-weight: bold;
-                        color: #1e293b;
-                        margin-bottom: 5px;
+                        color: #ffffff;
+                        margin-bottom: 6px;
                     }
                     
                     .print-company-tagline {
-                        color: #64748b;
-                        font-size: 12px;
-                        margin-bottom: 10px;
+                        color: #dbeafe;
+                        font-size: 13px;
+                        margin-bottom: 12px;
                     }
                     
                     .print-company-details {
                         font-size: 11px;
-                        color: #64748b;
-                        line-height: 1.6;
+                        color: #e0e7ff;
+                        line-height: 1.8;
                     }
                     
                     .print-header-right {
                         text-align: right;
                         font-size: 11px;
-                        color: #64748b;
+                        color: #e0e7ff;
+                        background: rgba(255,255,255,0.1);
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                        border: 1px solid rgba(255,255,255,0.2);
+                    }
+                    
+                    .print-header-right strong {
+                        color: #ffffff;
+                        font-size: 10px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
                     }
                     
                     .print-title {
@@ -215,129 +228,160 @@ const BookingDetails = () => {
                         font-weight: bold;
                         color: #1e293b;
                         text-align: center;
-                        margin: 20px 0;
+                        margin: 18px 0 14px 0;
                         text-transform: uppercase;
-                        letter-spacing: 1px;
-                        padding: 10px;
-                        background: #f1f5f9;
-                        border-radius: 6px;
+                        letter-spacing: 1.5px;
+                        padding: 0;
+                        background: transparent;
+                        border-radius: 0;
                     }
                     
                     .print-section {
-                        margin-bottom: 20px;
+                        margin-bottom: 12px;
                         page-break-inside: avoid;
+                        background: #ffffff;
+                        border: 1.5px solid #e2e8f0;
+                        border-radius: 10px;
+                        padding: 14px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                     }
                     
                     .print-section-title {
-                        font-size: 14px;
+                        font-size: 12px;
                         font-weight: 700;
-                        color: #1e293b;
-                        background: #f8fafc;
+                        color: #1e40af;
+                        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
                         padding: 8px 12px;
-                        margin-bottom: 12px;
-                        border-left: 4px solid #3b82f6;
+                        margin: -14px -14px 10px -14px;
+                        border-radius: 8px 8px 0 0;
+                        border-bottom: 2px solid #3b82f6;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
                     }
                     
                     .print-table {
                         width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 10px;
+                        border-collapse: separate;
+                        border-spacing: 0;
+                        margin-top: 0;
                     }
                     
                     .print-table tr {
-                        border-bottom: 1px solid #e2e8f0;
+                        border-bottom: 1px solid #f1f5f9;
                     }
                     
                     .print-table tr:last-child {
                         border-bottom: none;
                     }
                     
+                    .print-table tr:nth-child(even) {
+                        background: #f8fafc;
+                    }
+                    
                     .print-table td {
-                        padding: 10px 8px;
+                        padding: 8px 10px;
                         font-size: 12px;
                     }
                     
                     .print-table td:first-child {
-                        color: #64748b;
-                        font-weight: 500;
-                        width: 35%;
+                        color: #475569;
+                        font-weight: 600;
+                        width: 40%;
+                        text-transform: uppercase;
+                        font-size: 10px;
+                        letter-spacing: 0.3px;
                     }
                     
                     .print-table td:last-child {
-                        color: #1e293b;
+                        color: #0f172a;
                         font-weight: 600;
+                        font-size: 12px;
                     }
                     
                     .print-barcode {
                         text-align: center;
-                        margin: 15px 0;
-                        padding: 15px;
-                        background: #f8fafc;
-                        border: 2px dashed #cbd5e1;
-                        border-radius: 8px;
+                        margin: 14px 0;
+                        padding: 14px;
+                        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                        border: 2px dashed #94a3b8;
+                        border-radius: 12px;
+                        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
                     }
                     
                     .print-booking-id {
                         font-family: 'Courier New', monospace;
-                        font-size: 13px;
-                        color: #1e293b;
-                        letter-spacing: 1px;
+                        font-size: 14px;
+                        color: #0f172a;
+                        letter-spacing: 2px;
                         font-weight: bold;
-                        margin: 8px 0;
+                        margin: 6px 0;
+                        padding: 6px 14px;
+                        background: #ffffff;
+                        border-radius: 6px;
+                        display: inline-block;
+                        border: 1px solid #cbd5e1;
                     }
                     
                     .print-status-badge {
                         display: inline-block;
                         padding: 6px 16px;
-                        border-radius: 20px;
-                        font-size: 11px;
+                        border-radius: 25px;
+                        font-size: 10px;
                         font-weight: 700;
                         margin-top: 8px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
                     }
                     
                     .print-status-paid {
-                        background: #d1fae5;
+                        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
                         color: #065f46;
-                        border: 1px solid #10b981;
+                        border: 1.5px solid #10b981;
+                        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
                     }
                     
                     .print-total-box {
-                        background: #eff6ff;
-                        border: 2px solid #3b82f6;
-                        padding: 15px 20px;
-                        border-radius: 8px;
-                        margin-top: 15px;
+                        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                        border: 2.5px solid #10b981;
+                        padding: 14px 18px;
+                        border-radius: 12px;
+                        margin-top: 10px;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
+                        box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
                     }
                     
                     .print-total-label {
-                        font-size: 16px;
+                        font-size: 15px;
                         font-weight: 700;
-                        color: #1e293b;
+                        color: #065f46;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
                     }
                     
                     .print-total-amount {
                         font-size: 22px;
                         font-weight: bold;
-                        color: #2563eb;
+                        color: #065f46;
                     }
                     
                     .print-instructions {
-                        background: #fef3c7;
-                        padding: 15px;
-                        border-radius: 6px;
-                        border: 1px solid #fbbf24;
-                        margin-top: 10px;
+                        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                        padding: 12px 14px;
+                        border-radius: 10px;
+                        border: 1.5px solid #fbbf24;
+                        margin-top: 0;
+                        box-shadow: 0 2px 4px rgba(251, 191, 36, 0.1);
                     }
                     
                     .print-instructions ul {
                         margin: 0;
                         padding-left: 20px;
-                        font-size: 11px;
-                        color: #92400e;
-                        line-height: 1.8;
+                        font-size: 10.5px;
+                        color: #78350f;
+                        line-height: 1.7;
+                        font-weight: 500;
                     }
                     
                     .print-terms {
@@ -391,14 +435,15 @@ const BookingDetails = () => {
                     
                     .print-vehicle-image {
                         max-width: 100%;
-                        max-height: 180px;
+                        max-height: 160px;
                         height: auto;
-                        border-radius: 6px;
-                        margin-bottom: 15px;
+                        border-radius: 10px;
+                        margin-bottom: 10px;
+                        border: 2px solid #e2e8f0;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                         display: block;
                         margin-left: auto;
                         margin-right: auto;
-                        border: 1px solid #e2e8f0;
                     }
                 }
             `}</style>
