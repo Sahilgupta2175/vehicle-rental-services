@@ -18,10 +18,14 @@ connectDB(MONGO_URI);
 // Create HTTP server
 const server = http.createServer(app);
 
-// Initialize Socket.IO
+// Initialize Socket.IO with multiple origins
+const allowedOrigins = process.env.CLIENT_URL 
+    ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+    : ['*'];
+
 const io = new Server(server, { 
     cors: { 
-        origin: process.env.CLIENT_URL || '*',
+        origin: allowedOrigins,
         credentials: true
     } 
 });
