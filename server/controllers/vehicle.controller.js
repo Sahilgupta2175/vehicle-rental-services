@@ -109,6 +109,33 @@ exports.deleteVehicle = async (req, res, next) => {
 
 exports.getVehicles = async (req, res, next) => {
     try {
+        // First, check and complete any expired bookings
+        const Booking = require('../models/Booking');
+        const now = new Date();
+        const endedBookings = await Booking.find({
+            status: 'paid',
+            end: { $lt: now }
+        });
+
+        for (const booking of endedBookings) {
+            // Mark booking as completed
+            booking.status = 'completed';
+            await booking.save();
+
+            // Check if there are any other active bookings for this vehicle
+            const activeBookings = await Booking.countDocuments({
+                vehicle: booking.vehicle,
+                status: { $in: ['paid', 'approved', 'pending'] },
+                start: { $lte: now },
+                end: { $gte: now }
+            });
+
+            // If no active bookings, make vehicle available
+            if (activeBookings === 0) {
+                await Vehicle.findByIdAndUpdate(booking.vehicle, { available: true });
+            }
+        }
+
         const { q, city, type, minPrice, maxPrice, page = 1, limit = 20, mine } = req.query;
         const filter = {};
 

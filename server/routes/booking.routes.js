@@ -9,6 +9,7 @@ router.get('/me', authenticate, bookingCtrl.getUserBookings);
 router.get('/vendor', authenticate, allowRoles('vendor'), bookingCtrl.getVendorBookings);
 router.get('/:id', authenticate, bookingCtrl.getBookingById);
 router.post('/:id/cancel', authenticate, allowRoles('user'), bookingCtrl.cancelBooking);
+router.post('/complete-expired', authenticate, allowRoles('admin', 'vendor'), bookingCtrl.completeExpiredBookings);
 // Vendor action route removed - bookings are auto-approved
 
 module.exports = router;

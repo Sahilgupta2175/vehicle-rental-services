@@ -236,6 +236,10 @@ exports.cancelBooking = async (req, res, next) => {
 
 exports.getUserBookings = async (req, res, next) => {
     try {
+        // Check and complete any expired bookings before fetching
+        const { completeExpiredBookings } = require('../cron/jobs');
+        await completeExpiredBookings();
+        
         const bookings = await Booking.find({ user: req.user._id }).populate('vehicle');
         res.json(bookings);
     } catch (err) {
@@ -245,6 +249,10 @@ exports.getUserBookings = async (req, res, next) => {
 
 exports.getVendorBookings = async (req, res, next) => {
     try {
+        // Check and complete any expired bookings before fetching
+        const { completeExpiredBookings } = require('../cron/jobs');
+        await completeExpiredBookings();
+        
         const bookings = await Booking.find({ vendor: req.user._id }).populate('vehicle user');
         res.json(bookings);
     } catch (err) {
@@ -277,6 +285,17 @@ exports.getBookingById = async (req, res, next) => {
         }
 
         res.json(booking);
+    } catch (err) {
+        next(err);
+    }
+};
+
+// Complete expired bookings and make vehicles available
+exports.completeExpiredBookings = async (req, res, next) => {
+    try {
+        const { completeExpiredBookings } = require('../cron/jobs');
+        await completeExpiredBookings();
+        res.json({ success: true, message: 'Expired bookings processed successfully' });
     } catch (err) {
         next(err);
     }

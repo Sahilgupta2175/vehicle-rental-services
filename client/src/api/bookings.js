@@ -7,4 +7,5 @@ export const bookingApi = {
     respond: (id, data) => api.post(`/bookings/${id}/respond`, data),
     getById: (id) => api.get(`/bookings/${id}`),
     cancel: (id) => api.post(`/bookings/${id}/cancel`),
+    completeExpired: () => api.post("/bookings/complete-expired"),
 };

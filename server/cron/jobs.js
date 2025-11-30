@@ -5,8 +5,8 @@ const moment = require('moment');
 const { sendSMS } = require('../services/sms.service');
 const { generateMonthlyReport } = require('../services/report.service');
 
-// Run every hour to complete bookings and make vehicles available
-cron.schedule('0 * * * *', async () => {
+// Export function to complete bookings (can be called manually or by cron)
+const completeExpiredBookings = async () => {
     try {
         // Find all paid bookings that have ended
         const now = new Date();
@@ -43,7 +43,12 @@ cron.schedule('0 * * * *', async () => {
     } catch (err) {
         console.error('[cron] complete bookings error', err);
     }
-});
+};
+
+// Run every 15 minutes to complete bookings and make vehicles available
+cron.schedule('*/15 * * * *', completeExpiredBookings);
+
+module.exports = { completeExpiredBookings };
 
 cron.schedule('0 2 * * *', async () => {
     // daily at 02:00 - auto cancel pending bookings older than AUTO_CANCEL_HOURS

@@ -9,6 +9,7 @@ const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [roleFilter, setRoleFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedDate, setSelectedDate] = useState({
         year: new Date().getFullYear(),
         month: new Date().getMonth() + 1,
@@ -37,17 +38,44 @@ const AdminDashboard = () => {
         }
     };
 
-    const filterUsers = (userList, filter) => {
-        if (filter === 'all') {
-            setUsers(userList);
-        } else {
-            setUsers(userList.filter(u => u.role === filter));
+    const filterUsers = (userList, filter, search = searchQuery) => {
+        let filtered = userList;
+
+        // Apply role filter
+        if (filter !== 'all') {
+            filtered = filtered.filter(u => u.role === filter);
         }
+
+        // Apply search filter
+        if (search.trim()) {
+            const query = search.toLowerCase().trim();
+            filtered = filtered.filter(u => {
+                const name = u.name?.toLowerCase() || '';
+                const email = u.email?.toLowerCase() || '';
+                const role = u.role?.toLowerCase() || '';
+                const status = u.role === 'vendor'
+                    ? (u.isVendorApproved ? 'approved' : 'pending')
+                    : 'active';
+
+                return name.includes(query) ||
+                    email.includes(query) ||
+                    role.includes(query) ||
+                    status.includes(query);
+            });
+        }
+
+        setUsers(filtered);
     };
 
     const handleRoleFilterChange = (filter) => {
         setRoleFilter(filter);
-        filterUsers(allUsers, filter);
+        filterUsers(allUsers, filter, searchQuery);
+    };
+
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        filterUsers(allUsers, roleFilter, query);
     };
 
     useEffect(() => {
@@ -179,7 +207,7 @@ const AdminDashboard = () => {
 
                 {/* Users & Vendors Section */}
                 <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-3xl p-6 shadow-xl">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div className="flex flex-col gap-4 mb-6">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
                                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,6 +219,37 @@ const AdminDashboard = () => {
                                 <p className="text-sm text-slate-400">Manage vendors and their approval</p>
                             </div>
                         </div>
+
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                placeholder="Search by name, email, role, or status..."
+                                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        filterUsers(allUsers, roleFilter, '');
+                                    }}
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition-colors"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Filter Buttons */}
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => handleRoleFilterChange('all')}
