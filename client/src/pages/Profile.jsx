@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import { authApi } from '../api/auth';
-import PageContainer from '../components/common/pageContainer';
+import PageContainer from '../components/common/PageContainer';
 import Loader from '../components/common/Loader';
 
 const Profile = () => {
