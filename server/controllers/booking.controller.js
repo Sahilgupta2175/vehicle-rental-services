@@ -136,6 +136,19 @@ exports.cancelBooking = async (req, res, next) => {
             return res.status(400).json({ success: false, message: `Cannot cancel booking with status: ${booking.status}` });
         }
 
+        // Check if cancellation is within allowed time window
+        // User can cancel from booking date until 30 minutes before rental starts
+        const now = new Date();
+        const rentalStartTime = new Date(booking.startDate);
+        const thirtyMinutesBeforeRental = new Date(rentalStartTime.getTime() - 30 * 60 * 1000);
+
+        if (now >= thirtyMinutesBeforeRental) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Cannot cancel booking within 30 minutes of rental start time' 
+            });
+        }
+
         booking.status = 'cancelled';
         await booking.save();
 

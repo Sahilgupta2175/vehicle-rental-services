@@ -10,6 +10,15 @@ const BookingDetails = () => {
     const [booking, setBooking] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Check if booking can be cancelled (30 minutes before rental start)
+    const canCancelBooking = (booking) => {
+        if (!booking) return false;
+        const now = new Date();
+        const rentalStart = new Date(booking.startDate);
+        const thirtyMinutesBefore = new Date(rentalStart.getTime() - 30 * 60 * 1000);
+        return now < thirtyMinutesBefore;
+    };
+
     const fetchBooking = async () => {
         try {
             const { data } = await bookingApi.getById(bookingId);
@@ -861,8 +870,14 @@ const BookingDetails = () => {
                             </button>
                             {(booking.status === 'approved' || booking.status === 'paid') && (
                                 <button
-                                    onClick={handleCancelBooking}
-                                    className="px-6 py-3 rounded-xl bg-linear-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-medium transition-all flex items-center gap-2"
+                                    onClick={() => canCancelBooking(booking) && handleCancelBooking()}
+                                    disabled={!canCancelBooking(booking)}
+                                    title={!canCancelBooking(booking) ? "Cannot cancel within 30 minutes of rental start time" : "Cancel this booking"}
+                                    className={`px-6 py-3 rounded-xl text-white font-medium transition-all flex items-center gap-2 ${
+                                        canCancelBooking(booking)
+                                            ? 'bg-linear-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 cursor-pointer'
+                                            : 'bg-gray-500 cursor-not-allowed opacity-50'
+                                    }`}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
