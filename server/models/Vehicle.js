@@ -19,6 +19,30 @@ const VehicleSchema = new mongoose.Schema({
         set: v => v ? v.toLowerCase() : v
     },
     description: String,
+    specifications: {
+        transmission: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
+        },
+        fuelType: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
+        },
+        seating: Number,
+        mileage: String,
+        year: Number,
+        color: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
+        },
+        registrationNumber: {
+            type: String,
+            set: v => v ? v.toUpperCase() : v
+        }
+    },
     images: [
         { 
             url: String, 

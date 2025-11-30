@@ -196,7 +196,7 @@ const VehicleDetail = () => {
                                         </div>
                                         <div>
                                             <p className="text-xs text-slate-500">Transmission</p>
-                                            <p className="text-sm font-semibold text-slate-200">{vehicle.specs?.transmission || "N/A"}</p>
+                                            <p className="text-sm font-semibold text-slate-200">{vehicle.specifications?.transmission || "N/A"}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@ const VehicleDetail = () => {
                                         </div>
                                         <div>
                                             <p className="text-xs text-slate-500">Fuel Type</p>
-                                            <p className="text-sm font-semibold text-slate-200">{vehicle.specs?.fuel || "N/A"}</p>
+                                            <p className="text-sm font-semibold text-slate-200">{vehicle.specifications?.fuelType || "N/A"}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -224,7 +224,7 @@ const VehicleDetail = () => {
                                         </div>
                                         <div>
                                             <p className="text-xs text-slate-500">Seating</p>
-                                            <p className="text-sm font-semibold text-slate-200">{vehicle.specs?.seats || "N/A"} Seats</p>
+                                            <p className="text-sm font-semibold text-slate-200">{vehicle.specifications?.seating ? `${vehicle.specifications.seating} Seats` : "N/A"}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -242,6 +242,70 @@ const VehicleDetail = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                {vehicle.specifications?.year && (
+                                    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                                                <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500">Year</p>
+                                                <p className="text-sm font-semibold text-slate-200">{vehicle.specifications.year}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {vehicle.specifications?.mileage && (
+                                    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500">Mileage</p>
+                                                <p className="text-sm font-semibold text-slate-200">{vehicle.specifications.mileage}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {vehicle.specifications?.color && (
+                                    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                                                <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500">Color</p>
+                                                <p className="text-sm font-semibold text-slate-200">{vehicle.specifications.color}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {vehicle.specifications?.registrationNumber && (
+                                    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 col-span-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                                                <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500">Registration Number</p>
+                                                <p className="text-sm font-semibold text-slate-200 uppercase tracking-wider">{vehicle.specifications.registrationNumber}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

@@ -3,7 +3,7 @@ const { uploadBuffer } = require('../services/storage.service');
 
 exports.createVehicle = async (req, res, next) => {
     try {
-        const { name, type, description, pricePerHour, location } = req.body;
+        const { name, type, description, pricePerHour, location, specifications } = req.body;
         const owner = req.user._id;
         const vehicle = new Vehicle({
             owner,
@@ -11,7 +11,8 @@ exports.createVehicle = async (req, res, next) => {
             type,
             description,
             pricePerHour: Number(pricePerHour),
-            location: typeof location === 'string' ? JSON.parse(location) : location
+            location: typeof location === 'string' ? JSON.parse(location) : location,
+            specifications: typeof specifications === 'string' ? JSON.parse(specifications) : specifications
         });
 
         if (req.files && req.files.length) {
@@ -64,6 +65,14 @@ exports.updateVehicle = async (req, res, next) => {
             vehicle.location = {
                 ...vehicle.location,
                 ...req.body.location
+            };
+        }
+
+        // Handle specifications as nested object
+        if (req.body.specifications) {
+            vehicle.specifications = {
+                ...vehicle.specifications,
+                ...req.body.specifications
             };
         }
 

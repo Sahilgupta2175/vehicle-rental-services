@@ -11,6 +11,13 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
         state: initialData?.location?.state || "",
         address: initialData?.location?.address || "",
         description: initialData?.description || "",
+        transmission: initialData?.specifications?.transmission || "",
+        fuelType: initialData?.specifications?.fuelType || "",
+        seating: initialData?.specifications?.seating || "",
+        mileage: initialData?.specifications?.mileage || "",
+        year: initialData?.specifications?.year || "",
+        color: initialData?.specifications?.color || "",
+        registrationNumber: initialData?.specifications?.registrationNumber || "",
     });
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -43,6 +50,15 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
             fd.set("location[city]", form.city);
             fd.set("location[state]", form.state);
             fd.set("location[address]", form.address);
+            
+            // Add specifications
+            if (form.transmission) fd.set("specifications[transmission]", form.transmission);
+            if (form.fuelType) fd.set("specifications[fuelType]", form.fuelType);
+            if (form.seating) fd.set("specifications[seating]", form.seating);
+            if (form.mileage) fd.set("specifications[mileage]", form.mileage);
+            if (form.year) fd.set("specifications[year]", form.year);
+            if (form.color) fd.set("specifications[color]", form.color);
+            if (form.registrationNumber) fd.set("specifications[registrationNumber]", form.registrationNumber);
 
             images.forEach((file) => fd.append("images", file));
 
@@ -204,6 +220,134 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
                         placeholder="Street address or landmark"
                         className="w-full"
                     />
+                </div>
+            </div>
+
+            {/* Specifications Section */}
+            <div className="pt-4">
+                <div className="flex items-center gap-2 mb-4">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <h4 className="text-lg font-semibold text-slate-200">Specifications</h4>
+                    <span className="text-xs text-slate-500">(Optional but recommended)</span>
+                </div>
+
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Transmission */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Transmission
+                        </label>
+                        <select 
+                            name="transmission" 
+                            value={form.transmission} 
+                            onChange={handleChange}
+                            className="w-full appearance-none"
+                        >
+                            <option value="">Select Transmission</option>
+                            <option value="manual">Manual</option>
+                            <option value="automatic">Automatic</option>
+                            <option value="semi-automatic">Semi-Automatic</option>
+                        </select>
+                    </div>
+
+                    {/* Fuel Type */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Fuel Type
+                        </label>
+                        <select 
+                            name="fuelType" 
+                            value={form.fuelType} 
+                            onChange={handleChange}
+                            className="w-full appearance-none"
+                        >
+                            <option value="">Select Fuel Type</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="electric">Electric</option>
+                            <option value="cng">CNG</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    {/* Seating Capacity */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Seating Capacity
+                        </label>
+                        <input
+                            type="number"
+                            name="seating"
+                            min="1"
+                            max="20"
+                            value={form.seating}
+                            onChange={handleChange}
+                            placeholder="e.g., 5"
+                            className="w-full"
+                        />
+                    </div>
+
+                    {/* Year */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Manufacturing Year
+                        </label>
+                        <input
+                            type="number"
+                            name="year"
+                            min="1990"
+                            max={new Date().getFullYear() + 1}
+                            value={form.year}
+                            onChange={handleChange}
+                            placeholder="e.g., 2024"
+                            className="w-full"
+                        />
+                    </div>
+
+                    {/* Mileage */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Mileage
+                        </label>
+                        <input
+                            name="mileage"
+                            value={form.mileage}
+                            onChange={handleChange}
+                            placeholder="e.g., 20 km/l"
+                            className="w-full"
+                        />
+                    </div>
+
+                    {/* Color */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Color
+                        </label>
+                        <input
+                            name="color"
+                            value={form.color}
+                            onChange={handleChange}
+                            placeholder="e.g., Black"
+                            className="w-full"
+                        />
+                    </div>
+
+                    {/* Registration Number */}
+                    <div className="space-y-2 sm:col-span-2 lg:col-span-3">
+                        <label className="block text-sm font-medium text-slate-300">
+                            Registration Number
+                        </label>
+                        <input
+                            name="registrationNumber"
+                            value={form.registrationNumber}
+                            onChange={handleChange}
+                            placeholder="e.g., MH12AB1234"
+                            className="w-full uppercase"
+                            maxLength="15"
+                        />
+                    </div>
                 </div>
             </div>
 
