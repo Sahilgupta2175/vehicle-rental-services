@@ -185,12 +185,12 @@ const Profile = () => {
                             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-700 shadow-lg">
                                 {user.profilePicture ? (
                                     <img 
-                                        src={`http://localhost:5000${user.profilePicture}`}
+                                        src={user.profilePicture}
                                         alt={user.name}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                    <div className="w-full h-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                                         <span className="text-4xl font-bold text-white">
                                             {user.name?.charAt(0).toUpperCase()}
                                         </span>

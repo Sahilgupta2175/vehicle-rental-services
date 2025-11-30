@@ -6,16 +6,8 @@ const { authLimiter } = require('../middleware/rateLimiter.middleware');
 const multer = require('multer');
 const path = require('path');
 
-// Configure multer for profile picture uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/profiles/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// Configure multer for profile picture uploads (memory storage for Cloudinary)
+const storage = multer.memoryStorage();
 
 const uploadProfilePic = multer({ 
     storage, 

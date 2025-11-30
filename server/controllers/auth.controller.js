@@ -293,8 +293,33 @@ exports.uploadProfilePicture = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Store the file path
-        user.profilePicture = `/uploads/${req.file.filename}`;
+        // Upload to Cloudinary
+        const { uploadWithOptions, remove } = require('../services/storage.service');
+        
+        // Delete old profile picture from Cloudinary if exists
+        if (user.profilePicture && user.profilePicture.includes('cloudinary')) {
+            try {
+                // Extract public_id from URL
+                const urlParts = user.profilePicture.split('/');
+                const publicIdWithExt = urlParts.slice(-2).join('/');
+                const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
+                await remove(publicId);
+            } catch (deleteErr) {
+                console.warn('[Auth] Failed to delete old profile picture:', deleteErr);
+            }
+        }
+
+        // Upload new profile picture
+        const result = await uploadWithOptions(req.file.buffer, {
+            folder: 'profiles',
+            width: 400,
+            height: 400,
+            crop: 'fill',
+            tags: ['profile', user.role]
+        });
+
+        // Store the Cloudinary URL
+        user.profilePicture = result.secure_url;
         await user.save();
 
         res.json({ 
