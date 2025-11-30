@@ -8,12 +8,15 @@ const VehicleSchema = new mongoose.Schema({
     },
     name: { 
         type: String, 
-        required: true 
+        required: true,
+        set: v => v ? v.toLowerCase() : v,
+        get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
     },
     type: { 
         type: String, 
         enum: ['car', 'bike', 'scooter', 'other'], 
-        default: 'car' 
+        default: 'car',
+        set: v => v ? v.toLowerCase() : v
     },
     description: String,
     images: [
@@ -23,10 +26,26 @@ const VehicleSchema = new mongoose.Schema({
         }
     ],
     location: {
-        address: String,
-        city: String,
-        state: String,
-        country: String,
+        address: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : v
+        },
+        city: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
+        },
+        state: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
+        },
+        country: {
+            type: String,
+            set: v => v ? v.toLowerCase() : v,
+            get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
+        },
         lat: Number,
         lng: Number
     },
@@ -49,6 +68,9 @@ const VehicleSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now 
     }
+}, {
+    toJSON: { getters: true },
+    toObject: { getters: true }
 });
 
 // Indexes for faster queries

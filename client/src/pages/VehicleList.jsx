@@ -100,16 +100,27 @@ const VehicleList = () => {
         setShowFilters(false);
     };
 
-    const clearFilters = () => {
-        setFilters({
+    const clearFilters = async () => {
+        const emptyFilters = {
             q: "",
             city: "",
             type: "",
             minPrice: "",
             maxPrice: "",
-        });
+        };
+        setFilters(emptyFilters);
         setSearchParams({});
-        loadVehicles();
+        
+        // Fetch all vehicles with no filters
+        try {
+            setLoading(true);
+            const { data } = await vehicleApi.list({});
+            setVehicles(data.vehicles || data);
+        } catch (err) {
+            console.error("Failed to load vehicles", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const activeFiltersCount = Object.values(filters).filter(v => v).length;
@@ -267,12 +278,26 @@ const VehicleList = () => {
                                 <span className="text-slate-400">{labels[key]}:</span>
                                 <span className="text-white font-medium">{value}</span>
                                 <button
-                                    onClick={() => {
-                                        setFilters(f => ({ ...f, [key]: '' }));
-                                        const newParams = { ...filters, [key]: '' };
-                                        Object.keys(newParams).forEach(k => !newParams[k] && delete newParams[k]);
+                                    onClick={async () => {
+                                        const newFilters = { ...filters, [key]: '' };
+                                        setFilters(newFilters);
+                                        
+                                        const newParams = {};
+                                        Object.entries(newFilters).forEach(([k, v]) => {
+                                            if (v) newParams[k] = v;
+                                        });
                                         setSearchParams(newParams);
-                                        loadVehicles();
+                                        
+                                        // Fetch with updated filters
+                                        try {
+                                            setLoading(true);
+                                            const { data } = await vehicleApi.list(newParams);
+                                            setVehicles(data.vehicles || data);
+                                        } catch (err) {
+                                            console.error("Failed to load vehicles", err);
+                                        } finally {
+                                            setLoading(false);
+                                        }
                                     }}
                                     className="text-slate-400 hover:text-white"
                                 >

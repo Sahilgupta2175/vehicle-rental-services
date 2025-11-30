@@ -116,11 +116,13 @@ exports.getVehicles = async (req, res, next) => {
         }
 
         if (city) {
-            filter['location.city'] = city;
+            // Case-insensitive search by converting to lowercase
+            filter['location.city'] = city.toLowerCase();
         }
 
         if (type) {
-            filter.type = type;
+            // Case-insensitive search by converting to lowercase
+            filter.type = type.toLowerCase();
         }
 
         if (minPrice) {

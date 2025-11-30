@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
     name: { 
         type: String,
-        required: true 
+        required: true,
+        set: v => v ? v.toLowerCase() : v,
+        get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
     },
     email: { 
         type: String,
