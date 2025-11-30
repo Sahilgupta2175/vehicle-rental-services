@@ -39,7 +39,7 @@ const Navbar = () => {
                         {user?.role === "vendor" && (
                             <Link
                                 to="/vendor"
-                                className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 border border-blue-500/30 hover:border-blue-500 text-slate-200 hover:text-white transition-all"
+                                className="px-5 py-2 rounded-lg text-sm font-medium bg-linear-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all"
                             >
                                 Vendor Panel
                             </Link>
@@ -48,9 +48,9 @@ const Navbar = () => {
                         {user?.role === "admin" && (
                             <Link
                                 to="/admin"
-                                className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-800 border border-blue-500/30 hover:border-blue-500 text-slate-200 hover:text-white transition-all"
+                                className="px-5 py-2 rounded-lg text-sm font-medium bg-linear-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all"
                             >
-                                Admin
+                                Admin Panel
                             </Link>
                         )}
 
@@ -129,7 +129,7 @@ const Navbar = () => {
                             <Link
                                 to="/vendor"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg text-sm font-medium bg-background-light border border-purple-800/30 text-slate-200 transition-all"
+                                className="block px-4 py-3 rounded-lg text-sm font-medium bg-linear-to-r from-amber-500 to-amber-600 text-white text-center shadow-lg shadow-amber-500/30"
                             >
                                 Vendor Panel
                             </Link>
@@ -139,9 +139,9 @@ const Navbar = () => {
                             <Link
                                 to="/admin"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg text-sm font-medium bg-background-light border border-purple-800/30 text-slate-200 transition-all"
+                                className="block px-4 py-3 rounded-lg text-sm font-medium bg-linear-to-r from-purple-500 to-purple-600 text-white text-center shadow-lg shadow-purple-500/30"
                             >
-                                Admin
+                                Admin Panel
                             </Link>
                         )}
 
