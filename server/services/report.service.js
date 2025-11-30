@@ -91,7 +91,7 @@ async function generateMonthlyReport({ year, month }) {
             doc.fontSize(20).font('Helvetica-Bold').fillColor('#15803d')
                 .text(`₹${totalRevenue.toLocaleString('en-IN')}`, 60 + (cardWidth + cardSpacing) * 2, cardY + 45, { width: cardWidth - 20, align: 'center' });
 
-            doc.moveDown(6.5);
+            doc.moveDown(3.5);
 
             // Bookings Section Header
             doc.fontSize(16).font('Helvetica-Bold').fillColor('#1e293b').text('Booking Details', 50);
