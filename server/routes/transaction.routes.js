@@ -16,7 +16,7 @@ const queryValidation = [
     query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
     query('status').optional().isIn(['pending', 'completed', 'failed', 'refunded']).withMessage('Invalid status'),
     query('type').optional().isIn(['charge', 'payout', 'refund', 'late_fee', 'deposit']).withMessage('Invalid type'),
-    query('provider').optional().isIn(['stripe', 'razorpay', 'cash']).withMessage('Invalid provider')
+    query('provider').optional().isIn(['razorpay', 'cash']).withMessage('Invalid provider')
 ];
 
 // Get user's own transactions

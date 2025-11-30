@@ -41,10 +41,17 @@ const BookingDetails = () => {
     };
 
     const handleCancelBooking = async () => {
-        if (window.confirm('Are you sure you want to cancel this booking?')) {
+        if (window.confirm('Are you sure you want to cancel this booking? A refund will be processed and credited within 5-7 business days.')) {
             try {
-                await bookingApi.cancel(bookingId);
-                toast.success('Booking cancelled successfully');
+                const { data } = await bookingApi.cancel(bookingId);
+                
+                // Show appropriate message based on refund status
+                if (data.refund?.success) {
+                    toast.success('Booking cancelled successfully! Refund has been initiated and will be credited within 5-7 business days.');
+                } else {
+                    toast.success(data.message || 'Booking cancelled successfully');
+                }
+                
                 await fetchBooking();
             } catch (err) {
                 toast.error(err.response?.data?.message || 'Failed to cancel booking');

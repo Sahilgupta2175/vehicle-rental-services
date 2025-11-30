@@ -56,7 +56,6 @@ server.listen(PORT, () => {
     console.log(`💾 Database: Connected`);
     console.log(`📧 SMTP Host: ${process.env.SMTP_HOST || 'Not configured'}`);
     console.log(`📱 Twilio: ${process.env.TWILIO_FROM_NUMBER || 'Not configured'}`);
-    console.log(`💳 Stripe: ${process.env.STRIPE_SECRET ? '✅ Configured' : '❌ Not configured'}`);
     console.log(`💰 Razorpay: ${process.env.RAZORPAY_KEY ? '✅ Configured' : '❌ Not configured'}`);
     console.log(`☁️  Cloudinary: ${process.env.CLD_NAME ? '✅ Configured' : '❌ Not configured'}`);
     console.log('═══════════════════════════════════════════════════');

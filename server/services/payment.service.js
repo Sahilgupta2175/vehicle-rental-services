@@ -25,4 +25,26 @@ function verifyRazorpaySignature(body, signature) {
     return expected === signature;
 }
 
-module.exports = { createRazorpayOrder, verifyRazorpaySignature, razorpay };
+async function processRefund({ paymentId, amount, provider }) {
+    try {
+        if (provider === 'razorpay') {
+            if (!razorpay) {
+                throw new Error('Razorpay not configured');
+            }
+            // Create refund in Razorpay
+            const refund = await razorpay.payments.refund(paymentId, {
+                amount: Math.round(amount * 100), // Convert to paise
+                speed: 'normal' // Can be 'normal' or 'optimum'
+            });
+            return { success: true, refundId: refund.id, refund };
+        } else {
+            // For cash or other providers, manual refund
+            return { success: true, refundId: 'manual_' + Date.now(), manual: true };
+        }
+    } catch (error) {
+        console.error('[Payment Service] Refund error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+module.exports = { createRazorpayOrder, verifyRazorpaySignature, razorpay, processRefund };

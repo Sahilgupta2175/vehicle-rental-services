@@ -32,9 +32,6 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false 
     },
-    stripeCustomerId: {
-        type: String
-    },
     resetPasswordToken: {
         type: String
     },

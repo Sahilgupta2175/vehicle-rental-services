@@ -358,7 +358,7 @@ const MONGO = process.env.MONGO_URI;
             totalAmount: 4320,
             status: 'completed',
             payment: {
-                provider: 'stripe',
+                provider: 'razorpay',
                 providerPaymentId: 'pi_mock789012',
                 status: 'paid'
             }
@@ -387,7 +387,7 @@ const MONGO = process.env.MONGO_URI;
             totalAmount: 25200,
             status: 'approved',
             payment: {
-                provider: 'stripe',
+                provider: 'razorpay',
                 providerPaymentId: 'pi_mock901234',
                 status: 'paid'
             }
@@ -416,7 +416,7 @@ const MONGO = process.env.MONGO_URI;
             totalAmount: 19200,
             status: 'pending',
             payment: {
-                provider: 'stripe',
+                provider: 'razorpay',
                 status: 'pending'
             }
         },

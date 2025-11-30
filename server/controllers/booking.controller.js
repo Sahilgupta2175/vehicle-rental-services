@@ -1,8 +1,10 @@
 const Booking = require('../models/Booking');
 const Vehicle = require('../models/Vehicle');
 const User = require('../models/User');
+const Transaction = require('../models/Transaction');
 const { sendMail, sendBookingConfirmation } = require('../services/email.service');
 const { sendSMS } = require('../services/sms.service');
+const { processRefund } = require('../services/payment.service');
 
 exports.createBooking = async (req, res, next) => {
     try {
@@ -149,6 +151,53 @@ exports.cancelBooking = async (req, res, next) => {
             });
         }
 
+        // Process refund if booking was paid
+        let refundResult = null;
+        if (booking.status === 'paid' && booking.payment) {
+            // Find the payment transaction
+            const paymentTransaction = await Transaction.findOne({
+                booking: booking._id,
+                type: 'charge',
+                status: 'completed'
+            });
+
+            if (paymentTransaction) {
+                // Process refund through payment provider
+                refundResult = await processRefund({
+                    paymentId: paymentTransaction.providerId,
+                    amount: booking.totalPrice,
+                    provider: paymentTransaction.provider
+                });
+
+                if (refundResult.success) {
+                    // Create refund transaction record
+                    await Transaction.create({
+                        booking: booking._id,
+                        user: booking.user._id,
+                        amount: booking.totalPrice,
+                        type: 'refund',
+                        provider: paymentTransaction.provider,
+                        providerId: refundResult.refundId,
+                        status: 'completed',
+                        metadata: {
+                            originalTransaction: paymentTransaction._id,
+                            refundReason: 'User cancelled booking'
+                        }
+                    });
+
+                    // Update payment transaction status
+                    paymentTransaction.status = 'refunded';
+                    await paymentTransaction.save();
+
+                    // Update booking payment status
+                    booking.payment.status = 'refunded';
+                } else {
+                    console.error('[Booking] Refund failed:', refundResult.error);
+                    // Still cancel the booking but notify about refund failure
+                }
+            }
+        }
+
         booking.status = 'cancelled';
         await booking.save();
 
@@ -158,13 +207,24 @@ exports.cancelBooking = async (req, res, next) => {
         }
 
         // Send notification emails
+        const emailText = refundResult?.success 
+            ? `Your booking for ${booking.vehicle.name} has been cancelled successfully. A refund of ₹${booking.totalPrice} has been initiated and will be credited to your account within 5-7 business days.`
+            : `Your booking for ${booking.vehicle.name} has been cancelled successfully.${booking.status === 'paid' ? ' Please contact support for refund processing.' : ''}`;
+
         sendMail({ 
             to: booking.user.email, 
             subject: 'Booking Cancelled', 
-            text: `Your booking for ${booking.vehicle.name} has been cancelled successfully.` 
+            text: emailText
         }).catch(console.warn);
 
-        res.json({ success: true, booking, message: 'Booking cancelled successfully' });
+        res.json({ 
+            success: true, 
+            booking, 
+            refund: refundResult,
+            message: refundResult?.success 
+                ? 'Booking cancelled successfully. Refund has been processed.'
+                : 'Booking cancelled successfully.' 
+        });
     } catch (err) {
         console.error('[Booking] Cancel error:', err);
         next(err);

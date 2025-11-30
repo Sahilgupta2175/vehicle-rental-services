@@ -24,7 +24,7 @@ const TransactionSchema = new mongoose.Schema({
     },
     provider: {
         type: String,
-        enum: ['stripe', 'razorpay', 'cash'],
+        enum: ['razorpay', 'cash'],
         required: true
     },
     providerId: String,
