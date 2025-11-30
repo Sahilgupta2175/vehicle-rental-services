@@ -88,7 +88,7 @@ const RazorpayPayment = ({ bookingId, onSuccess }) => {
 
     return (
         <div className="space-y-3 text-xs">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-3">
+            <div className="bg-slate-800 border border-slate-600 rounded-xl p-3">
                 <p className="text-slate-300">Pay securely via UPI / Card / Netbanking</p>
                 {order && (
                     <p className="text-[11px] text-slate-500 mt-1">

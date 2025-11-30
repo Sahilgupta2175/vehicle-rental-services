@@ -126,7 +126,7 @@ const VendorDashboard = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 bg-slate-900/50 rounded-xl p-1.5 border border-slate-800 w-fit">
+            <div className="flex gap-2 bg-slate-800/50 rounded-xl p-1.5 border border-slate-700 w-fit">
                 <button
                     onClick={() => setTab("vehicles")}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
@@ -190,7 +190,7 @@ const VendorDashboard = () => {
                             {vehicles.map((v) => (
                                 <div
                                     key={v._id}
-                                    className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 hover:border-blue-500/30 transition-all group"
+                                    className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 hover:border-blue-500/30 transition-all group"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
@@ -308,10 +308,10 @@ const VendorDashboard = () => {
                     onClick={closeModal}
                 >
                     <div 
-                        className="bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+                        className="bg-slate-800 rounded-2xl border border-slate-600 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="sticky top-0 bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between z-10">
+                        <div className="sticky top-0 bg-slate-800 border-b border-slate-600 px-6 py-4 flex items-center justify-between z-10">
                             <h2 className="text-xl font-bold text-slate-100">
                                 {selectedVehicle ? "Edit Vehicle" : "Add New Vehicle"}
                             </h2>

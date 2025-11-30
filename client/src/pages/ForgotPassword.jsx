@@ -22,7 +22,7 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 mt-6">
+        <div className="max-w-md mx-auto bg-slate-800 border border-slate-700 rounded-2xl p-6 mt-6">
             <h1 className="text-xl font-semibold mb-2">Forgot password</h1>
             <p className="text-xs text-slate-400 mb-4">
                 Enter your registered email and we&apos;ll send you a link to reset

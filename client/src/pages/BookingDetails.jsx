@@ -676,14 +676,14 @@ const BookingDetails = () => {
                 )}
 
                 {/* Main Details Card */}
-                <div className="bg-linear-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                <div className="bg-linear-to-br from-slate-800 to-slate-700 border border-slate-600 rounded-2xl shadow-2xl overflow-hidden">
                     {/* Header */}
                     <div className="bg-linear-to-r from-blue-600/20 to-purple-600/20 border-b border-slate-700 p-6">
                         <div className="flex items-start justify-between">
                             <div>
                                 <h1 className="text-3xl font-bold text-white mb-2">Booking Confirmed</h1>
                                 <div className="flex items-center gap-3">
-                                    <code className="text-sm font-mono text-cyan-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                                    <code className="text-sm font-mono text-cyan-400 bg-slate-800 px-3 py-1.5 rounded-lg border border-cyan-500/30">
                                         ID: {booking._id}
                                     </code>
                                     <button 
@@ -853,7 +853,7 @@ const BookingDetails = () => {
                     </div>
 
                     {/* Actions */}
-                    <div className="bg-slate-800/50 border-t border-slate-700 p-6">
+                    <div className="bg-slate-700/50 border-t border-slate-600 p-6">
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => navigate("/dashboard")}

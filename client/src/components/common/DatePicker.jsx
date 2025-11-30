@@ -139,7 +139,7 @@ const DatePicker = ({ value, onChange, label }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 bottom-full mb-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-3 min-w-60 max-w-60">
+                <div className="absolute z-50 bottom-full mb-2 bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl p-3 min-w-60 max-w-60">
                     {/* Month and Year Selectors */}
                     <div className="flex gap-2 mb-3">
                         <select

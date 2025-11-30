@@ -50,7 +50,7 @@ const Navbar = () => {
     };
 
     return (
-        <header className="border-b border-slate-700/50 bg-slate-900/90 backdrop-blur-xl sticky top-0 z-50 shadow-lg shadow-black/10">
+        <header className="border-b border-slate-700/50 bg-slate-800/90 backdrop-blur-xl sticky top-0 z-50 shadow-lg shadow-black/10">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex items-center justify-between gap-4">
                     {/* Logo */}
@@ -105,7 +105,7 @@ const Navbar = () => {
 
                                 {/* Dropdown Menu */}
                                 {profileDropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black/50 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                                    <div className="absolute right-0 mt-2 w-64 bg-slate-800 border border-slate-600 rounded-xl shadow-2xl shadow-black/50 py-2 z-50 animate-in fade-in slide-in-from-top-2">
                                         {/* User Info Header */}
                                         <div className="px-4 py-3 border-b border-slate-700">
                                             <p className="text-white font-medium truncate">{user?.name}</p>
@@ -216,7 +216,7 @@ const Navbar = () => {
                         {isAuthenticated ? (
                             <>
                                 {/* User Info */}
-                                <div className="px-4 py-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                                <div className="px-4 py-3 bg-slate-700/50 rounded-lg border border-slate-600">
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-600">
                                             {user?.profilePicture ? (

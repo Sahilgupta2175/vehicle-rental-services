@@ -54,7 +54,7 @@ const StripePayment = ({ bookingId, onSuccess }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-3 text-xs">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl p-3">
+            <div className="bg-slate-800 border border-slate-600 rounded-xl p-3">
                 <CardElement
                     options={{
                         style: {

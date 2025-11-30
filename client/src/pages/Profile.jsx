@@ -178,7 +178,7 @@ const Profile = () => {
                 )}
 
                 {/* Profile Picture Section */}
-                <div className="bg-slate-900/50 backdrop-blur border border-slate-700/50 rounded-xl p-6 mb-6">
+                <div className="bg-slate-800/50 backdrop-blur border border-slate-600/50 rounded-xl p-6 mb-6">
                     <h2 className="text-xl font-semibold text-white mb-4">Profile Picture</h2>
                     <div className="flex items-center gap-6">
                         <div className="relative">
@@ -253,9 +253,9 @@ const Profile = () => {
                             </label>
                             <input
                                 type="email"
-                                value={formData.email}
+                                value={user.email}
                                 disabled
-                                className="w-full px-4 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-400 cursor-not-allowed"
+                                className="w-full px-4 py-3 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-400 cursor-not-allowed"
                             />
                             <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
                         </div>
@@ -313,7 +313,7 @@ const Profile = () => {
                 </div>
 
                 {/* Change Password Section */}
-                <div className="bg-slate-900/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+                <div className="bg-slate-800/50 backdrop-blur border border-slate-600/50 rounded-xl p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-semibold text-white">Security</h2>
                         {!showPasswordSection && (

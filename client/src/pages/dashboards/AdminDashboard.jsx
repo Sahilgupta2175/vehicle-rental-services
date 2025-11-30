@@ -103,7 +103,7 @@ const AdminDashboard = () => {
         <div className="min-h-screen bg-slate-950">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Header Section */}
-                <div className="relative overflow-hidden bg-linear-to-br from-slate-900 via-slate-900 to-blue-900/30 border border-slate-700/50 rounded-3xl p-8 shadow-2xl">
+                <div className="relative overflow-hidden bg-linear-to-br from-slate-800 via-slate-800 to-blue-900/30 border border-slate-600/50 rounded-3xl p-8 shadow-2xl">
                     {/* Background Pattern */}
                     <div className="absolute inset-0 opacity-5">
                         <div className="absolute inset-0" style={{
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
                         ].map((stat) => (
                             <div key={stat.label} className={`bg-linear-to-br ${stat.gradient} border ${stat.border} rounded-2xl p-5 hover:scale-105 transition-all duration-300 backdrop-blur-sm`}>
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-800/50 flex items-center justify-center">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
                                         <svg className={`w-5 h-5 ${stat.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
                                         </svg>
@@ -236,10 +236,10 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/50">
+                    <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-800/50">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-slate-800 bg-slate-800/50">
+                                <tr className="border-b border-slate-700 bg-slate-700/50">
                                     <th className="text-left py-4 px-4 font-semibold text-slate-300">Name</th>
                                     <th className="text-left py-4 px-4 font-semibold text-slate-300">Email</th>
                                     <th className="text-left py-4 px-4 font-semibold text-slate-300">Role</th>

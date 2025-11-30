@@ -140,7 +140,7 @@ const BookingCard = ({ booking, actions }) => {
                 </div>
 
                 {/* Date & Time Section */}
-                <div className="bg-slate-800/50 rounded-xl p-4 mb-4 border border-slate-700/30">
+                <div className="bg-slate-700/50 rounded-xl p-4 mb-4 border border-slate-600/30">
                     <div className="grid grid-cols-2 gap-4">
                         {/* Start Date */}
                         <div className="space-y-1">

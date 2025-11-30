@@ -44,7 +44,7 @@ const UserDashboard = () => {
         <div className="min-h-screen bg-slate-950">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Header Section */}
-                <div className="relative overflow-hidden bg-linear-to-br from-slate-900 via-slate-900 to-blue-900/30 border border-slate-700/50 rounded-3xl p-8 shadow-2xl">
+                <div className="relative overflow-hidden bg-linear-to-br from-slate-800 via-slate-800 to-blue-900/30 border border-slate-600/50 rounded-3xl p-8 shadow-2xl">
                     {/* Background Pattern */}
                     <div className="absolute inset-0 opacity-5">
                         <div className="absolute inset-0" style={{
@@ -89,7 +89,7 @@ const UserDashboard = () => {
                         ].map((stat) => (
                             <div key={stat.label} className={`bg-linear-to-br ${stat.gradient} border ${stat.border} rounded-2xl p-5 hover:scale-105 transition-all duration-300 backdrop-blur-sm`}>
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className={`w-10 h-10 rounded-xl bg-slate-800/50 flex items-center justify-center`}>
+                                    <div className={`w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center`}>
                                         <svg className={`w-5 h-5 ${stat.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
                                         </svg>
@@ -103,7 +103,7 @@ const UserDashboard = () => {
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-2 border border-slate-800 shadow-xl">
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-2 border border-slate-700 shadow-xl">
                     <div className="flex flex-wrap gap-2">
                         {[
                             { value: "all", label: "All Bookings", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
@@ -165,7 +165,7 @@ const UserDashboard = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-24 bg-slate-900/30 backdrop-blur-sm rounded-3xl border border-slate-800 shadow-xl">
+                        <div className="text-center py-24 bg-slate-800/30 backdrop-blur-sm rounded-3xl border border-slate-700 shadow-xl">
                             <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-linear-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-2xl">
                                 <svg className="w-16 h-16 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

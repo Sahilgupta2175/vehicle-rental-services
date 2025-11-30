@@ -119,7 +119,7 @@ const Booking = () => {
     return (
         <div className="max-w-6xl mx-auto py-8 space-y-8">
             {/* Header Section */}
-            <div className="bg-linear-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-6 shadow-2xl">
+            <div className="bg-linear-to-br from-slate-800 to-slate-700 border border-slate-600 rounded-2xl p-6 shadow-2xl">
                 <div className="flex items-center gap-4 mb-4">
                     <div className="w-14 h-14 rounded-xl bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ const Booking = () => {
                 {/* Left Column - Vehicle Info */}
                 <div className="space-y-6">
                     {/* Vehicle Card */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
                         {/* Vehicle Image */}
                         {primaryImage && (
                             <div className="h-48 overflow-hidden bg-slate-800">
@@ -163,7 +163,7 @@ const Booking = () => {
                             </div>
 
                             {/* Price Display */}
-                            <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                            <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600/50">
                                 <p className="text-xs text-slate-500 mb-1">Rental Rate</p>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-3xl font-bold bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -203,7 +203,7 @@ const Booking = () => {
 
                 {/* Right Column - Booking Form */}
                 <div className="space-y-6">
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Date Selection */}
                             <div className="space-y-4">

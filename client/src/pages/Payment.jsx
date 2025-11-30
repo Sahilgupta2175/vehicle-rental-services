@@ -13,7 +13,7 @@ const Payment = () => {
         <div className="min-h-[70vh] flex items-center justify-center py-8 px-4">
             <div className="w-full max-w-2xl space-y-8">
                 {/* Header Section */}
-                <div className="bg-linear-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-8 shadow-2xl">
+                <div className="bg-linear-to-br from-slate-800 to-slate-700 border border-slate-600 rounded-2xl p-8 shadow-2xl">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-16 h-16 rounded-xl bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
                             <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,11 +27,11 @@ const Payment = () => {
                     </div>
                     
                     {/* Booking ID Display */}
-                    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                    <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600/50">
                         <div className="flex items-center justify-between">
                             <span className="text-sm text-slate-400">Booking ID</span>
                             <div className="flex items-center gap-2">
-                                <code className="text-sm font-mono text-cyan-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-cyan-500/30">
+                                <code className="text-sm font-mono text-cyan-400 bg-slate-800 px-3 py-1.5 rounded-lg border border-cyan-500/30">
                                     {bookingId}
                                 </code>
                                 <button 
@@ -49,7 +49,7 @@ const Payment = () => {
                 </div>
 
                 {/* Payment Method Selection */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-xl">
                     <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                         <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -80,7 +80,7 @@ const Payment = () => {
                     </div>
 
                     {/* Payment Component */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+                    <div className="bg-slate-700/50 rounded-xl p-6 border border-slate-600/50">
                         <RazorpayPayment bookingId={bookingId} onSuccess={handlePaymentSuccess} />
                     </div>
 
