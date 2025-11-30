@@ -21,16 +21,18 @@ async function generateMonthlyReport({ year, month }) {
         const vendorRevenue = {};
 
         bookings.forEach((b) => {
-            totalRevenue += b.totalAmount || 0;
-            const vendorId = String(b.vendor?._id || b.vendor);
-            if (!vendorRevenue[vendorId]) {
-                vendorRevenue[vendorId] = {
-                    name: b.vendor?.name || 'Unknown Vendor',
-                    email: b.vendor?.email || 'N/A',
-                    earnings: 0
-                };
+            if (b.status !== 'cancelled') {
+                totalRevenue += b.totalAmount || 0;
+                const vendorId = String(b.vendor?._id || b.vendor);
+                if (!vendorRevenue[vendorId]) {
+                    vendorRevenue[vendorId] = {
+                        name: b.vendor?.name || 'Unknown Vendor',
+                        email: b.vendor?.email || 'N/A',
+                        earnings: 0
+                    };
+                }
+                vendorRevenue[vendorId].earnings += (b.totalAmount || 0);
             }
-            vendorRevenue[vendorId].earnings += (b.totalAmount || 0);
         });
 
         const reportsDir = process.env.REPORTS_PATH || path.join(process.cwd(), 'reports');
@@ -46,97 +48,124 @@ async function generateMonthlyReport({ year, month }) {
         console.log(`Generating PDF: ${filePath}`);
 
         return new Promise((resolve, reject) => {
-            const doc = new PDFDocument({ margin: 40, size: 'A4' });
+            const doc = new PDFDocument({ margin: 50, size: 'A4' });
             const writeStream = fs.createWriteStream(filePath);
             
             doc.pipe(writeStream);
 
-            // Header
-            doc.fontSize(20).font('Helvetica-Bold').text('Monthly Revenue Report', { align: 'center' });
-            doc.moveDown(0.5);
-            doc.fontSize(10).font('Helvetica').fillColor('#666666')
-                .text(`Generated on: ${moment().format('MMMM DD, YYYY hh:mm A')}`, { align: 'center' });
-            doc.moveDown(1.5);
-
-            // Summary Section
-            doc.fontSize(14).font('Helvetica-Bold').fillColor('#000000').text('Report Summary');
-            doc.moveDown(0.5);
-            
-            const summaryY = doc.y;
-            doc.fontSize(10).font('Helvetica')
-                .text(`Report Period:`, 70, summaryY)
-                .font('Helvetica-Bold').text(`${moment(start).format('MMMM DD, YYYY')} to ${moment(end).format('MMMM DD, YYYY')}`, 180, summaryY);
-            
-            doc.font('Helvetica').text(`Total Bookings:`, 70, summaryY + 20)
-                .font('Helvetica-Bold').text(`${bookings.length}`, 180, summaryY + 20);
-            
-            doc.font('Helvetica').text(`Total Revenue:`, 70, summaryY + 40)
-                .font('Helvetica-Bold').fillColor('#10b981').text(`Rs. ${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 180, summaryY + 40);
+            // Professional Header with background
+            doc.rect(0, 0, 595, 80).fill('#1e40af');
+            doc.fontSize(24).font('Helvetica-Bold').fillColor('#ffffff')
+                .text('MONTHLY REVENUE REPORT', 50, 25, { align: 'center' });
+            doc.fontSize(11).font('Helvetica').fillColor('#e0e7ff')
+                .text(`${moment(start).format('MMMM YYYY')}`, 50, 52, { align: 'center' });
             
             doc.moveDown(3);
 
-            // Bookings Section
-            doc.fontSize(14).font('Helvetica-Bold').fillColor('#000000').text('Booking Details', 50);
-            doc.moveDown(0.5);
+            // Summary Cards Section
+            const cardY = 100;
+            const cardHeight = 85;
+            const cardWidth = 155;
+            const cardSpacing = 15;
+
+            // Card 1: Report Period
+            doc.roundedRect(50, cardY, cardWidth, cardHeight, 5).fillAndStroke('#f8fafc', '#e2e8f0');
+            doc.fontSize(9).font('Helvetica').fillColor('#64748b')
+                .text('REPORT PERIOD', 60, cardY + 15, { width: cardWidth - 20 });
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('#1e293b')
+                .text(moment(start).format('MMM DD, YYYY'), 60, cardY + 35, { width: cardWidth - 20 })
+                .text('to', 60, cardY + 50, { width: cardWidth - 20, align: 'center' })
+                .text(moment(end).format('MMM DD, YYYY'), 60, cardY + 65, { width: cardWidth - 20 });
+
+            // Card 2: Total Bookings
+            doc.roundedRect(50 + cardWidth + cardSpacing, cardY, cardWidth, cardHeight, 5).fillAndStroke('#eff6ff', '#bfdbfe');
+            doc.fontSize(9).font('Helvetica').fillColor('#1e40af')
+                .text('TOTAL BOOKINGS', 60 + cardWidth + cardSpacing, cardY + 15, { width: cardWidth - 20 });
+            doc.fontSize(28).font('Helvetica-Bold').fillColor('#1e40af')
+                .text(`${bookings.length}`, 60 + cardWidth + cardSpacing, cardY + 40, { width: cardWidth - 20, align: 'center' });
+
+            // Card 3: Total Revenue
+            doc.roundedRect(50 + (cardWidth + cardSpacing) * 2, cardY, cardWidth, cardHeight, 5).fillAndStroke('#f0fdf4', '#bbf7d0');
+            doc.fontSize(9).font('Helvetica').fillColor('#15803d')
+                .text('TOTAL REVENUE', 60 + (cardWidth + cardSpacing) * 2, cardY + 15, { width: cardWidth - 20 });
+            doc.fontSize(20).font('Helvetica-Bold').fillColor('#15803d')
+                .text(`₹${totalRevenue.toLocaleString('en-IN')}`, 60 + (cardWidth + cardSpacing) * 2, cardY + 45, { width: cardWidth - 20, align: 'center' });
+
+            doc.moveDown(6.5);
+
+            // Bookings Section Header
+            doc.fontSize(16).font('Helvetica-Bold').fillColor('#1e293b').text('Booking Details', 50);
+            doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).strokeColor('#cbd5e1').lineWidth(1).stroke();
+            doc.moveDown(1);
 
             if (bookings.length > 0) {
-                // Table Header
+                // Compact Table
                 const tableTop = doc.y;
                 const col1X = 50;
-                const col2X = 140;
-                const col3X = 230;
-                const col4X = 360;
-                const col5X = 480;
-                const rowHeight = 25;
+                const col2X = 135;
+                const col3X = 225;
+                const col4X = 305;
+                const col5X = 410;
+                const col6X = 485;
+                const rowHeight = 22;
 
-                // Header background
-                doc.rect(col1X - 5, tableTop - 5, 495, 20).fillAndStroke('#3b82f6', '#3b82f6');
+                // Table Header
+                doc.rect(col1X, tableTop, 495, 22).fill('#1e40af');
                 
-                // Header text
                 doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff');
-                doc.text('Booking ID', col1X, tableTop, { width: 85, align: 'left' });
-                doc.text('Vehicle', col2X, tableTop, { width: 85, align: 'left' });
-                doc.text('Customer', col3X, tableTop, { width: 125, align: 'left' });
-                doc.text('Amount', col4X, tableTop, { width: 115, align: 'right' });
-                doc.text('Status', col5X, tableTop, { width: 60, align: 'center' });
+                doc.text('Booking ID', col1X + 5, tableTop + 6, { width: 80 });
+                doc.text('Vehicle', col2X + 5, tableTop + 6, { width: 85 });
+                doc.text('Customer', col3X + 5, tableTop + 6, { width: 75 });
+                doc.text('Date Range', col4X + 5, tableTop + 6, { width: 100 });
+                doc.text('Amount', col5X + 5, tableTop + 6, { width: 65, align: 'right' });
+                doc.text('Status', col6X + 5, tableTop + 6, { width: 50, align: 'center' });
 
                 let currentY = tableTop + rowHeight;
                 let rowIndex = 0;
 
                 bookings.forEach((b) => {
-                    // Check if we need a new page
-                    if (currentY > 720) {
+                    // Page break check
+                    if (currentY > 680) {
                         doc.addPage();
                         currentY = 50;
                     }
 
-                    // Alternating row colors
-                    if (rowIndex % 2 === 0) {
-                        doc.rect(col1X - 5, currentY - 7, 495, rowHeight).fill('#f8fafc');
-                    }
+                    // Row background
+                    const rowColor = rowIndex % 2 === 0 ? '#f8fafc' : '#ffffff';
+                    doc.rect(col1X, currentY, 495, rowHeight).fill(rowColor);
 
-                    doc.fontSize(8).font('Helvetica').fillColor('#000000');
+                    doc.fontSize(8).font('Helvetica').fillColor('#334155');
                     
-                    // Booking ID (shortened)
-                    const bookingId = String(b._id).substring(0, 12) + '...';
-                    doc.text(bookingId, col1X, currentY, { width: 85, align: 'left' });
+                    // Booking ID
+                    const bookingId = String(b._id).substring(0, 8).toUpperCase();
+                    doc.text(bookingId, col1X + 5, currentY + 6, { width: 80 });
                     
                     // Vehicle name
-                    const vehicleName = b.vehicle?.name || 'N/A';
-                    doc.text(vehicleName, col2X, currentY, { width: 85, align: 'left', ellipsis: true });
+                    const vehicleName = (b.vehicle?.name || 'N/A').substring(0, 18);
+                    doc.text(vehicleName, col2X + 5, currentY + 6, { width: 85, ellipsis: true });
                     
                     // User name
-                    const userName = b.user?.name || 'N/A';
-                    doc.text(userName, col3X, currentY, { width: 125, align: 'left', ellipsis: true });
+                    const userName = (b.user?.name || 'N/A').substring(0, 15);
+                    doc.text(userName, col3X + 5, currentY + 6, { width: 75, ellipsis: true });
+                    
+                    // Date Range
+                    const startDate = moment(b.startDate).format('DD MMM');
+                    const endDate = moment(b.endDate).format('DD MMM');
+                    doc.fontSize(7).text(`${startDate} - ${endDate}`, col4X + 5, currentY + 7, { width: 100 });
                     
                     // Amount
-                    doc.font('Helvetica-Bold').fillColor('#10b981')
-                        .text(`Rs. ${(b.totalAmount || 0).toLocaleString('en-IN')}`, col4X, currentY, { width: 115, align: 'right' });
+                    doc.fontSize(9).font('Helvetica-Bold').fillColor('#15803d')
+                        .text(`₹${(b.totalAmount || 0).toLocaleString('en-IN')}`, col5X + 5, currentY + 6, { width: 65, align: 'right' });
                     
-                    // Status
-                    const statusColor = b.status === 'completed' ? '#10b981' : b.status === 'active' ? '#3b82f6' : '#f59e0b';
-                    doc.font('Helvetica').fillColor(statusColor)
-                        .text(b.status.toUpperCase(), col5X, currentY, { width: 60, align: 'center' });
+                    // Status badge
+                    const statusColors = {
+                        completed: '#15803d',
+                        paid: '#1e40af',
+                        active: '#0891b2',
+                        cancelled: '#dc2626'
+                    };
+                    doc.fontSize(7).font('Helvetica-Bold').fillColor(statusColors[b.status] || '#6b7280')
+                        .text(b.status.toUpperCase(), col6X + 5, currentY + 7, { width: 50, align: 'center' });
 
                     currentY += rowHeight;
                     rowIndex++;
@@ -144,66 +173,71 @@ async function generateMonthlyReport({ year, month }) {
 
                 doc.moveDown(2);
             } else {
-                doc.fontSize(10).font('Helvetica').fillColor('#666666')
-                    .text('No paid bookings were found for the selected period.', { align: 'center' });
+                doc.fontSize(11).font('Helvetica').fillColor('#64748b')
+                    .text('No bookings found for the selected period.', { align: 'center' });
                 doc.moveDown(2);
             }
 
-            // Vendor Earnings Section
-            doc.fontSize(14).font('Helvetica-Bold').fillColor('#000000').text('Vendor Earnings Summary', 50);
-            doc.moveDown(0.5);
+            // Vendor Earnings Section Header
+            doc.fontSize(16).font('Helvetica-Bold').fillColor('#1e293b').text('Vendor Earnings Summary', 50);
+            doc.moveTo(50, doc.y + 5).lineTo(545, doc.y + 5).strokeColor('#cbd5e1').lineWidth(1).stroke();
+            doc.moveDown(1);
             
             if (Object.keys(vendorRevenue).length > 0) {
                 const vendorTableTop = doc.y;
                 const vendorCol1X = 50;
-                const vendorCol2X = 180;
-                const vendorCol3X = 310;
-                const vendorCol4X = 440;
-                const vendorRowHeight = 20;
+                const vendorCol2X = 170;
+                const vendorCol3X = 320;
+                const vendorCol4X = 450;
+                const vendorRowHeight = 22;
 
-                // Header background
-                doc.rect(vendorCol1X - 5, vendorTableTop - 5, 495, 18).fillAndStroke('#3b82f6', '#3b82f6');
+                // Table Header
+                doc.rect(vendorCol1X, vendorTableTop, 495, 22).fill('#1e40af');
                 
-                // Header text
                 doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff');
-                doc.text('Vendor Name', vendorCol1X, vendorTableTop, { width: 125, align: 'left' });
-                doc.text('Email', vendorCol2X, vendorTableTop, { width: 125, align: 'left' });
-                doc.text('Vendor ID', vendorCol3X, vendorTableTop, { width: 125, align: 'left' });
-                doc.text('Total Earnings', vendorCol4X, vendorTableTop, { width: 100, align: 'right' });
+                doc.text('Vendor Name', vendorCol1X + 5, vendorTableTop + 6, { width: 115 });
+                doc.text('Email', vendorCol2X + 5, vendorTableTop + 6, { width: 145 });
+                doc.text('Vendor ID', vendorCol3X + 5, vendorTableTop + 6, { width: 125 });
+                doc.text('Total Earnings', vendorCol4X + 5, vendorTableTop + 6, { width: 90, align: 'right' });
 
                 let vendorY = vendorTableTop + vendorRowHeight;
                 let vendorIndex = 0;
 
                 Object.entries(vendorRevenue).forEach(([vid, vendorData]) => {
-                    // Alternating row colors
-                    if (vendorIndex % 2 === 0) {
-                        doc.rect(vendorCol1X - 5, vendorY - 5, 495, vendorRowHeight).fill('#f8fafc');
-                    }
+                    // Row background
+                    const rowColor = vendorIndex % 2 === 0 ? '#f8fafc' : '#ffffff';
+                    doc.rect(vendorCol1X, vendorY, 495, vendorRowHeight).fill(rowColor);
 
-                    doc.fontSize(8).font('Helvetica').fillColor('#000000');
-                    doc.text(vendorData.name, vendorCol1X, vendorY, { width: 125, align: 'left', ellipsis: true });
-                    doc.text(vendorData.email, vendorCol2X, vendorY, { width: 125, align: 'left', ellipsis: true });
+                    doc.fontSize(8).font('Helvetica').fillColor('#334155');
+                    doc.text(vendorData.name, vendorCol1X + 5, vendorY + 6, { width: 115, ellipsis: true });
+                    doc.text(vendorData.email, vendorCol2X + 5, vendorY + 6, { width: 145, ellipsis: true });
                     
-                    const shortVid = vid.substring(0, 12) + '...';
-                    doc.text(shortVid, vendorCol3X, vendorY, { width: 125, align: 'left' });
+                    const shortVid = vid.substring(0, 10).toUpperCase();
+                    doc.text(shortVid, vendorCol3X + 5, vendorY + 6, { width: 125 });
                     
-                    doc.font('Helvetica-Bold').fillColor('#10b981')
-                        .text(`Rs. ${vendorData.earnings.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, vendorCol4X, vendorY, { width: 100, align: 'right' });
+                    doc.fontSize(9).font('Helvetica-Bold').fillColor('#15803d')
+                        .text(`₹${vendorData.earnings.toLocaleString('en-IN')}`, vendorCol4X + 5, vendorY + 6, { width: 90, align: 'right' });
 
                     vendorY += vendorRowHeight;
                     vendorIndex++;
                 });
             } else {
-                doc.fontSize(10).font('Helvetica').fillColor('#666666')
+                doc.fontSize(11).font('Helvetica').fillColor('#64748b')
                     .text('No vendor earnings recorded for this period.', { align: 'center' });
             }
 
-            // Footer
+            // Footer with generation timestamp
             const pageCount = doc.bufferedPageRange().count;
             for (let i = 0; i < pageCount; i++) {
                 doc.switchToPage(i);
-                doc.fontSize(8).font('Helvetica').fillColor('#999999')
-                    .text(`Page ${i + 1} of ${pageCount}`, 50, 770, { align: 'center', width: 495 });
+                
+                // Footer line
+                doc.moveTo(50, 770).lineTo(545, 770).strokeColor('#cbd5e1').lineWidth(0.5).stroke();
+                
+                // Footer text
+                doc.fontSize(8).font('Helvetica').fillColor('#94a3b8')
+                    .text(`Generated on ${moment().format('MMM DD, YYYY [at] hh:mm A')}`, 50, 775, { width: 250, align: 'left' })
+                    .text(`Page ${i + 1} of ${pageCount}`, 295, 775, { width: 250, align: 'right' });
             }
 
             doc.end();
