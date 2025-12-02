@@ -141,7 +141,7 @@ exports.cancelBooking = async (req, res, next) => {
         // Check if cancellation is within allowed time window
         // User can cancel from booking date until 30 minutes before rental starts
         const now = new Date();
-        const rentalStartTime = new Date(booking.startDate);
+        const rentalStartTime = new Date(booking.start);
         const thirtyMinutesBeforeRental = new Date(rentalStartTime.getTime() - 30 * 60 * 1000);
 
         if (now >= thirtyMinutesBeforeRental) {
@@ -167,7 +167,7 @@ exports.cancelBooking = async (req, res, next) => {
                 // Process refund through payment provider
                 refundResult = await processRefund({
                     paymentId: paymentTransaction.providerId,
-                    amount: booking.totalPrice,
+                    amount: booking.totalAmount,
                     provider: paymentTransaction.provider
                 });
 
@@ -176,7 +176,7 @@ exports.cancelBooking = async (req, res, next) => {
                     await Transaction.create({
                         booking: booking._id,
                         user: booking.user._id,
-                        amount: booking.totalPrice,
+                        amount: booking.totalAmount,
                         type: 'refund',
                         provider: paymentTransaction.provider,
                         providerId: refundResult.refundId,
@@ -234,13 +234,13 @@ exports.cancelBooking = async (req, res, next) => {
                         <p><strong>Type:</strong> ${booking.vehicle.type}</p>
                         <p><strong>Original Start Time:</strong> ${startDate}</p>
                         <p><strong>Original End Time:</strong> ${endDate}</p>
-                        <p><strong>Booking Amount:</strong> ₹${booking.totalPrice}</p>
+                        <p><strong>Booking Amount:</strong> ₹${booking.totalAmount}</p>
                         <p><strong>Status:</strong> <span style="color: #ff6b6b;">CANCELLED</span></p>
                     </div>
 
                     <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4CAF50;">
                         <h3 style="margin-top: 0; color: #2e7d32;">💰 Refund Information</h3>
-                        <p style="margin: 0;"><strong>Refund Amount:</strong> ₹${booking.totalPrice}</p>
+                        <p style="margin: 0;"><strong>Refund Amount:</strong> ₹${booking.totalAmount}</p>
                         <p style="margin: 10px 0 0 0;"><strong>Refund Status:</strong> <span style="color: #4CAF50;">Initiated</span></p>
                         <p style="margin: 15px 0 0 0; padding-top: 15px; border-top: 1px solid #c8e6c9;">
                             ⏱️ The refund has been successfully processed and will be credited to your original payment method within <strong>3-5 working days</strong>.
@@ -284,7 +284,7 @@ exports.cancelBooking = async (req, res, next) => {
                     ${wasPaid ? `
                         <div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4CAF50;">
                             <h3 style="margin-top: 0; color: #2e7d32;">💰 Refund Information</h3>
-                            <p style="margin: 0;"><strong>Refund Amount:</strong> ₹${booking.totalPrice}</p>
+                            <p style="margin: 0;"><strong>Refund Amount:</strong> ₹${booking.totalAmount}</p>
                             <p style="margin: 10px 0 0 0;"><strong>Refund Status:</strong> <span style="color: #ff9800;">Processing</span></p>
                             <p style="margin: 15px 0 0 0; padding-top: 15px; border-top: 1px solid #c8e6c9;">
                                 ⏱️ Your refund is being processed and will be credited to your original payment method within <strong>3-5 working days</strong>.
@@ -334,7 +334,7 @@ exports.cancelBooking = async (req, res, next) => {
                             <p><strong>Customer:</strong> ${booking.user.name}</p>
                             <p><strong>Original Start Time:</strong> ${startDate}</p>
                             <p><strong>Original End Time:</strong> ${endDate}</p>
-                            <p><strong>Amount:</strong> ₹${booking.totalPrice}</p>
+                            <p><strong>Amount:</strong> ₹${booking.totalAmount}</p>
                         </div>
 
                         <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2196F3;">
@@ -346,7 +346,7 @@ exports.cancelBooking = async (req, res, next) => {
                         ${refundResult?.success ? `
                             <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
                                 <p style="margin: 0; color: #856404;">
-                                    <strong>Note:</strong> A refund of ₹${booking.totalPrice} has been initiated to the customer and will be processed within 3-5 working days.
+                                    <strong>Note:</strong> A refund of ₹${booking.totalAmount} has been initiated to the customer and will be processed within 3-5 working days.
                                 </p>
                             </div>
                         ` : ''}
