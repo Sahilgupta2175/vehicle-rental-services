@@ -1,4 +1,13 @@
 const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+
+// Check if we are using SendGrid (API) or Nodemailer (SMTP)
+const useSendGrid = !!process.env.SENDGRID_API_KEY;
+
+if (useSendGrid) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    console.log('Using SendGrid API for emails');
+}
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -14,29 +23,51 @@ const transporter = nodemailer.createTransport({
     family: 4 // Force IPv4 to avoid timeouts on some networks
 });
 
-// Verify connection configuration
-transporter.verify(function (error, success) {
-    if (error) {
-        console.error('SMTP Connection Error:', error);
-    } else {
-        console.log('SMTP Server is ready to take our messages');
-    }
-});
+// Verify connection configuration (only if using SMTP)
+if (!useSendGrid) {
+    transporter.verify(function (error, success) {
+        if (error) {
+            console.error('SMTP Connection Error:', error);
+        } else {
+            console.log('SMTP Server is ready to take our messages');
+        }
+    });
+}
 
 // Base send email function
 async function sendMail({ to, subject, text, html }) {
-    if (!process.env.SMTP_USER) {
-        console.warn('SMTP not configured; skipping email');
-        return null;
+    try {
+        if (useSendGrid) {
+            const msg = {
+                to,
+                from: process.env.SMTP_FROM, // Must be verified in SendGrid
+                subject,
+                text,
+                html: html || text,
+            };
+            await sgMail.send(msg);
+            return { messageId: 'sendgrid-sent' };
+        } else {
+            if (!process.env.SMTP_USER) {
+                console.warn('SMTP not configured; skipping email');
+                return null;
+            }
+            const info = await transporter.sendMail({
+                from: process.env.SMTP_FROM,
+                to,
+                subject,
+                text,
+                html: html || text
+            });
+            return info;
+        }
+    } catch (error) {
+        console.error('Email sending failed:', error);
+        if (error.response) {
+            console.error(error.response.body);
+        }
+        throw error;
     }
-    const info = await transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to,
-        subject,
-        text,
-        html: html || text
-    });
-    return info;
 }
 
 // Email templates
