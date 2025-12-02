@@ -82,6 +82,14 @@ exports.login = async (req, res, next) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
+        // Prevent admin from logging in via standard login
+        if (user.role === 'admin') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Admin access restricted. Please use the Admin Login page.' 
+            });
+        }
+
         const token = jwt.sign(
             { id: user._id, role: user.role }, 
             process.env.JWT_SECRET || 'secret', 
@@ -102,6 +110,55 @@ exports.login = async (req, res, next) => {
         });
     } catch (err) {
         console.error('[Auth] Login error:', err);
+        next(err);
+    }
+};
+
+exports.adminLogin = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email and password are required' });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        // Only allow admin role
+        if (user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Access denied. Admin privileges required.' });
+        }
+
+        const valid = await bcrypt.compare(password, user.passwordHash);
+
+        if (!valid) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role }, 
+            process.env.JWT_SECRET || 'secret', 
+            { expiresIn: process.env.JWT_EXPIRES || '7d' }
+        );
+        
+        res.json({ 
+            success: true,
+            token, 
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role,
+                phone: user.phone,
+                profilePicture: user.profilePicture
+            } 
+        });
+    } catch (err) {
+        console.error('[Auth] Admin Login error:', err);
         next(err);
     }
 };

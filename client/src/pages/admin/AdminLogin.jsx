@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import useAuthStore from "../../store/authStore";
 
 const AdminLogin = () => {
-    const { login, loading, isAuthenticated, initialized, user } = useAuthStore();
+    const { adminLogin, loading, isAuthenticated, initialized, user } = useAuthStore();
     const [form, setForm] = useState({ email: "", password: "" });
     const navigate = useNavigate();
 
@@ -26,7 +26,7 @@ const AdminLogin = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const res = await login(form);
+        const res = await adminLogin(form);
         
         if (!res.success) {
             toast.error(res.message);

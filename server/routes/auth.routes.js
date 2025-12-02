@@ -28,6 +28,7 @@ const uploadProfilePic = multer({
 // Apply rate limiting to auth routes
 router.post('/register', authLimiter, authCtrl.registerValidators, authCtrl.register);
 router.post('/login', authLimiter, authCtrl.login);
+router.post('/admin/login', authLimiter, authCtrl.adminLogin);
 router.get('/me', authenticate, authCtrl.me);
 
 // Password reset routes

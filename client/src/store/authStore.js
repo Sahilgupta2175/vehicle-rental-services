@@ -43,7 +43,22 @@ const useAuthStore = create((set, get) => ({
             return { success: true, user: data.user };
         } catch (err) {
             set({ loading: false });
-            const msg = err.response?.data?.error || "Login failed";
+            const msg = err.response?.data?.message || err.response?.data?.error || "Login failed";
+            return { success: false, message: msg };
+        }
+    },
+
+    adminLogin: async (credentials) => {
+        set({ loading: true });
+
+        try {
+            const { data } = await authApi.adminLogin(credentials);
+            localStorage.setItem("vr_token", data.token);
+            set({ user: data.user, isAuthenticated: true, loading: false });
+            return { success: true, user: data.user };
+        } catch (err) {
+            set({ loading: false });
+            const msg = err.response?.data?.message || err.response?.data?.error || "Admin login failed";
             return { success: false, message: msg };
         }
     },
