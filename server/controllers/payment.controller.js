@@ -87,7 +87,7 @@ exports.razorpayWebhook = async (req, res, next) => {
                     );
 
                     // Send detailed booking confirmation email to user
-                    const { sendMail } = require('../services/email.service');
+                    const { sendMail, sendVendorNewBookingEmail } = require('../services/email.service');
                     const startDate = new Date(booking.start).toLocaleString('en-US', { 
                         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
                     });
@@ -131,37 +131,8 @@ exports.razorpayWebhook = async (req, res, next) => {
                     }).catch(console.warn);
 
                     // Send notification to vendor
-                    sendMail({
-                        to: booking.vendor.email,
-                        subject: 'New Booking Received - Payment Confirmed',
-                        html: `
-                            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-                                <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
-                                    <h2 style="color: #4CAF50;">💰 Payment Received!</h2>
-                                    <p>Dear ${booking.vendor.name},</p>
-                                    <p>You have received a new booking with confirmed payment:</p>
-                                    
-                                    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                                        <h3 style="margin-top: 0;">Booking Details</h3>
-                                        <p><strong>Booking ID:</strong> ${booking._id}</p>
-                                        <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
-                                        <p><strong>Customer:</strong> ${booking.user.name}</p>
-                                        <p><strong>Customer Email:</strong> ${booking.user.email}</p>
-                                        ${booking.user.phone ? `<p><strong>Customer Phone:</strong> ${booking.user.phone}</p>` : ''}
-                                        <p><strong>Start:</strong> ${startDate}</p>
-                                        <p><strong>End:</strong> ${endDate}</p>
-                                        <p><strong>Amount Received:</strong> ₹${booking.totalAmount}</p>
-                                    </div>
-
-                                    <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                                        <p style="margin: 0;">⚠️ Your vehicle <strong>${booking.vehicle.name}</strong> is now marked as unavailable until the booking ends.</p>
-                                    </div>
-
-                                    <p style="color: #666;">Please ensure the vehicle is ready for pickup at the scheduled time.</p>
-                                </div>
-                            </div>
-                        `
-                    }).catch(console.warn);
+                    sendVendorNewBookingEmail(booking, booking.vendor, booking.user, booking.vehicle)
+                        .catch(err => console.warn('[Email] Failed to send vendor notification:', err));
 
                     // Notify via Socket.IO
                     if (global.io) {
@@ -293,7 +264,7 @@ exports.verifyRazorpayPayment = async (req, res, next) => {
             );
 
             // Send detailed booking confirmation email to user
-            const { sendMail } = require('../services/email.service');
+            const { sendMail, sendVendorNewBookingEmail } = require('../services/email.service');
             const startDate = new Date(booking.start).toLocaleString('en-US', { 
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
             });
@@ -337,37 +308,8 @@ exports.verifyRazorpayPayment = async (req, res, next) => {
             }).catch(console.warn);
 
             // Send notification to vendor
-            sendMail({
-                to: booking.vendor.email,
-                subject: 'New Booking Received - Payment Confirmed',
-                html: `
-                    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-                        <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
-                            <h2 style="color: #4CAF50;">💰 Payment Received!</h2>
-                            <p>Dear ${booking.vendor.name},</p>
-                            <p>You have received a new booking with confirmed payment:</p>
-                            
-                            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-                                <h3 style="margin-top: 0;">Booking Details</h3>
-                                <p><strong>Booking ID:</strong> ${booking._id}</p>
-                                <p><strong>Vehicle:</strong> ${booking.vehicle.name}</p>
-                                <p><strong>Customer:</strong> ${booking.user.name}</p>
-                                <p><strong>Customer Email:</strong> ${booking.user.email}</p>
-                                ${booking.user.phone ? `<p><strong>Customer Phone:</strong> ${booking.user.phone}</p>` : ''}
-                                <p><strong>Start:</strong> ${startDate}</p>
-                                <p><strong>End:</strong> ${endDate}</p>
-                                <p><strong>Amount Received:</strong> ₹${booking.totalAmount}</p>
-                            </div>
-
-                            <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                                <p style="margin: 0;">⚠️ Your vehicle <strong>${booking.vehicle.name}</strong> is now marked as unavailable until the booking ends.</p>
-                            </div>
-
-                            <p style="color: #666;">Please ensure the vehicle is ready for pickup at the scheduled time.</p>
-                        </div>
-                    </div>
-                `
-            }).catch(console.warn);
+            sendVendorNewBookingEmail(booking, booking.vendor, booking.user, booking.vehicle)
+                .catch(err => console.warn('[Email] Failed to send vendor notification:', err));
 
             // Notify via Socket.IO
             if (global.io) {

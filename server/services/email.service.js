@@ -351,6 +351,51 @@ async function sendBookingReminder(booking, user, vehicle, hoursUntilStart) {
     });
 }
 
+// Vendor new booking notification
+async function sendVendorNewBookingEmail(booking, vendor, user, vehicle) {
+    const content = `
+        <h2>💰 New Booking Received!</h2>
+        <p>Hi <strong>${vendor.name}</strong>,</p>
+        <p>Great news! You have received a new booking for your vehicle.</p>
+        
+        <div class="details">
+            <div class="details-row">
+                <span class="details-label">Vehicle:</span>
+                <span class="details-value">${vehicle.name}</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Customer:</span>
+                <span class="details-value">${user.name}</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Start Date:</span>
+                <span class="details-value">${new Date(booking.start).toLocaleString()}</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">End Date:</span>
+                <span class="details-value">${new Date(booking.end).toLocaleString()}</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Total Amount:</span>
+                <span class="details-value"><strong>₹${booking.totalAmount.toLocaleString()}</strong></span>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <strong>⚠️ Action Required:</strong>
+            <p style="margin: 5px 0;">Please ensure the vehicle is clean and ready for pickup.</p>
+        </div>
+        
+        <p>You can view full details in your dashboard.</p>
+    `;
+    
+    return await sendMail({
+        to: vendor.email,
+        subject: `New Booking - ${vehicle.name} (Paid)`,
+        html: emailTemplate('New Booking Received', content)
+    });
+}
+
 module.exports = { 
     sendMail, 
     sendBookingConfirmation,
@@ -358,5 +403,6 @@ module.exports = {
     sendCancellationEmail,
     sendPasswordResetEmail,
     sendWelcomeEmail,
-    sendBookingReminder
+    sendBookingReminder,
+    sendVendorNewBookingEmail
 };
