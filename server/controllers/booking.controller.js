@@ -377,7 +377,9 @@ exports.getUserBookings = async (req, res, next) => {
         const { completeExpiredBookings } = require('../cron/jobs');
         await completeExpiredBookings();
         
-        const bookings = await Booking.find({ user: req.user._id }).populate('vehicle');
+        const bookings = await Booking.find({ user: req.user._id })
+            .sort({ createdAt: -1 })
+            .populate('vehicle');
         res.json(bookings);
     } catch (err) {
         next(err);
@@ -390,7 +392,9 @@ exports.getVendorBookings = async (req, res, next) => {
         const { completeExpiredBookings } = require('../cron/jobs');
         await completeExpiredBookings();
         
-        const bookings = await Booking.find({ vendor: req.user._id }).populate('vehicle user');
+        const bookings = await Booking.find({ vendor: req.user._id })
+            .sort({ createdAt: -1 })
+            .populate('vehicle user');
         res.json(bookings);
     } catch (err) {
         next(err);
