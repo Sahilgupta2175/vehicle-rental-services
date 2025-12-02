@@ -10,6 +10,16 @@ const transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
+    },
+    family: 4 // Force IPv4 to avoid timeouts on some networks
+});
+
+// Verify connection configuration
+transporter.verify(function (error, success) {
+    if (error) {
+        console.error('SMTP Connection Error:', error);
+    } else {
+        console.log('SMTP Server is ready to take our messages');
     }
 });
 
