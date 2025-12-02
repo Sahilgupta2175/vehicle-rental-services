@@ -23,6 +23,9 @@ const { apiLimiter } = require('./middleware/rateLimiter.middleware');
 
 const app = express();
 
+// Trust proxy - Required when behind Render, Heroku, or other proxies
+app.set('trust proxy', 1);
+
 // Security middlewares
 app.use(helmet());
 app.use(xss());
