@@ -4,6 +4,7 @@ import Navbar from "./components/common/Navbar";
 import PageContainer from "./components/common/PageContainer.jsx";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RoleRoute from "./components/common/RoleRoute";
+import ChatBot from "./components/common/ChatBot";
 import useAuthStore from "./store/authStore";
 
 import Home from "./pages/Home";
@@ -129,6 +130,9 @@ function App() {
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </PageContainer>
+            
+            {/* ChatBot Widget - Available on all pages */}
+            <ChatBot />
         </div>
     );
 }

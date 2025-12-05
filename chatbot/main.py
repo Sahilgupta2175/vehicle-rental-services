@@ -65,14 +65,8 @@ RULES:
    - Aadhar or any government ID proof is required.
    - We provide vehicle documents at pickup.
 5. Cancellation Policy:
-   - Free cancellation up to 24 hours before pickup.
-   - After that, a 20% cancellation fee applies.
-   - Refund is processed back to original payment mode.
-6. Pricing (approx):
-   - Bikes start at ₹399/day.
-   - Scooters at ₹299/day.
-   - Cars at ₹999/day.
-   - SUVs at ₹1999/day.
+   - Free cancellation up to 30 minutes before pickup.
+   - Refund is processed back to original payment mode within 3-5 business days.
 """
 
 
