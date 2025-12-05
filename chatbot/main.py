@@ -1,0 +1,121 @@
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import google.generativeai as genai
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import re
+
+app = FastAPI()
+
+# ---- Rate Limiter ----
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ---- CORS ----
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ---- Gemini API Key ----
+genai.configure(api_key="AIzaSyBfKGbSUvHXFVbAB-1JFqsdzZtLuVJ4owk")
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+# ----------- CLEAN MARKDOWN -----------
+def clean_markdown(text: str) -> str:
+    if not text:
+        return text
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
+    text = re.sub(r'\*(.*?)\*', r'\1', text)
+    text = re.sub(r'^\s*\*\s*', '', text, flags=re.MULTILINE)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+
+# ----------- VEHICLE SUPPORT SYSTEM PROMPT -----------
+SYSTEM_PROMPT = """
+You are a Vehicle Rental Service Support Chatbot. 
+You must answer ONLY questions related to:
+- Payment modes (cash, UPI, wallets, cards)
+- Pickup & required documents
+- Driving licence requirements
+- Refunds, cancellation fees, cancellation rules
+- Pricing for bikes & cars
+- Rental policies
+
+RULES:
+1. Be short, friendly, and clear.
+2. If user asks anything out of topic, reply:
+   "I can help only with vehicle rental information — please ask about payments, pricing, bookings, documents, or cancellations."
+3. Payment Policy:
+   - Cash allowed only at selected pickup points.
+   - UPI, Wallets, and Cards are fully supported.
+   - Full payment is required before vehicle release; no post-usage payment allowed.
+4. Document Policy:
+   - Valid Driving Licence is mandatory.
+   - Aadhar or any government ID proof is required.
+   - We provide vehicle documents at pickup.
+5. Cancellation Policy:
+   - Free cancellation up to 24 hours before pickup.
+   - After that, a 20% cancellation fee applies.
+   - Refund is processed back to original payment mode.
+6. Pricing (approx):
+   - Bikes start at ₹399/day.
+   - Scooters at ₹299/day.
+   - Cars at ₹999/day.
+   - SUVs at ₹1999/day.
+"""
+
+
+# ----------- INTENT DETECTION (Keyword-Based Routing) -----------
+def detect_intent(user_text: str):
+    text = user_text.lower()
+
+    intents = {
+        "payment": ["pay", "cash", "upi", "wallet", "card", "payment", "online"],
+        "documents": ["document", "licence", "license", "aadhar", "id proof", "dl", "bring", "pickup"],
+        "cancel": ["cancel", "refund", "charge", "cancellation", "fee"],
+        "pricing": ["price", "cost", "rent", "rate", "charges", "how much"],
+    }
+
+    for intent, keywords in intents.items():
+        if any(k in text for k in keywords):
+            return intent
+
+    return "general"
+
+
+def build_prompt(intent: str, user_message: str):
+    return f"{SYSTEM_PROMPT}\nUser intent: {intent}\nUser: {user_message}\nAssistant:"
+
+
+# ----------- MAIN CHAT ENDPOINT -----------
+@app.post("/chat")
+@limiter.limit("15/minute")
+async def chat(request: Request, req: ChatRequest):
+    user_message = req.message
+
+    # 1️⃣ Detect what type of question the user is asking
+    intent = detect_intent(user_message)
+
+    # 2️⃣ Build a prompt based on intent + system rules
+    final_prompt = build_prompt(intent, user_message)
+
+    # 3️⃣ Call Gemini
+    model = genai.GenerativeModel("gemini-2.5-flash")
+    response = model.generate_content(final_prompt)
+
+    # 4️⃣ Clean stars / markdown
+    cleaned = clean_markdown(response.text)
+
+    # 5️⃣ Return in the same field your frontend expects
+    return {"answer": cleaned}
