@@ -108,6 +108,26 @@ def build_prompt(intent: str, user_message: str):
     return f"{SYSTEM_PROMPT}\nUser intent: {intent}\nUser: {user_message}\nAssistant:"
 
 
+# ----------- MODEL SELECTION -----------
+MODEL_CANDIDATES = [
+    os.getenv("GEMINI_MODEL"),  # optional override via env
+    "models/gemini-1.5-flash",
+    "models/gemini-1.5-pro",
+    "models/gemini-pro",
+    "gemini-1.5-pro",
+]
+
+
+def get_model_candidates():
+    seen = set()
+    ordered = []
+    for name in MODEL_CANDIDATES:
+        if name and name not in seen:
+            ordered.append(name)
+            seen.add(name)
+    return ordered
+
+
 # ----------- HEALTH CHECK -----------
 @app.get("/")
 async def root():
@@ -140,15 +160,24 @@ async def chat(request: Request, req: ChatRequest):
         # 2️⃣ Build a prompt based on intent + system rules
         final_prompt = build_prompt(intent, user_message)
 
-        # 3️⃣ Call Gemini (using stable pro model)
-        model = genai.GenerativeModel("gemini-1.5-pro")
-        response = model.generate_content(final_prompt)
+        # 3️⃣ Try available models (handles API version/model name changes)
+        last_error = None
+        for model_name in get_model_candidates():
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(final_prompt)
+                cleaned = clean_markdown(response.text)
+                return {"answer": cleaned}
+            except Exception as model_error:
+                last_error = str(model_error)
+                print(f"❌ Model {model_name} failed: {model_error}")
+                continue
 
-        # 4️⃣ Clean stars / markdown
-        cleaned = clean_markdown(response.text)
-
-        # 5️⃣ Return in the same field your frontend expects
-        return {"answer": cleaned}
+        # If all models fail, return a graceful fallback
+        print(f"❌ All models failed. Last error: {last_error}")
+        return {
+            "answer": "I'm having trouble reaching the AI model right now. Please try again in a moment."
+        }
         
     except Exception as e:
         print(f"❌ Chat error: {str(e)}")
