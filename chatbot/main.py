@@ -141,7 +141,7 @@ async def chat(request: Request, req: ChatRequest):
         final_prompt = build_prompt(intent, user_message)
 
         # 3️⃣ Call Gemini (using stable model)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-1.5-flash-latest")
         response = model.generate_content(final_prompt)
 
         # 4️⃣ Clean stars / markdown
