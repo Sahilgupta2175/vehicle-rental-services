@@ -112,9 +112,12 @@ def build_prompt(intent: str, user_message: str):
 MODEL_CANDIDATES = [
     os.getenv("GEMINI_MODEL"),  # optional override via env
     "models/gemini-1.5-flash",
+    "models/gemini-1.5-flash-001",
     "models/gemini-1.5-pro",
+    "models/gemini-1.0-pro",
     "models/gemini-pro",
     "gemini-1.5-pro",
+    "gemini-1.0-pro",
 ]
 
 
@@ -164,6 +167,7 @@ async def chat(request: Request, req: ChatRequest):
         last_error = None
         for model_name in get_model_candidates():
             try:
+                print(f"🔄 Trying model: {model_name}")
                 model = genai.GenerativeModel(model_name)
                 response = model.generate_content(final_prompt)
                 cleaned = clean_markdown(response.text)
