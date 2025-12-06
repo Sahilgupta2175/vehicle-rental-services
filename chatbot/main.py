@@ -140,8 +140,8 @@ async def chat(request: Request, req: ChatRequest):
         # 2️⃣ Build a prompt based on intent + system rules
         final_prompt = build_prompt(intent, user_message)
 
-        # 3️⃣ Call Gemini (using a stable and widely available model)
-        model = genai.GenerativeModel("gemini-pro")
+        # 3️⃣ Call Gemini (using stable pro model)
+        model = genai.GenerativeModel("gemini-1.5-pro")
         response = model.generate_content(final_prompt)
 
         # 4️⃣ Clean stars / markdown
