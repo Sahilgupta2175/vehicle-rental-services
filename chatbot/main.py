@@ -7,6 +7,11 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import re
 import os
+import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI(title="Vehicle Rental Chatbot API")
 
@@ -25,8 +30,11 @@ app.add_middleware(
 )
 
 # ---- Gemini API Key ----
-# Use environment variable in production, fallback to hardcoded for development
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBfKGbSUvHXFVbAB-1JFqsdzZtLuVJ4owk")
+# Load from environment variable (no fallback for security)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set. Please check your .env file.")
 
 try:
     genai.configure(api_key=GEMINI_API_KEY)
@@ -147,3 +155,15 @@ async def chat(request: Request, req: ChatRequest):
         return {
             "answer": "I apologize, but I'm having trouble processing your request right now. Please try asking about our payment methods, pricing, or rental policies."
         }
+
+# ----------- RUN SERVER -----------
+if __name__ == "__main__":
+    # Get port from environment variable (Render provides $PORT) or default to 8000
+    port = int(os.getenv("PORT", 8000))
+    print(f"🚀 Starting chatbot server on port {port}")
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=port,
+        reload=True  # Enable auto-reload for development
+    )
