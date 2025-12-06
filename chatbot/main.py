@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.generativeai as genai
@@ -6,8 +6,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import re
+import os
 
-app = FastAPI()
+app = FastAPI(title="Vehicle Rental Chatbot API")
 
 # ---- Rate Limiter ----
 limiter = Limiter(key_func=get_remote_address)
@@ -24,7 +25,14 @@ app.add_middleware(
 )
 
 # ---- Gemini API Key ----
-genai.configure(api_key="AIzaSyBfKGbSUvHXFVbAB-1JFqsdzZtLuVJ4owk")
+# Use environment variable in production, fallback to hardcoded for development
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBfKGbSUvHXFVbAB-1JFqsdzZtLuVJ4owk")
+
+try:
+    genai.configure(api_key=GEMINI_API_KEY)
+    print("✅ Gemini API configured successfully")
+except Exception as e:
+    print(f"❌ Error configuring Gemini API: {e}")
 
 class ChatRequest(BaseModel):
     message: str
@@ -92,24 +100,50 @@ def build_prompt(intent: str, user_message: str):
     return f"{SYSTEM_PROMPT}\nUser intent: {intent}\nUser: {user_message}\nAssistant:"
 
 
+# ----------- HEALTH CHECK -----------
+@app.get("/")
+async def root():
+    return {
+        "status": "healthy",
+        "service": "Vehicle Rental Chatbot",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok",
+        "gemini_configured": bool(GEMINI_API_KEY)
+    }
+
 # ----------- MAIN CHAT ENDPOINT -----------
 @app.post("/chat")
 @limiter.limit("15/minute")
 async def chat(request: Request, req: ChatRequest):
-    user_message = req.message
+    try:
+        user_message = req.message
+        
+        if not user_message or len(user_message.strip()) == 0:
+            return {"answer": "Please ask me a question about vehicle rentals!"}
 
-    # 1️⃣ Detect what type of question the user is asking
-    intent = detect_intent(user_message)
+        # 1️⃣ Detect what type of question the user is asking
+        intent = detect_intent(user_message)
 
-    # 2️⃣ Build a prompt based on intent + system rules
-    final_prompt = build_prompt(intent, user_message)
+        # 2️⃣ Build a prompt based on intent + system rules
+        final_prompt = build_prompt(intent, user_message)
 
-    # 3️⃣ Call Gemini
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    response = model.generate_content(final_prompt)
+        # 3️⃣ Call Gemini (using stable model)
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(final_prompt)
 
-    # 4️⃣ Clean stars / markdown
-    cleaned = clean_markdown(response.text)
+        # 4️⃣ Clean stars / markdown
+        cleaned = clean_markdown(response.text)
 
-    # 5️⃣ Return in the same field your frontend expects
-    return {"answer": cleaned}
+        # 5️⃣ Return in the same field your frontend expects
+        return {"answer": cleaned}
+        
+    except Exception as e:
+        print(f"❌ Chat error: {str(e)}")
+        return {
+            "answer": "I apologize, but I'm having trouble processing your request right now. Please try asking about our payment methods, pricing, or rental policies."
+        }
