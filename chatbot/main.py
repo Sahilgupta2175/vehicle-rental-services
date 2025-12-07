@@ -109,11 +109,11 @@ def build_prompt(intent: str, user_message: str):
 
 
 # ----------- MODEL SELECTION -----------
-# Use v1 API models (v1beta models don't work with current API)
+# Use v1 API models (only these are available in v1 API as of Dec 2024)
 MODEL_CANDIDATES = [
     os.getenv("GEMINI_MODEL"),  # optional override via env
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
+    "gemini-2.5-flash",  # Primary model - fast and efficient
+    "gemini-2.5-pro",    # Fallback model - more capable
 ]
 
 
