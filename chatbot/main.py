@@ -112,7 +112,6 @@ def build_prompt(intent: str, user_message: str):
 # Use v1 API models (v1beta models don't work with current API)
 MODEL_CANDIDATES = [
     os.getenv("GEMINI_MODEL"),  # optional override via env
-    "gemini-2.0-flash-exp",  # Latest model for v1 API
     "gemini-1.5-flash",
     "gemini-1.5-pro",
 ]
