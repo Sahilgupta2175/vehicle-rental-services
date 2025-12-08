@@ -99,7 +99,7 @@ const ChatBot = () => {
         <div className="fixed bottom-6 right-6 z-[9999] font-sans">
             {/* Chat Window */}
             <div
-                className={`absolute bottom-20 right-0 w-[420px] h-[600px] bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border border-blue-500/20 flex-col overflow-hidden transition-all duration-300 backdrop-blur-sm ${
+                className={`absolute bottom-20 right-4 left-4 sm:right-0 sm:left-auto w-auto sm:w-[420px] max-w-[92%] h-[70vh] sm:h-[600px] bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border border-blue-500/20 flex-col overflow-hidden transition-all duration-300 backdrop-blur-sm ${
                     isOpen ? 'flex animate-slideUp' : 'hidden'
                 }`}
                 style={{
@@ -132,7 +132,7 @@ const ChatBot = () => {
                             }`}
                         >
                             <div
-                                className={`max-w-[85%] p-3 rounded-xl text-sm leading-relaxed ${
+                                className={`max-w-[85%] sm:max-w-[70%] p-3 rounded-xl text-sm leading-relaxed ${
                                     msg.sender === 'user'
                                         ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-sm shadow-lg shadow-blue-500/30'
                                         : 'bg-blue-500/15 text-blue-100 border border-blue-500/30 rounded-bl-sm'
@@ -186,11 +186,12 @@ const ChatBot = () => {
             {/* Toggle Button */}
             <button
                 onClick={toggleChat}
-                className={`w-16 h-16 rounded-full text-white border-none text-3xl cursor-pointer shadow-2xl transition-all duration-300 flex items-center justify-center relative overflow-hidden hover:scale-110 active:scale-95 ${
+                className={`fixed bottom-6 right-6 z-[10000] w-14 h-14 sm:w-16 sm:h-16 rounded-full text-white border-none text-2xl sm:text-3xl cursor-pointer shadow-2xl transition-all duration-300 flex items-center justify-center relative overflow-hidden hover:scale-110 active:scale-95 ${
                     isOpen
                         ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/40'
                         : 'bg-gradient-to-br from-blue-600 to-blue-700 shadow-blue-500/40'
                 }`}
+                aria-label={isOpen ? 'Close chat' : 'Open chat'}
             >
                 {isOpen ? (
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
