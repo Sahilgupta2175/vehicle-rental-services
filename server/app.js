@@ -33,7 +33,7 @@ app.use(xss());
 // CORS configuration - support multiple origins
 const allowedOrigins = process.env.CLIENT_URL 
     ? process.env.CLIENT_URL.split(',').map(url => url.trim())
-    : [];
+    : ['http://localhost:5173', 'http://localhost:3000'];
 
 app.use(cors({ 
     origin: (origin, callback) => {
@@ -41,7 +41,7 @@ app.use(cors({
         if (!origin) return callback(null, true);
         
         // Check if origin is in allowed list
-        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));

@@ -1,4 +1,42 @@
-node_modules
-package-lock.json
+# Environment Variables - NEVER COMMIT
 .env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+npm-error.log*
+yarn.lock
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Uploads and temporary files
 uploads/
+temp/
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Docker
+docker-compose.override.yml

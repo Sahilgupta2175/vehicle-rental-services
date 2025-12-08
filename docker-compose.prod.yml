@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  # ==================== MONGODB ====================
+  mongodb:
+    image: mongo:6.0-alpine
+    container_name: vehicle-rental-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secure-password}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - vehicle-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==================== BACKEND SERVER ====================
+  server:
+    image: ghcr.io/${GITHUB_REPOSITORY}/server:latest
+    container_name: vehicle-rental-server
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      CLIENT_URL: ${CLIENT_URL}
+      MONGO_USER: ${MONGO_USER:-admin}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-secure-password}
+      MONGODB_URI: ${MONGODB_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES: ${JWT_EXPIRES:-7d}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_NUMBER: ${TWILIO_PHONE_NUMBER}
+      STRIPE_SECRET: ${STRIPE_SECRET}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      RAZORPAY_KEY: ${RAZORPAY_KEY}
+      RAZORPAY_SECRET: ${RAZORPAY_SECRET}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      CLD_NAME: ${CLD_NAME}
+      CLD_KEY: ${CLD_KEY}
+      CLD_SECRET: ${CLD_SECRET}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - vehicle-network
+    healthcheck:
+      test: curl -f http://localhost:8080/api/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==================== CHATBOT ====================
+  chatbot:
+    image: ghcr.io/${GITHUB_REPOSITORY}/chatbot:latest
+    container_name: vehicle-rental-chatbot
+    restart: unless-stopped
+    expose:
+      - "8000"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    networks:
+      - vehicle-network
+    healthcheck:
+      test: curl -f http://localhost:8000/docs || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==================== CLIENT ====================
+  client:
+    image: ghcr.io/${GITHUB_REPOSITORY}/client:latest
+    container_name: vehicle-rental-client
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+      VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+      VITE_CHATBOT_API_URL: ${VITE_CHATBOT_API_URL}
+      VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+      VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
+    depends_on:
+      - server
+    networks:
+      - vehicle-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==================== NGINX REVERSE PROXY ====================
+  nginx:
+    image: nginx:alpine
+    container_name: vehicle-rental-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - client
+      - server
+      - chatbot
+    networks:
+      - vehicle-network
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  mongodb_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  vehicle-network:
+    driver: bridge
