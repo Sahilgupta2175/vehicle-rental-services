@@ -24,6 +24,7 @@ import VendorDashboard from "./pages/dashboards/VendorDashboard";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminSignup from "./pages/admin/AdminSignup";
+import ApiDocs from "./pages/ApiDocs";
 
 function App() {
     const { init, initialized } = useAuthStore();
@@ -51,6 +52,7 @@ function App() {
                 <Routes>
                     {/* Public */}
                     <Route path="/" element={<Home />} />
+                    <Route path="/doc" element={<ApiDocs />} />
                     <Route path="/vehicles" element={<VehicleList />} />
                     <Route path="/vehicles/:id" element={<VehicleDetail />} />
                     <Route path="/login" element={<Login />} />
