@@ -108,7 +108,7 @@ const ApiDocs = () => {
                         Comprehensive documentation for the Vehicle Rental Services REST API.
                     </p>
                     <div className="mt-6 inline-block px-4 py-2 bg-slate-800 rounded-lg border border-slate-700 font-mono text-sm">
-                        Base URL: <span className="text-blue-400">http://localhost:5000/api</span>
+                        Base URL: <span className="text-blue-400">https://vrs-frontend-sg.vercel.app/api</span>
                     </div>
                 </div>
 
