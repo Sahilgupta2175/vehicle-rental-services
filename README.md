@@ -28,7 +28,6 @@
 - [Usage](#-usage)
 - [API Documentation](#-api-documentation)
 - [Project Structure](#-project-structure)
-- [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
 - [License](#-license)
 - [Contact](#-contact)
@@ -423,12 +422,6 @@ For complete API documentation, visit: `/api-docs` (when server is running)
 - **Payment Service**: Razorpay integration
 - **Storage Service**: Cloudinary integration
 - **Report Service**: PDF and CSV generation
-
----
-
-## 🎨 Screenshots
-
-> Add your project screenshots here
 
 ---
 
