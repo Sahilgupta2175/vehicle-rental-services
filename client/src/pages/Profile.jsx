@@ -15,7 +15,11 @@ const Profile = () => {
     const [formData, setFormData] = useState({
         name: user?.name || '',
         phone: user?.phone || '',
-        email: user?.email || ''
+        email: user?.email || '',
+        address: user?.location?.address || '',
+        city: user?.location?.city || '',
+        state: user?.location?.state || '',
+        country: user?.location?.country || ''
     });
     
     const [passwordData, setPasswordData] = useState({
@@ -31,7 +35,11 @@ const Profile = () => {
             setFormData({
                 name: user.name || '',
                 phone: user.phone || '',
-                email: user.email || ''
+                email: user.email || '',
+                address: user.location?.address || '',
+                city: user.location?.city || '',
+                state: user.location?.state || '',
+                country: user.location?.country || ''
             });
         }
     }, [user]);
@@ -52,7 +60,13 @@ const Profile = () => {
         try {
             const response = await authApi.updateProfile({
                 name: formData.name,
-                phone: formData.phone
+                phone: formData.phone,
+                location: {
+                    address: formData.address,
+                    city: formData.city,
+                    state: formData.state,
+                    country: formData.country
+                }
             });
 
             if (response.data.success) {
@@ -283,6 +297,73 @@ const Profile = () => {
                             </div>
                         </div>
 
+                        {/* Location Fields */}
+                        <div className="pt-4 border-t border-slate-700">
+                            <h3 className="text-lg font-semibold text-white mb-4">Location Information</h3>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                        Address
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                        disabled={!isEditing || loading}
+                                        placeholder="Enter your address"
+                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                        City
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="city"
+                                        value={formData.city}
+                                        onChange={handleInputChange}
+                                        disabled={!isEditing || loading}
+                                        placeholder="Enter your city"
+                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                        State
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="state"
+                                        value={formData.state}
+                                        onChange={handleInputChange}
+                                        disabled={!isEditing || loading}
+                                        placeholder="Enter your state"
+                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                        Country
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="country"
+                                        value={formData.country}
+                                        onChange={handleInputChange}
+                                        disabled={!isEditing || loading}
+                                        placeholder="Enter your country"
+                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         {isEditing && (
                             <div className="flex gap-3 pt-4">
                                 <button
@@ -299,7 +380,11 @@ const Profile = () => {
                                         setFormData({
                                             name: user.name,
                                             phone: user.phone,
-                                            email: user.email
+                                            email: user.email,
+                                            address: user.location?.address || '',
+                                            city: user.location?.city || '',
+                                            state: user.location?.state || '',
+                                            country: user.location?.country || ''
                                         });
                                     }}
                                     disabled={loading}

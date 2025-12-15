@@ -307,7 +307,7 @@ exports.changePassword = async (req, res, next) => {
 // Update user profile
 exports.updateProfile = async (req, res, next) => {
     try {
-        const { name, phone } = req.body;
+        const { name, phone, location } = req.body;
         const user = await User.findById(req.user._id);
 
         if (!user) {
@@ -316,6 +316,14 @@ exports.updateProfile = async (req, res, next) => {
 
         if (name) user.name = name;
         if (phone) user.phone = phone;
+        
+        // Update location fields if provided
+        if (location) {
+            if (location.address !== undefined) user.location.address = location.address;
+            if (location.city !== undefined) user.location.city = location.city;
+            if (location.state !== undefined) user.location.state = location.state;
+            if (location.country !== undefined) user.location.country = location.country;
+        }
 
         await user.save();
 
@@ -328,7 +336,8 @@ exports.updateProfile = async (req, res, next) => {
                 email: user.email,
                 role: user.role,
                 phone: user.phone,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                location: user.location
             }
         });
     } catch (err) {
