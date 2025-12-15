@@ -1,5 +1,6 @@
 const Vehicle = require('../models/Vehicle');
 const { uploadBuffer } = require('../services/storage.service');
+const { validateCoordinates, sortByDistance } = require('../utils/location.util');
 
 exports.createVehicle = async (req, res, next) => {
     try {
@@ -185,6 +186,71 @@ exports.getVehicle = async (req, res, next) => {
         }
 
         res.json(vehicle);
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.getNearbyVehicles = async (req, res, next) => {
+    try {
+        const { lat, lng, radius = 50, type, minPrice, maxPrice, page = 1, limit = 20 } = req.query;
+
+        // Validate required parameters
+        if (!lat || !lng) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        const latitude = parseFloat(lat);
+        const longitude = parseFloat(lng);
+        const radiusKm = parseFloat(radius);
+
+        // Validate coordinates
+        if (!validateCoordinates(latitude, longitude)) {
+            return res.status(400).json({ error: 'Invalid coordinates' });
+        }
+
+        // Build filter
+        const filter = {
+            available: true,
+            'location.coordinates': {
+                $near: {
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: [longitude, latitude] // GeoJSON uses [lng, lat]
+                    },
+                    $maxDistance: radiusKm * 1000 // Convert km to meters
+                }
+            }
+        };
+
+        // Additional filters
+        if (type) {
+            filter.type = type.toLowerCase();
+        }
+
+        if (minPrice) {
+            filter.pricePerHour = Object.assign(filter.pricePerHour || {}, { $gte: Number(minPrice) });
+        }
+
+        if (maxPrice) {
+            filter.pricePerHour = Object.assign(filter.pricePerHour || {}, { $lte: Number(maxPrice) });
+        }
+
+        // Query vehicles with geospatial search
+        const vehicles = await Vehicle.find(filter)
+            .populate('owner', 'name email phone')
+            .skip((page - 1) * limit)
+            .limit(Number(limit));
+
+        // Calculate distances and add to response
+        const vehiclesWithDistance = sortByDistance(vehicles, latitude, longitude);
+
+        res.json({
+            count: vehiclesWithDistance.length,
+            radius: radiusKm,
+            userLocation: { lat: latitude, lng: longitude },
+            vehicles: vehiclesWithDistance
+        });
     } catch (err) {
         next(err);
     }

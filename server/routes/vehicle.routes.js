@@ -15,6 +15,7 @@ const optionalAuth = (req, res, next) => {
 };
 
 router.get('/', optionalAuth, vehicleCtrl.getVehicles);
+router.get('/nearby', vehicleCtrl.getNearbyVehicles);
 router.get('/:id', vehicleCtrl.getVehicle);
 
 router.post('/', authenticate, allowRoles('vendor', 'admin'), upload.array('images', 6), vehicleCtrl.createVehicle);
