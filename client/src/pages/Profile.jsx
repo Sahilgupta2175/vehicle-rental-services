@@ -177,12 +177,12 @@ const Profile = () => {
 
     return (
         <PageContainer>
-            <div className="max-w-4xl mx-auto py-8 px-4">
-                <h1 className="text-3xl font-bold text-white mb-8">My Profile</h1>
+            <div className="max-w-5xl mx-auto py-4 sm:py-6 px-3 sm:px-4">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">My Profile</h1>
 
                 {/* Message Display */}
                 {message.text && (
-                    <div className={`mb-6 p-4 rounded-lg ${
+                    <div className={`mb-3 sm:mb-4 p-3 rounded-lg text-sm ${
                         message.type === 'success' 
                             ? 'bg-green-500/10 border border-green-500/30 text-green-400' 
                             : 'bg-red-500/10 border border-red-500/30 text-red-400'
@@ -192,11 +192,10 @@ const Profile = () => {
                 )}
 
                 {/* Profile Picture Section */}
-                <div className="bg-slate-800/50 backdrop-blur border border-slate-600/50 rounded-xl p-6 mb-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">Profile Picture</h2>
-                    <div className="flex items-center gap-6">
+                <div className="bg-slate-800/50 backdrop-blur border border-slate-600/50 rounded-xl p-4 sm:p-5 mb-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
                         <div className="relative">
-                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-700 shadow-lg">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-3 border-slate-700 shadow-lg">
                                 {user.profilePicture ? (
                                     <img 
                                         src={user.profilePicture}
@@ -205,14 +204,15 @@ const Profile = () => {
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                        <span className="text-4xl font-bold text-white">
+                                        <span className="text-2xl sm:text-3xl font-bold text-white">
                                             {user.name?.charAt(0).toUpperCase()}
                                         </span>
                                     </div>
                                 )}
                             </div>
                         </div>
-                        <div>
+                        <div className="flex-1 text-center sm:text-left">
+                            <h2 className="text-lg sm:text-xl font-semibold text-white mb-2">{user.name}</h2>
                             <label className="cursor-pointer">
                                 <input
                                     type="file"
@@ -221,89 +221,94 @@ const Profile = () => {
                                     className="hidden"
                                     disabled={loading}
                                 />
-                                <div className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all hover:scale-105 inline-block">
+                                <div className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all hover:scale-105 inline-block">
                                     {loading ? 'Uploading...' : 'Change Picture'}
                                 </div>
                             </label>
-                            <p className="text-sm text-slate-400 mt-2">
-                                JPG, PNG, GIF or WebP. Max size 5MB
+                            <p className="text-xs text-slate-400 mt-1.5">
+                                JPG, PNG, GIF or WebP. Max 5MB
                             </p>
                         </div>
                     </div>
                 </div>
 
                 {/* Profile Information */}
-                <div className="bg-slate-900/50 backdrop-blur border border-slate-700/50 rounded-xl p-6 mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-white">Profile Information</h2>
+                <div className="bg-slate-900/50 backdrop-blur border border-slate-700/50 rounded-xl p-4 sm:p-5 mb-4">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Information</h2>
                         {!isEditing && (
                             <button
                                 onClick={() => setIsEditing(true)}
-                                className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-all"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm transition-all"
                             >
-                                Edit Profile
+                                Edit
                             </button>
                         )}
                     </div>
 
-                    <form onSubmit={handleProfileUpdate} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Full Name
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                disabled={!isEditing || loading}
-                                className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                            />
+                    <form onSubmit={handleProfileUpdate} className="space-y-3">
+                        {/* Basic Info Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing || loading}
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                                    Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    disabled={!isEditing || loading}
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                value={user.email}
-                                disabled
-                                className="w-full px-4 py-3 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-400 cursor-not-allowed"
-                            />
-                            <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
-                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={user.email}
+                                    disabled
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-400 text-sm cursor-not-allowed"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">Cannot be changed</p>
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Phone Number
-                            </label>
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleInputChange}
-                                disabled={!isEditing || loading}
-                                className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">
-                                Role
-                            </label>
-                            <div className={`inline-block px-4 py-2 rounded-lg border font-medium capitalize ${getRoleColor(user.role)}`}>
-                                {user.role}
+                            <div>
+                                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                                    Role
+                                </label>
+                                <div className={`inline-block px-3 py-1.5 rounded-lg border text-sm font-medium capitalize ${getRoleColor(user.role)}`}>
+                                    {user.role}
+                                </div>
                             </div>
                         </div>
 
                         {/* Location Fields */}
-                        <div className="pt-4 border-t border-slate-700">
-                            <h3 className="text-lg font-semibold text-white mb-4">Location Information</h3>
+                        <div className="pt-3 border-t border-slate-700">
+                            <h3 className="text-base sm:text-lg font-semibold text-white mb-3">Location</h3>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="sm:col-span-2">
+                                    <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
                                         Address
                                     </label>
                                     <input
@@ -313,12 +318,12 @@ const Profile = () => {
                                         onChange={handleInputChange}
                                         disabled={!isEditing || loading}
                                         placeholder="Enter your address"
-                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                    <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
                                         City
                                     </label>
                                     <input
@@ -327,13 +332,13 @@ const Profile = () => {
                                         value={formData.city}
                                         onChange={handleInputChange}
                                         disabled={!isEditing || loading}
-                                        placeholder="Enter your city"
-                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                        placeholder="City"
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                    <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
                                         State
                                     </label>
                                     <input
@@ -342,13 +347,13 @@ const Profile = () => {
                                         value={formData.state}
                                         onChange={handleInputChange}
                                         disabled={!isEditing || loading}
-                                        placeholder="Enter your state"
-                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                        placeholder="State"
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                <div className="sm:col-span-2">
+                                    <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
                                         Country
                                     </label>
                                     <input
@@ -357,21 +362,21 @@ const Profile = () => {
                                         value={formData.country}
                                         onChange={handleInputChange}
                                         disabled={!isEditing || loading}
-                                        placeholder="Enter your country"
-                                        className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                        placeholder="Country"
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         {isEditing && (
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-2 sm:gap-3 pt-3">
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all hover:scale-105 disabled:opacity-50"
+                                    className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all hover:scale-105 disabled:opacity-50"
                                 >
-                                    {loading ? 'Saving...' : 'Save Changes'}
+                                    {loading ? 'Saving...' : 'Save'}
                                 </button>
                                 <button
                                     type="button"
@@ -388,7 +393,7 @@ const Profile = () => {
                                         });
                                     }}
                                     disabled={loading}
-                                    className="px-6 py-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-medium transition-all"
+                                    className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-all"
                                 >
                                     Cancel
                                 </button>
@@ -398,13 +403,13 @@ const Profile = () => {
                 </div>
 
                 {/* Change Password Section */}
-                <div className="bg-slate-800/50 backdrop-blur border border-slate-600/50 rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-white">Security</h2>
+                <div className="bg-slate-800/50 backdrop-blur border border-slate-600/50 rounded-xl p-4 sm:p-5">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <h2 className="text-lg sm:text-xl font-semibold text-white">Security</h2>
                         {!showPasswordSection && (
                             <button
                                 onClick={() => setShowPasswordSection(true)}
-                                className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-all"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm transition-all"
                             >
                                 Change Password
                             </button>
@@ -412,9 +417,9 @@ const Profile = () => {
                     </div>
 
                     {showPasswordSection && (
-                        <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                        <form onSubmit={handlePasswordUpdate} className="space-y-3">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
                                     Current Password
                                 </label>
                                 <input
@@ -423,45 +428,47 @@ const Profile = () => {
                                     value={passwordData.currentPassword}
                                     onChange={handlePasswordChange}
                                     required
-                                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    New Password
-                                </label>
-                                <input
-                                    type="password"
-                                    name="newPassword"
-                                    value={passwordData.newPassword}
-                                    onChange={handlePasswordChange}
-                                    required
-                                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                                        New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="newPassword"
+                                        value={passwordData.newPassword}
+                                        onChange={handlePasswordChange}
+                                        required
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs sm:text-sm font-medium text-slate-300 mb-1.5">
+                                        Confirm New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        value={passwordData.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        required
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    Confirm New Password
-                                </label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    value={passwordData.confirmPassword}
-                                    onChange={handlePasswordChange}
-                                    required
-                                    className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-2 sm:gap-3 pt-3">
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all hover:scale-105 disabled:opacity-50"
+                                    className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all hover:scale-105 disabled:opacity-50"
                                 >
-                                    {loading ? 'Updating...' : 'Update Password'}
+                                    {loading ? 'Updating...' : 'Update'}
                                 </button>
                                 <button
                                     type="button"
@@ -470,7 +477,7 @@ const Profile = () => {
                                         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                                     }}
                                     disabled={loading}
-                                    className="px-6 py-3 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-medium transition-all"
+                                    className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-all"
                                 >
                                     Cancel
                                 </button>
