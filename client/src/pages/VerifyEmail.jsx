@@ -25,7 +25,9 @@ const VerifyEmail = () => {
             try {
                 const response = await authApi.verifyEmail(token);
                 
-                if (response.data.success) {
+                console.log('Verification response:', response.data);
+                
+                if (response.data && response.data.success) {
                     setStatus('success');
                     setMessage(response.data.message || 'Email verified successfully!');
                     
@@ -50,10 +52,12 @@ const VerifyEmail = () => {
                         }, 3000);
                     }
                 } else {
+                    console.error('Verification failed - response:', response.data);
                     setStatus('error');
-                    setMessage(response.data.message || 'Verification failed');
+                    setMessage(response.data?.message || 'Verification failed');
                 }
             } catch (error) {
+                console.error('Verification error:', error);
                 setStatus('error');
                 setMessage(error.response?.data?.message || 'Verification failed. Please try again.');
             }
