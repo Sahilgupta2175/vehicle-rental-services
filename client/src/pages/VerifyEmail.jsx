@@ -25,9 +25,9 @@ const VerifyEmail = () => {
             try {
                 const response = await authApi.verifyEmail(token);
                 
-                if (response.success) {
+                if (response.data.success) {
                     setStatus('success');
-                    setMessage(response.message || 'Email verified successfully!');
+                    setMessage(response.data.message || 'Email verified successfully!');
                     
                     // Update user in store if logged in
                     if (user) {
@@ -51,7 +51,7 @@ const VerifyEmail = () => {
                     }
                 } else {
                     setStatus('error');
-                    setMessage(response.message || 'Verification failed');
+                    setMessage(response.data.message || 'Verification failed');
                 }
             } catch (error) {
                 setStatus('error');
