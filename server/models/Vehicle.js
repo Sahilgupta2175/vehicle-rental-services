@@ -71,7 +71,18 @@ const VehicleSchema = new mongoose.Schema({
             get: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : v
         },
         lat: Number,
-        lng: Number
+        lng: Number,
+        coordinates: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                default: 'Point'
+            },
+            coordinates: {
+                type: [Number],
+                default: [0, 0]
+            }
+        }
     },
     pricePerHour: { 
         type: Number, 
@@ -103,5 +114,21 @@ VehicleSchema.index({ type: 1, available: 1 });
 VehicleSchema.index({ 'location.city': 1 });
 VehicleSchema.index({ pricePerHour: 1 });
 VehicleSchema.index({ name: 'text', 'location.city': 'text', type: 'text' });
+VehicleSchema.index({ 'location.coordinates': '2dsphere' });
+
+// Pre-save hook to sync lat/lng with GeoJSON coordinates
+VehicleSchema.pre('save', function(next) {
+    if (this.location && this.location.lat && this.location.lng) {
+        if (!this.location.coordinates) {
+            this.location.coordinates = {
+                type: 'Point',
+                coordinates: [this.location.lng, this.location.lat]
+            };
+        } else {
+            this.location.coordinates.coordinates = [this.location.lng, this.location.lat];
+        }
+    }
+    next();
+});
 
 module.exports = mongoose.model('Vehicle', VehicleSchema);
