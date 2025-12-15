@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { vehicleApi } from "../../api/vehicles";
 import { bookingApi } from "../../api/bookings";
+import { authApi } from "../../api/auth";
 import VehicleForm from "../../components/vehicle/VehicleForm";
 import BookingCard from "../../components/booking/BookingCard";
 import { toast } from "react-toastify";
 import useSocket from "../../hooks/useSocket";
 import { io } from "socket.io-client";
 import useAuthStore from "../../store/authStore";
+import useGeolocation from "../../hooks/useGeolocation";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
@@ -21,6 +23,18 @@ const VendorDashboard = () => {
     const [showModal, setShowModal] = useState(false);
     const [bookingFilter, setBookingFilter] = useState("all");
     const [openDropdown, setOpenDropdown] = useState(null);
+    
+    // Location management
+    const [locationForm, setLocationForm] = useState({
+        address: user?.location?.address || "",
+        city: user?.location?.city || "",
+        state: user?.location?.state || "",
+        country: user?.location?.country || "India",
+        lat: user?.location?.coordinates?.coordinates?.[1] || "",
+        lng: user?.location?.coordinates?.coordinates?.[0] || ""
+    });
+    const [savingLocation, setSavingLocation] = useState(false);
+    const { location: geoLocation, loading: geoLoading, getLocation } = useGeolocation();
 
     useSocket();
 
@@ -133,6 +147,66 @@ const VendorDashboard = () => {
         ? bookings 
         : bookings.filter(b => b.status === bookingFilter);
 
+    // Location handlers
+    const handleLocationChange = (e) => {
+        setLocationForm(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }));
+    };
+
+    const handleUseCurrentLocation = () => {
+        getLocation();
+    };
+
+    useEffect(() => {
+        if (geoLocation) {
+            setLocationForm(prev => ({
+                ...prev,
+                lat: geoLocation.lat,
+                lng: geoLocation.lng
+            }));
+            toast.success("Location detected!");
+        }
+    }, [geoLocation]);
+
+    const handleSaveLocation = async (e) => {
+        e.preventDefault();
+        
+        if (!locationForm.lat || !locationForm.lng) {
+            toast.error("Please provide latitude and longitude");
+            return;
+        }
+
+        try {
+            setSavingLocation(true);
+            
+            await authApi.updateProfile({
+                location: {
+                    address: locationForm.address,
+                    city: locationForm.city,
+                    state: locationForm.state,
+                    country: locationForm.country,
+                    coordinates: {
+                        type: 'Point',
+                        coordinates: [parseFloat(locationForm.lng), parseFloat(locationForm.lat)]
+                    }
+                }
+            });
+
+            toast.success("Business location updated successfully!");
+            
+            // Refresh user data
+            const { data: userData } = await authApi.me();
+            useAuthStore.getState().setUser(userData.user);
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update location");
+        } finally {
+            setSavingLocation(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -195,6 +269,20 @@ const VendorDashboard = () => {
                             {bookings.length}
                         </span>
                     )}
+                </button>
+                <button
+                    onClick={() => setTab("location")}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                        tab === "location"
+                            ? "bg-linear-to-r from-blue-500/20 to-blue-600/20 text-blue-400 border border-blue-500/30 shadow-lg shadow-blue-500/10"
+                            : "text-slate-400 hover:text-slate-300 hover:bg-slate-800/50"
+                    }`}
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Business Location
                 </button>
             </div>
 
@@ -465,6 +553,166 @@ const VendorDashboard = () => {
                             ))}
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Location Tab */}
+            {tab === "location" && (
+                <div className="card p-6 max-w-3xl">
+                    <div className="space-y-6">
+                        <div>
+                            <h2 className="text-2xl font-bold text-white mb-2">Business Location</h2>
+                            <p className="text-slate-400">
+                                Set your business location so customers can find vehicles near them. This location will be used as the default for your vehicles.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleSaveLocation} className="space-y-6">
+                            {/* Address */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-300">Business Address</label>
+                                <input
+                                    type="text"
+                                    name="address"
+                                    value={locationForm.address}
+                                    onChange={handleLocationChange}
+                                    placeholder="e.g., Shop 123, Main Street"
+                                    className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    required
+                                />
+                            </div>
+
+                            {/* City, State, Country */}
+                            <div className="grid sm:grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-300">City *</label>
+                                    <input
+                                        type="text"
+                                        name="city"
+                                        value={locationForm.city}
+                                        onChange={handleLocationChange}
+                                        placeholder="e.g., Mumbai"
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-300">State *</label>
+                                    <input
+                                        type="text"
+                                        name="state"
+                                        value={locationForm.state}
+                                        onChange={handleLocationChange}
+                                        placeholder="e.g., Maharashtra"
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-300">Country *</label>
+                                    <input
+                                        type="text"
+                                        name="country"
+                                        value={locationForm.country}
+                                        onChange={handleLocationChange}
+                                        placeholder="e.g., India"
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Coordinates */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-slate-300">Coordinates (Required for nearby search)</label>
+                                    <button
+                                        type="button"
+                                        onClick={handleUseCurrentLocation}
+                                        disabled={geoLoading}
+                                        className="btn-secondary text-sm flex items-center gap-2"
+                                    >
+                                        {geoLoading ? (
+                                            <>
+                                                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Detecting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                </svg>
+                                                Use Current Location
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                                
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">Latitude *</label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            name="lat"
+                                            value={locationForm.lat}
+                                            onChange={handleLocationChange}
+                                            placeholder="e.g., 19.0760"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-300">Longitude *</label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            name="lng"
+                                            value={locationForm.lng}
+                                            onChange={handleLocationChange}
+                                            placeholder="e.g., 72.8777"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-600 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="text-sm text-slate-400 bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                                    <strong className="text-slate-300">Tip:</strong> You can find coordinates by searching your address on Google Maps, 
+                                    right-clicking on your location, and selecting the coordinates to copy them.
+                                </div>
+                            </div>
+
+                            {/* Save Button */}
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={savingLocation}
+                                    className="flex-1 btn-primary flex items-center justify-center gap-2"
+                                >
+                                    {savingLocation ? (
+                                        <>
+                                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Save Location
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 
