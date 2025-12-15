@@ -2,12 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { vehicleApi } from "../api/vehicles";
 import VehicleCard from "../components/vehicle/VehicleCard";
+import useGeolocation from "../hooks/useGeolocation";
+import { toast } from "react-toastify";
 
 const VehicleList = () => {
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const [showFilters, setShowFilters] = useState(false);
+    const [isNearbySearch, setIsNearbySearch] = useState(false);
+    const [nearbyInfo, setNearbyInfo] = useState(null);
+    const { location, error: locationError, loading: locationLoading, getLocation, clearError } = useGeolocation();
 
     const [filters, setFilters] = useState({
         q: searchParams.get("q") || "",
@@ -15,6 +20,7 @@ const VehicleList = () => {
         type: searchParams.get("type") || "",
         minPrice: searchParams.get("minPrice") || "",
         maxPrice: searchParams.get("maxPrice") || "",
+        radius: searchParams.get("radius") || "50",
     });
 
     const loadVehicles = async () => {
@@ -107,9 +113,12 @@ const VehicleList = () => {
             type: "",
             minPrice: "",
             maxPrice: "",
+            radius: "50",
         };
         setFilters(emptyFilters);
         setSearchParams({});
+        setIsNearbySearch(false);
+        setNearbyInfo(null);
         
         // Fetch all vehicles with no filters
         try {
@@ -123,6 +132,65 @@ const VehicleList = () => {
         }
     };
 
+    const handleFindNearby = () => {
+        clearError();
+        getLocation();
+    };
+
+    // Handle location change for nearby search
+    useEffect(() => {
+        if (location && !locationError) {
+            loadNearbyVehicles();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location]);
+
+    // Handle location errors
+    useEffect(() => {
+        if (locationError) {
+            toast.error(locationError.message);
+        }
+    }, [locationError]);
+
+    const loadNearbyVehicles = async () => {
+        if (!location) return;
+
+        try {
+            setLoading(true);
+            setIsNearbySearch(true);
+
+            const params = {
+                lat: location.lat,
+                lng: location.lng,
+                radius: filters.radius || 50,
+            };
+
+            if (filters.type) params.type = filters.type;
+            if (filters.minPrice) params.minPrice = filters.minPrice;
+            if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+
+            const { data } = await vehicleApi.nearby(params);
+            
+            setVehicles(data.vehicles || []);
+            setNearbyInfo({
+                count: data.count,
+                radius: data.radius,
+                userLocation: data.userLocation
+            });
+
+            if (data.count === 0) {
+                toast.info(`No vehicles found within ${data.radius}km. Try increasing the search radius.`);
+            } else {
+                toast.success(`Found ${data.count} vehicles near you!`);
+            }
+        } catch (err) {
+            console.error("Failed to load nearby vehicles", err);
+            toast.error("Failed to load nearby vehicles");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const activeFiltersCount = Object.values(filters).filter(v => v).length;
 
     return (
@@ -131,28 +199,81 @@ const VehicleList = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                        Browse Vehicles
+                        {isNearbySearch ? 'Nearby Vehicles' : 'Browse Vehicles'}
                     </h1>
                     <p className="text-slate-400 mt-2">
                         {loading ? 'Loading...' : `${vehicles.length} vehicles available`}
                     </p>
                 </div>
                 
-                <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="btn-secondary flex items-center gap-2 relative"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    Filters
-                    {activeFiltersCount > 0 && (
-                        <span className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                            {activeFiltersCount}
-                        </span>
-                    )}
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleFindNearby}
+                        disabled={locationLoading}
+                        className="btn-primary flex items-center gap-2"
+                    >
+                        {locationLoading ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Getting Location...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Find Nearby
+                            </>
+                        )}
+                    </button>
+                    
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="btn-secondary flex items-center gap-2 relative"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Filters
+                        {activeFiltersCount > 0 && (
+                            <span className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </button>
+                </div>
             </div>
+
+            {/* Nearby Search Info Banner */}
+            {isNearbySearch && nearbyInfo && (
+                <div className="card p-4 bg-blue-500/10 border-blue-500/20">
+                    <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-blue-500/20">
+                            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-blue-400">Showing vehicles within {nearbyInfo.radius}km</h3>
+                            <p className="text-sm text-slate-400 mt-1">
+                                Based on your current location. Found {nearbyInfo.count} vehicles nearby.
+                            </p>
+                        </div>
+                        <button
+                            onClick={clearFilters}
+                            className="text-slate-400 hover:text-white transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Filters Panel */}
             {showFilters && (
@@ -241,6 +362,34 @@ const VehicleList = () => {
                                     />
                                 </div>
                             </div>
+                            
+                            {isNearbySearch && (
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                        </svg>
+                                        Search Radius (km)
+                                    </label>
+                                    <select
+                                        name="radius"
+                                        value={filters.radius}
+                                        onChange={(e) => {
+                                            handleFilterChange(e);
+                                            if (location) {
+                                                setTimeout(() => loadNearbyVehicles(), 100);
+                                            }
+                                        }}
+                                        className="w-full"
+                                    >
+                                        <option value="5">5 km</option>
+                                        <option value="10">10 km</option>
+                                        <option value="25">25 km</option>
+                                        <option value="50">50 km</option>
+                                        <option value="100">100 km</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-3 pt-2">
