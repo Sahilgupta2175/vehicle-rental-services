@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
+import VerifyEmailReminder from "./pages/VerifyEmailReminder";
 import VehicleList from "./pages/VehicleList";
 import VehicleDetail from "./pages/VehicleDetail";
 import Booking from "./pages/Booking";
@@ -61,6 +62,7 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
+                    <Route path="/verify-email-reminder" element={<VerifyEmailReminder />} />
                     
                     {/* Admin Auth */}
                     <Route path="/admin/login" element={<AdminLogin />} />

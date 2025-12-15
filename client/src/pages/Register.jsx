@@ -39,10 +39,9 @@ const Register = () => {
             toast.error(res.message);
         } 
         else {
-            toast.success("Account created successfully");
-            // Redirect based on selected role
-            const redirectPath = getRedirectPath(form.role);
-            navigate(redirectPath);
+            toast.success(res.message || "Account created successfully! Please verify your email.");
+            // Redirect to email verification reminder page
+            navigate('/verify-email-reminder', { replace: true });
         }
     };
 

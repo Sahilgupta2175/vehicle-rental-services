@@ -3,6 +3,7 @@ const router = express.Router();
 const vehicleCtrl = require('../controllers/vehicle.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { allowRoles } = require('../middleware/role.middleware');
+const { requireEmailVerification } = require('../middleware/emailVerification.middleware');
 const upload = require('../middleware/upload.middleware');
 
 // Optional authentication - allows both authenticated and unauthenticated access
@@ -18,8 +19,8 @@ router.get('/', optionalAuth, vehicleCtrl.getVehicles);
 router.get('/nearby', vehicleCtrl.getNearbyVehicles);
 router.get('/:id', vehicleCtrl.getVehicle);
 
-router.post('/', authenticate, allowRoles('vendor', 'admin'), upload.array('images', 6), vehicleCtrl.createVehicle);
-router.put('/:id', authenticate, allowRoles('vendor', 'admin'), upload.array('images', 6), vehicleCtrl.updateVehicle);
-router.delete('/:id', authenticate, allowRoles('vendor', 'admin'), vehicleCtrl.deleteVehicle);
+router.post('/', authenticate, requireEmailVerification, allowRoles('vendor', 'admin'), upload.array('images', 6), vehicleCtrl.createVehicle);
+router.put('/:id', authenticate, requireEmailVerification, allowRoles('vendor', 'admin'), upload.array('images', 6), vehicleCtrl.updateVehicle);
+router.delete('/:id', authenticate, requireEmailVerification, allowRoles('vendor', 'admin'), vehicleCtrl.deleteVehicle);
 
 module.exports = router;

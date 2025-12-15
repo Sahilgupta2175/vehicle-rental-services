@@ -45,14 +45,14 @@ exports.register = async (req, res, next) => {
         await user.save();
 
         // Send verification email
-        sendVerificationEmail(user, verificationToken).catch(err => 
-            console.warn('[Email] Error sending verification email:', err)
-        );
+        sendVerificationEmail(user, verificationToken)
+            .then(() => console.log('[Email] Verification email sent successfully to:', user.email))
+            .catch(err => console.error('[Email] Error sending verification email:', err.message));
 
         // Send welcome email
-        sendWelcomeEmail(user).catch(err => 
-            console.warn('[Email] Error sending welcome email:', err)
-        );
+        sendWelcomeEmail(user)
+            .then(() => console.log('[Email] Welcome email sent successfully to:', user.email))
+            .catch(err => console.warn('[Email] Error sending welcome email:', err.message));
 
         // Generate token for automatic login
         const token = jwt.sign(

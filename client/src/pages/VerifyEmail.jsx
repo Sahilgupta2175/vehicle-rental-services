@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api/auth';
-import { useAuthStore } from '../store/authStore';
+import useAuthStore from '../store/authStore';
 import PageContainer from '../components/common/PageContainer';
 import Loader from '../components/common/Loader';
 
@@ -32,12 +32,23 @@ const VerifyEmail = () => {
                     // Update user in store if logged in
                     if (user) {
                         setUser({ ...user, emailVerified: true });
+                        
+                        // Redirect to user's dashboard based on role
+                        setTimeout(() => {
+                            if (user.role === 'vendor') {
+                                navigate('/dashboard/vendor');
+                            } else if (user.role === 'admin') {
+                                navigate('/dashboard/admin');
+                            } else {
+                                navigate('/dashboard/user');
+                            }
+                        }, 3000);
+                    } else {
+                        // Not logged in, redirect to login
+                        setTimeout(() => {
+                            navigate('/login');
+                        }, 3000);
                     }
-
-                    // Redirect after 3 seconds
-                    setTimeout(() => {
-                        navigate('/vehicles');
-                    }, 3000);
                 } else {
                     setStatus('error');
                     setMessage(response.message || 'Verification failed');

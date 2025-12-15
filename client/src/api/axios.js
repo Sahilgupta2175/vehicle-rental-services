@@ -25,14 +25,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
-            // Token expired or invalid
-            localStorage.removeItem("vr_token");
-            
-            // Only redirect if not already on login/register pages
-            const currentPath = window.location.pathname;
-            if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
-                window.location.href = '/login';
+        if (error.response) {
+            if (error.response.status === 401) {
+                // Token expired or invalid
+                localStorage.removeItem("vr_token");
+                
+                // Only redirect if not already on login/register pages
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+                    window.location.href = '/login';
+                }
+            } else if (error.response.status === 403 && error.response.data?.requiresVerification) {
+                // Email verification required
+                const currentPath = window.location.pathname;
+                if (!currentPath.includes('/verify-email')) {
+                    window.location.href = '/verify-email-reminder';
+                }
             }
         }
         return Promise.reject(error);
