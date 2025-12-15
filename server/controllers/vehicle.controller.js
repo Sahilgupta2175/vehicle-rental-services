@@ -63,10 +63,20 @@ exports.updateVehicle = async (req, res, next) => {
 
         // Handle location as nested object
         if (req.body.location) {
+            const currentLocation = vehicle.location || {};
+            const newLocation = req.body.location;
+            
             vehicle.location = {
-                ...vehicle.location,
-                ...req.body.location
+                address: newLocation.address !== undefined ? newLocation.address : currentLocation.address,
+                city: newLocation.city !== undefined ? newLocation.city : currentLocation.city,
+                state: newLocation.state !== undefined ? newLocation.state : currentLocation.state,
+                country: newLocation.country !== undefined ? newLocation.country : currentLocation.country,
+                lat: newLocation.lat !== undefined ? newLocation.lat : currentLocation.lat,
+                lng: newLocation.lng !== undefined ? newLocation.lng : currentLocation.lng
             };
+            
+            // Don't include coordinates in the update - let the pre-save hook handle it
+            // This prevents validation errors from undefined coordinates
         }
 
         // Handle specifications as nested object
