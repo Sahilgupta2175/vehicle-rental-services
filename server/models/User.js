@@ -32,6 +32,16 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false 
     },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: {
+        type: String
+    },
+    emailVerificationExpires: {
+        type: Date
+    },
     location: {
         address: {
             type: String,
@@ -85,6 +95,7 @@ UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ phone: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ resetPasswordToken: 1 });
+UserSchema.index({ emailVerificationToken: 1 });
 UserSchema.index({ 'location.coordinates': '2dsphere' });
 
 module.exports = mongoose.model('User', UserSchema);

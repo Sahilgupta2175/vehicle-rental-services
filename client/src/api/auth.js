@@ -6,6 +6,9 @@ export const authApi = {
     adminLogin: (data) => api.post("/auth/admin/login", data),
     me: () => api.get("/auth/me"),
     
+    verifyEmail: (token) => api.post("/auth/verify-email", { token }),
+    resendVerification: () => api.post("/auth/resend-verification"),
+    
     forgotPassword: (data) => api.post("/auth/forgot-password", data),
     resetPassword: (data) => api.post("/auth/reset-password", data),
     changePassword: (data) => api.post("/auth/change-password", data),

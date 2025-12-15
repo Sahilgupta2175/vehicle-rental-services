@@ -31,6 +31,10 @@ router.post('/login', authLimiter, authCtrl.login);
 router.post('/admin/login', authLimiter, authCtrl.adminLogin);
 router.get('/me', authenticate, authCtrl.me);
 
+// Email verification routes
+router.post('/verify-email', authCtrl.verifyEmail);
+router.post('/resend-verification', authenticate, authCtrl.resendVerification);
+
 // Password reset routes
 router.post('/forgot-password', authLimiter, authCtrl.forgotPassword);
 router.post('/reset-password', authLimiter, authCtrl.resetPassword);

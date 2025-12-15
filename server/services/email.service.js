@@ -312,6 +312,48 @@ async function sendWelcomeEmail(user) {
     });
 }
 
+// Email verification email
+async function sendVerificationEmail(user, token) {
+    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+    
+    const content = `
+        <h2>✉️ Verify Your Email Address</h2>
+        <p>Hi <strong>${user.name}</strong>,</p>
+        <p>Thank you for registering with Vehicle Rental Service. Please verify your email address to activate your account and access all features.</p>
+        
+        <div class="highlight">
+            <strong>⚠️ Important:</strong> This verification link will expire in 24 hours for security reasons.
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" class="button">Verify Email Address</a>
+        </div>
+        
+        <p style="color: #666; font-size: 14px;">
+            If the button doesn't work, copy and paste this link into your browser:<br>
+            <span style="word-break: break-all; color: #667eea;">${verificationUrl}</span>
+        </p>
+        
+        <div class="details">
+            <h3 style="margin-top: 0;">Why verify your email?</h3>
+            <p>✓ Secure your account</p>
+            <p>✓ Receive booking confirmations</p>
+            <p>✓ Get important updates</p>
+            <p>✓ Enable password recovery</p>
+        </div>
+        
+        <p style="color: #999; font-size: 13px; margin-top: 30px;">
+            If you didn't create an account with us, please ignore this email.
+        </p>
+    `;
+    
+    return await sendMail({
+        to: user.email,
+        subject: 'Verify Your Email Address - Vehicle Rental',
+        html: emailTemplate('Email Verification', content)
+    });
+}
+
 // Booking reminder email
 async function sendBookingReminder(booking, user, vehicle, hoursUntilStart) {
     const content = `
@@ -403,6 +445,7 @@ module.exports = {
     sendCancellationEmail,
     sendPasswordResetEmail,
     sendWelcomeEmail,
+    sendVerificationEmail,
     sendBookingReminder,
     sendVendorNewBookingEmail
 };

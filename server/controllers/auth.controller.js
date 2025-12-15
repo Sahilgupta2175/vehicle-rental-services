@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
-const { sendWelcomeEmail, sendPasswordResetEmail } = require('../services/email.service');
+const { sendWelcomeEmail, sendPasswordResetEmail, sendVerificationEmail } = require('../services/email.service');
 
 exports.registerValidators = [
     body('name').isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
@@ -27,9 +27,27 @@ exports.register = async (req, res, next) => {
         }
         
         const passwordHash = await bcrypt.hash(password, 10);
-        const user = new User({ name, email, passwordHash, role, phone });
+        
+        // Generate email verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        
+        const user = new User({ 
+            name, 
+            email, 
+            passwordHash, 
+            role, 
+            phone,
+            emailVerificationToken: verificationToken,
+            emailVerificationExpires: verificationExpires
+        });
 
         await user.save();
+
+        // Send verification email
+        sendVerificationEmail(user, verificationToken).catch(err => 
+            console.warn('[Email] Error sending verification email:', err)
+        );
 
         // Send welcome email
         sendWelcomeEmail(user).catch(err => 
@@ -45,7 +63,7 @@ exports.register = async (req, res, next) => {
 
         res.status(201).json({ 
             success: true,
-            message: 'Registration successful', 
+            message: 'Registration successful. Please check your email to verify your account.', 
             token,
             user: { 
                 id: user._id, 
@@ -53,7 +71,8 @@ exports.register = async (req, res, next) => {
                 email: user.email, 
                 role: user.role,
                 phone: user.phone,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                emailVerified: user.emailVerified
             } 
         });
     } catch (err) {
@@ -105,11 +124,92 @@ exports.login = async (req, res, next) => {
                 email: user.email, 
                 role: user.role,
                 phone: user.phone,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                emailVerified: user.emailVerified
             } 
         });
     } catch (err) {
         console.error('[Auth] Login error:', err);
+        next(err);
+    }
+};
+
+// Verify email with token
+exports.verifyEmail = async (req, res, next) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ success: false, message: 'Verification token is required' });
+        }
+
+        const user = await User.findOne({
+            emailVerificationToken: token,
+            emailVerificationExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid or expired verification token' 
+            });
+        }
+
+        user.emailVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpires = undefined;
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Email verified successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                emailVerified: user.emailVerified
+            }
+        });
+    } catch (err) {
+        console.error('[Auth] Verify email error:', err);
+        next(err);
+    }
+};
+
+// Resend verification email
+exports.resendVerification = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (user.emailVerified) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Email is already verified' 
+            });
+        }
+
+        // Generate new verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+        user.emailVerificationToken = verificationToken;
+        user.emailVerificationExpires = verificationExpires;
+        await user.save();
+
+        // Send verification email
+        await sendVerificationEmail(user, verificationToken);
+
+        res.json({
+            success: true,
+            message: 'Verification email sent successfully'
+        });
+    } catch (err) {
+        console.error('[Auth] Resend verification error:', err);
         next(err);
     }
 };
