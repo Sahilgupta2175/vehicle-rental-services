@@ -20,7 +20,7 @@ const VehicleList = () => {
         type: searchParams.get("type") || "",
         minPrice: searchParams.get("minPrice") || "",
         maxPrice: searchParams.get("maxPrice") || "",
-        radius: searchParams.get("radius") || "50",
+        radius: searchParams.get("radius") || "",
     });
 
     const loadVehicles = async () => {
@@ -191,7 +191,13 @@ const VehicleList = () => {
         }
     };
 
-    const activeFiltersCount = Object.values(filters).filter(v => v).length;
+    // Count active filters, excluding radius unless in nearby search mode
+    const activeFiltersCount = Object.entries(filters)
+        .filter(([key, value]) => {
+            if (key === 'radius' && !isNearbySearch) return false;
+            return value;
+        })
+        .length;
 
     return (
         <div className="space-y-6 pb-12">
@@ -278,6 +284,18 @@ const VehicleList = () => {
             {/* Filters Panel */}
             {showFilters && (
                 <div className="card p-6 animate-in slide-in-from-top">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-white">Filter Vehicles</h3>
+                        <button
+                            type="button"
+                            onClick={() => setShowFilters(false)}
+                            className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                     <form onSubmit={applyFilters} className="space-y-6">
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div className="space-y-2">
