@@ -75,8 +75,13 @@ exports.updateVehicle = async (req, res, next) => {
                 lng: newLocation.lng !== undefined ? newLocation.lng : currentLocation.lng
             };
             
-            // Don't include coordinates in the update - let the pre-save hook handle it
-            // This prevents validation errors from undefined coordinates
+            // Set coordinates with proper GeoJSON structure if lat/lng are provided
+            if (vehicle.location.lat && vehicle.location.lng) {
+                vehicle.location.coordinates = {
+                    type: 'Point',
+                    coordinates: [Number(vehicle.location.lng), Number(vehicle.location.lat)]
+                };
+            }
         }
 
         // Handle specifications as nested object

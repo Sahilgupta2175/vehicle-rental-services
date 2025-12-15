@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { vehicleApi } from "../../api/vehicles";
+import useAuthStore from "../../store/authStore";
+import useGeolocation from "../../hooks/useGeolocation";
 
 const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
+    const { user } = useAuthStore();
+    const { location: geoLocation, loading: geoLoading, getLocation } = useGeolocation();
+    
     const [form, setForm] = useState({
         name: initialData?.name || "",
         type: initialData?.type || "car",
         pricePerHour: initialData?.pricePerHour || "",
-        city: initialData?.location?.city || "",
-        state: initialData?.location?.state || "",
-        address: initialData?.location?.address || "",
+        city: initialData?.location?.city || user?.location?.city || "",
+        state: initialData?.location?.state || user?.location?.state || "",
+        country: initialData?.location?.country || user?.location?.country || "India",
+        address: initialData?.location?.address || user?.location?.address || "",
+        lat: initialData?.location?.lat || user?.location?.coordinates?.coordinates?.[1] || "",
+        lng: initialData?.location?.lng || user?.location?.coordinates?.coordinates?.[0] || "",
         description: initialData?.description || "",
         transmission: initialData?.specifications?.transmission || "",
         fuelType: initialData?.specifications?.fuelType || "",
@@ -22,8 +30,41 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Auto-fill coordinates from geolocation
+    useEffect(() => {
+        if (geoLocation) {
+            setForm(prev => ({
+                ...prev,
+                lat: geoLocation.lat,
+                lng: geoLocation.lng
+            }));
+            toast.success("Location detected!");
+        }
+    }, [geoLocation]);
+
     const handleChange = (e) => {
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    };
+
+    const handleUseVendorLocation = () => {
+        if (!user?.location) {
+            toast.error("Please set your business location in the dashboard first");
+            return;
+        }
+        setForm(prev => ({
+            ...prev,
+            address: user.location.address || "",
+            city: user.location.city || "",
+            state: user.location.state || "",
+            country: user.location.country || "India",
+            lat: user.location.coordinates?.coordinates?.[1] || "",
+            lng: user.location.coordinates?.coordinates?.[0] || ""
+        }));
+        toast.success("Vendor location applied!");
+    };
+
+    const handleUseCurrentLocation = () => {
+        getLocation();
     };
 
     const handleFileChange = (e) => {
@@ -49,7 +90,10 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
             fd.set("description", form.description);
             fd.set("location[city]", form.city);
             fd.set("location[state]", form.state);
+            fd.set("location[country]", form.country);
             fd.set("location[address]", form.address);
+            if (form.lat) fd.set("location[lat]", form.lat);
+            if (form.lng) fd.set("location[lng]", form.lng);
             
             // Add specifications
             if (form.transmission) fd.set("specifications[transmission]", form.transmission);
@@ -218,6 +262,98 @@ const VehicleForm = ({ initialData, onSaved, mode = "create" }) => {
                         value={form.address}
                         onChange={handleChange}
                         placeholder="Street address or landmark"
+                        className="w-full"
+                    />
+                </div>
+
+                {/* Country */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Country
+                        <span className="text-red-400 ml-1">*</span>
+                    </label>
+                    <input
+                        name="country"
+                        required
+                        value={form.country}
+                        onChange={handleChange}
+                        placeholder="e.g., India"
+                        className="w-full"
+                    />
+                </div>
+
+                {/* Location Helper Buttons */}
+                <div className="space-y-2 sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                        Coordinates (for nearby search)
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                        {user?.location?.coordinates && (
+                            <button
+                                type="button"
+                                onClick={handleUseVendorLocation}
+                                className="btn-secondary text-sm flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Use My Business Location
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={handleUseCurrentLocation}
+                            disabled={geoLoading}
+                            className="btn-secondary text-sm flex items-center gap-2"
+                        >
+                            {geoLoading ? (
+                                <>
+                                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Detecting...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    </svg>
+                                    Detect Current Location
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Latitude */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Latitude
+                    </label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="lat"
+                        value={form.lat}
+                        onChange={handleChange}
+                        placeholder="e.g., 19.0760"
+                        className="w-full"
+                    />
+                </div>
+
+                {/* Longitude */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                        Longitude
+                    </label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="lng"
+                        value={form.lng}
+                        onChange={handleChange}
+                        placeholder="e.g., 72.8777"
                         className="w-full"
                     />
                 </div>
