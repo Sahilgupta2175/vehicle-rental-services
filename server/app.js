@@ -31,23 +31,56 @@ app.use(helmet());
 app.use(xss());
 
 // CORS configuration - support multiple origins
-const allowedOrigins = process.env.CLIENT_URL 
-    ? process.env.CLIENT_URL.split(',').map(url => url.trim())
-    : [];
+const normalizeOrigin = (value) => {
+    if (!value) return '';
+
+    try {
+        return new URL(value).origin.toLowerCase();
+    } catch (error) {
+        return value.replace(/\/+$/, '').toLowerCase();
+    }
+};
+
+const configuredOrigins = [
+    ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : []),
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGIN
+]
+    .map((origin) => normalizeOrigin((origin || '').trim()))
+    .filter(Boolean);
+
+const allowedOrigins = new Set(configuredOrigins);
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS === 'true';
+
+const isVercelPreviewOrigin = (origin) => {
+    try {
+        const { hostname } = new URL(origin);
+        return hostname.endsWith('.vercel.app');
+    } catch (error) {
+        return false;
+    }
+};
 
 app.use(cors({ 
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
+
+        const requestOrigin = normalizeOrigin(origin);
+
+        if (allowVercelPreviews && isVercelPreviewOrigin(requestOrigin)) {
+            return callback(null, true);
+        }
         
         // Check if origin is in allowed list
-        if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        if (allowedOrigins.size === 0 || allowedOrigins.has(requestOrigin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true 
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 // Logging
@@ -84,6 +117,15 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || 'development'
+    });
+});
+
+// Root route for platform health checks
+app.get('/', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Vehicle Rental Service API is running',
+        health: '/api/health'
     });
 });
 
