@@ -1,73 +1,127 @@
-const nodemailer = require('nodemailer');
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 
-// Check if we are using SendGrid (API) or Nodemailer (SMTP)
-const useSendGrid = !!process.env.SENDGRID_API_KEY;
+const hasSendGrid = Boolean(process.env.SENDGRID_API_KEY);
+const hasSmtp = Boolean(
+  process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS,
+);
+const configuredProvider = (process.env.EMAIL_PROVIDER || "").toLowerCase();
 
-if (useSendGrid) {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    console.log('Using SendGrid API for emails');
+let activeProvider = "smtp";
+if (configuredProvider === "sendgrid") {
+  activeProvider = "sendgrid";
+} else if (configuredProvider === "smtp") {
+  activeProvider = "smtp";
+} else {
+  activeProvider = hasSmtp ? "smtp" : hasSendGrid ? "sendgrid" : "smtp";
 }
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
-    auth: { 
-        user: process.env.SMTP_USER, 
-        pass: process.env.SMTP_PASS 
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    family: 4 // Force IPv4 to avoid timeouts on some networks
-});
+const useSendGrid = activeProvider === "sendgrid" && hasSendGrid;
 
-// Verify connection configuration (only if using SMTP)
-if (!useSendGrid) {
-    transporter.verify(function (error, success) {
-        if (error) {
-            console.error('SMTP Connection Error:', error);
-        } else {
-            console.log('SMTP Server is ready to take our messages');
-        }
-    });
+if (useSendGrid) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  console.log("[Email] Provider: SendGrid");
+} else {
+  console.log("[Email] Provider: SMTP");
+}
+
+if (!hasSmtp && !hasSendGrid) {
+  console.warn(
+    "[Email] No valid email provider configured. Set SMTP_* or SENDGRID_API_KEY.",
+  );
+}
+
+const transporter = hasSmtp
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure:
+        process.env.SMTP_SECURE === "true" ||
+        Number(process.env.SMTP_PORT) === 465,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      family: 4,
+    })
+  : null;
+
+if (!useSendGrid && transporter) {
+  transporter.verify(function (error) {
+    if (error) {
+      console.error("[Email] SMTP Connection Error:", error.message);
+    } else {
+      console.log("[Email] SMTP Server is ready to take messages");
+    }
+  });
 }
 
 // Base send email function
 async function sendMail({ to, subject, text, html }) {
-    try {
-        if (useSendGrid) {
-            const msg = {
-                to,
-                from: process.env.SMTP_FROM, // Must be verified in SendGrid
-                subject,
-                text,
-                html: html || text,
-            };
-            await sgMail.send(msg);
-            return { messageId: 'sendgrid-sent' };
-        } else {
-            if (!process.env.SMTP_USER) {
-                console.warn('SMTP not configured; skipping email');
-                return null;
-            }
-            const info = await transporter.sendMail({
-                from: process.env.SMTP_FROM,
-                to,
-                subject,
-                text,
-                html: html || text
-            });
-            return info;
-        }
-    } catch (error) {
-        console.error('Email sending failed:', error);
-        if (error.response) {
-            console.error(error.response.body);
-        }
-        throw error;
+  const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER;
+
+  if (!fromAddress) {
+    console.warn(
+      "[Email] Missing sender address. Set SMTP_FROM (or SMTP_USER).",
+    );
+    return null;
+  }
+
+  try {
+    if (useSendGrid) {
+      const msg = {
+        to,
+        from: fromAddress,
+        subject,
+        text,
+        html: html || text,
+      };
+      await sgMail.send(msg);
+      return { messageId: "sendgrid-sent" };
+    } else {
+      if (!transporter) {
+        console.warn("[Email] SMTP not configured; skipping email");
+        return null;
+      }
+      const info = await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject,
+        text,
+        html: html || text,
+      });
+      return info;
     }
+  } catch (error) {
+    if (useSendGrid && transporter) {
+      console.warn(
+        "[Email] SendGrid send failed, retrying via SMTP:",
+        error.message,
+      );
+      try {
+        const info = await transporter.sendMail({
+          from: fromAddress,
+          to,
+          subject,
+          text,
+          html: html || text,
+        });
+        return info;
+      } catch (smtpError) {
+        console.error("[Email] SMTP fallback also failed:", smtpError.message);
+        throw smtpError;
+      }
+    }
+
+    console.error("[Email] Sending failed:", error.message);
+    if (error.response) {
+      console.error(error.response.body);
+    }
+    throw error;
+  }
 }
 
 // Email templates
@@ -118,7 +172,7 @@ const emailTemplate = (title, content) => `
 
 // Booking confirmation email
 async function sendBookingConfirmation(booking, user, vehicle) {
-    const content = `
+  const content = `
         <h2>🎉 Booking Confirmed!</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>Your booking has been successfully confirmed. Here are your booking details:</p>
@@ -134,11 +188,11 @@ async function sendBookingConfirmation(booking, user, vehicle) {
             </div>
             <div class="details-row">
                 <span class="details-label">Start Date:</span>
-                <span class="details-value">${new Date(booking.start).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}</span>
+                <span class="details-value">${new Date(booking.start).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}</span>
             </div>
             <div class="details-row">
                 <span class="details-label">End Date:</span>
-                <span class="details-value">${new Date(booking.end).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}</span>
+                <span class="details-value">${new Date(booking.end).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}</span>
             </div>
             <div class="details-row">
                 <span class="details-label">Total Amount:</span>
@@ -152,17 +206,17 @@ async function sendBookingConfirmation(booking, user, vehicle) {
         
         <p>Have a safe and enjoyable journey!</p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: `Booking Confirmed - ${vehicle.name} #${booking._id.toString().slice(-8).toUpperCase()}`,
-        html: emailTemplate('Booking Confirmed', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: `Booking Confirmed - ${vehicle.name} #${booking._id.toString().slice(-8).toUpperCase()}`,
+    html: emailTemplate("Booking Confirmed", content),
+  });
 }
 
 // Payment receipt email
 async function sendPaymentReceipt(transaction, booking, user, vehicle) {
-    const content = `
+  const content = `
         <h2>💳 Payment Receipt</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>Thank you for your payment. Your transaction has been processed successfully.</p>
@@ -186,7 +240,7 @@ async function sendPaymentReceipt(transaction, booking, user, vehicle) {
             </div>
             <div class="details-row">
                 <span class="details-label">Vehicle:</span>
-                <span class="details-value">${vehicle?.name || 'N/A'}</span>
+                <span class="details-value">${vehicle?.name || "N/A"}</span>
             </div>
             <div class="details-row" style="background: #e8f5e9; padding: 15px; margin-top: 10px;">
                 <span class="details-label" style="font-size: 18px;">Amount Paid:</span>
@@ -198,17 +252,17 @@ async function sendPaymentReceipt(transaction, booking, user, vehicle) {
             This is an automated receipt. Please keep it for your records.
         </p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: `Payment Receipt - ₹${transaction.amount} Received`,
-        html: emailTemplate('Payment Receipt', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: `Payment Receipt - ₹${transaction.amount} Received`,
+    html: emailTemplate("Payment Receipt", content),
+  });
 }
 
 // Booking cancellation email
 async function sendCancellationEmail(booking, user, vehicle, reason) {
-    const content = `
+  const content = `
         <h2>❌ Booking Cancelled</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>Your booking for <strong>${vehicle.name}</strong> has been cancelled.</p>
@@ -226,35 +280,43 @@ async function sendCancellationEmail(booking, user, vehicle, reason) {
                 <span class="details-label">Amount:</span>
                 <span class="details-value">₹${booking.totalAmount.toLocaleString()}</span>
             </div>
-            ${reason ? `
+            ${
+              reason
+                ? `
             <div class="details-row">
                 <span class="details-label">Reason:</span>
                 <span class="details-value">${reason}</span>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
         </div>
         
-        ${booking.payment?.status === 'paid' ? `
+        ${
+          booking.payment?.status === "paid"
+            ? `
         <div class="highlight">
             <strong>💰 Refund:</strong> Your payment will be refunded within 5-7 business days to your original payment method.
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <p>If you have any questions, please don't hesitate to contact our support team.</p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: `Booking Cancelled - ${vehicle.name}`,
-        html: emailTemplate('Booking Cancelled', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: `Booking Cancelled - ${vehicle.name}`,
+    html: emailTemplate("Booking Cancelled", content),
+  });
 }
 
 // Password reset email
 async function sendPasswordResetEmail(user, resetToken) {
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    
-    const content = `
+  const resetUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+
+  const content = `
         <h2>🔐 Password Reset Request</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>You requested to reset your password. Click the button below to create a new password:</p>
@@ -275,17 +337,17 @@ async function sendPasswordResetEmail(user, resetToken) {
             Or copy this link: ${resetUrl}
         </p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: 'Password Reset Request - Vehicle Rental',
-        html: emailTemplate('Password Reset', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: "Password Reset Request - Vehicle Rental",
+    html: emailTemplate("Password Reset", content),
+  });
 }
 
 // Welcome email
 async function sendWelcomeEmail(user) {
-    const content = `
+  const content = `
         <h2>👋 Welcome to Vehicle Rental!</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>Thank you for registering with us. We're excited to have you on board!</p>
@@ -299,24 +361,24 @@ async function sendWelcomeEmail(user) {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/vehicles" class="button">Browse Vehicles</a>
+            <a href="${process.env.CLIENT_URL || "http://localhost:3000"}/vehicles" class="button">Browse Vehicles</a>
         </div>
         
         <p>If you have any questions, our support team is here to help!</p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: 'Welcome to Vehicle Rental! 🚗',
-        html: emailTemplate('Welcome!', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: "Welcome to Vehicle Rental! 🚗",
+    html: emailTemplate("Welcome!", content),
+  });
 }
 
 // Email verification email
 async function sendVerificationEmail(user, token) {
-    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
-    
-    const content = `
+  const verificationUrl = `${process.env.CLIENT_URL || "http://localhost:3000"}/verify-email?token=${token}`;
+
+  const content = `
         <h2>✉️ Verify Your Email Address</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>Thank you for registering with Vehicle Rental Service. Please verify your email address to activate your account and access all features.</p>
@@ -346,17 +408,17 @@ async function sendVerificationEmail(user, token) {
             If you didn't create an account with us, please ignore this email.
         </p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: 'Verify Your Email Address - Vehicle Rental',
-        html: emailTemplate('Email Verification', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: "Verify Your Email Address - Vehicle Rental",
+    html: emailTemplate("Email Verification", content),
+  });
 }
 
 // Booking reminder email
 async function sendBookingReminder(booking, user, vehicle, hoursUntilStart) {
-    const content = `
+  const content = `
         <h2>⏰ Booking Reminder</h2>
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>This is a friendly reminder that your booking starts in <strong>${hoursUntilStart} hours</strong>.</p>
@@ -385,17 +447,17 @@ async function sendBookingReminder(booking, user, vehicle, hoursUntilStart) {
         
         <p>Looking forward to serving you!</p>
     `;
-    
-    return await sendMail({
-        to: user.email,
-        subject: `Reminder: Your ${vehicle.name} booking starts in ${hoursUntilStart}h`,
-        html: emailTemplate('Booking Reminder', content)
-    });
+
+  return await sendMail({
+    to: user.email,
+    subject: `Reminder: Your ${vehicle.name} booking starts in ${hoursUntilStart}h`,
+    html: emailTemplate("Booking Reminder", content),
+  });
 }
 
 // Vendor new booking notification
 async function sendVendorNewBookingEmail(booking, vendor, user, vehicle) {
-    const content = `
+  const content = `
         <h2>💰 New Booking Received!</h2>
         <p>Hi <strong>${vendor.name}</strong>,</p>
         <p>Great news! You have received a new booking for your vehicle.</p>
@@ -430,22 +492,22 @@ async function sendVendorNewBookingEmail(booking, vendor, user, vehicle) {
         
         <p>You can view full details in your dashboard.</p>
     `;
-    
-    return await sendMail({
-        to: vendor.email,
-        subject: `New Booking - ${vehicle.name} (Paid)`,
-        html: emailTemplate('New Booking Received', content)
-    });
+
+  return await sendMail({
+    to: vendor.email,
+    subject: `New Booking - ${vehicle.name} (Paid)`,
+    html: emailTemplate("New Booking Received", content),
+  });
 }
 
-module.exports = { 
-    sendMail, 
-    sendBookingConfirmation,
-    sendPaymentReceipt,
-    sendCancellationEmail,
-    sendPasswordResetEmail,
-    sendWelcomeEmail,
-    sendVerificationEmail,
-    sendBookingReminder,
-    sendVendorNewBookingEmail
+module.exports = {
+  sendMail,
+  sendBookingConfirmation,
+  sendPaymentReceipt,
+  sendCancellationEmail,
+  sendPasswordResetEmail,
+  sendWelcomeEmail,
+  sendVerificationEmail,
+  sendBookingReminder,
+  sendVendorNewBookingEmail,
 };

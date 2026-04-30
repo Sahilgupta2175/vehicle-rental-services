@@ -1,11 +1,17 @@
 import api from "./axios";
 
 export const bookingApi = {
-    create: (data) => api.post("/bookings", data),
-    myBookings: () => api.get("/bookings/me"),
-    vendorBookings: () => api.get("/bookings/vendor"),
-    respond: (id, data) => api.post(`/bookings/${id}/respond`, data),
-    getById: (id) => api.get(`/bookings/${id}`),
-    cancel: (id) => api.post(`/bookings/${id}/cancel`),
-    completeExpired: () => api.post("/bookings/complete-expired"),
+  create: (data) => api.post("/bookings", data),
+  myBookings: () => api.get("/bookings/me"),
+  vendorBookings: () => api.get("/bookings/vendor"),
+  respond: (id, data) => api.post(`/bookings/${id}/respond`, data),
+  getById: (id) => api.get(`/bookings/${id}`),
+  cancel: (id) => api.post(`/bookings/${id}/cancel`),
+  completeExpired: () => api.post("/bookings/complete-expired"),
+  requestLatePickupExtension: (data) =>
+    api.post("/bookings/late-pickup/request-extension", data),
+  confirmPickup: (data) =>
+    api.post("/bookings/late-pickup/confirm-pickup", data),
+  getLatePickupStatus: (bookingId) =>
+    api.get(`/bookings/late-pickup/status/${bookingId}`),
 };
